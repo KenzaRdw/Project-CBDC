@@ -611,16 +611,13 @@ def main():
     OUT.mkdir(exist_ok=True)
     body = GENERATED + body
     (OUT / "cbdc_corpus.tex").write_text(body, encoding="utf-8")
-    notes = body.replace(r"\begin{document}", "\\setbeameroption{show only notes}\n\\begin{document}", 1)
-    (OUT / "cbdc_corpus_notes.tex").write_text(notes, encoding="utf-8")
     build = OUT / ".build"  # compile aside, then swap the PDF in atomically: an open viewer never sees a half-written file
-    for f in ("cbdc_corpus", "cbdc_corpus_notes"):
-        subprocess.run(["latexmk", "-pdf", "-interaction=nonstopmode", "-halt-on-error", f"-outdir={build}", f"{f}.tex"],
-                       cwd=OUT, check=True, stdout=subprocess.DEVNULL)
-        tmp = OUT / f".{f}.pdf.tmp"
-        shutil.copyfile(build / f"{f}.pdf", tmp)
-        os.replace(tmp, OUT / f"{f}.pdf")
-    print(f"Wrote {OUT / 'cbdc_corpus.pdf'} and the speaker notes {OUT / 'cbdc_corpus_notes.pdf'}")
+    subprocess.run(["latexmk", "-pdf", "-interaction=nonstopmode", "-halt-on-error", f"-outdir={build}", "cbdc_corpus.tex"],
+                   cwd=OUT, check=True, stdout=subprocess.DEVNULL)
+    tmp = OUT / ".cbdc_corpus.pdf.tmp"
+    shutil.copyfile(build / "cbdc_corpus.pdf", tmp)
+    os.replace(tmp, OUT / "cbdc_corpus.pdf")
+    print(f"Wrote {OUT / 'cbdc_corpus.pdf'}")
 
 
 GENERATED = "% Final version, generated from data/cbdc_corpus.csv by scripts/make_slides.py.\n"

@@ -117,7 +117,7 @@ To add search terms, edit `TERMS` / `QUERY_PHRASES` in `cbdc_biblio/config.py`.
 
 ## Presentation (`presentation/`)
 
-* `cbdc_corpus.pdf` (slides, groundwork of the paper) and `cbdc_corpus_notes.pdf` (speaker notes, about 22½ minutes), built from the CSV.
+* `cbdc_corpus.pdf`: the slides (groundwork of the paper, about 23 minutes), built from the CSV.
 * Hand-coded validation samples (one coder, AI-assisted; a second human coder is still needed):
   * `validation_relevance.csv`: relevance filter, 140 texts stratified by label;
   * `validation_motivations_dev.csv` / `_test.csv`: motivation codebook, 100 development and 50 held-out texts;
