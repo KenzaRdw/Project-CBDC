@@ -1,4 +1,8 @@
-# CBDC corpus for bibliometric analysis
+# Project-CBDC
+A discourse analysis of central bank digital currencies (CBDCs) – M2 course project
+
+
+## CBDC corpus for bibliometric analysis
 
 Harvests everything about **central bank digital currencies** (CBDC, digital euro, e-CNY,
 digital pound, e-krona, eNaira, mBridge, …, in EN/FR/ES/PT/DE/IT/ZH/JA/KO/RU) from:
