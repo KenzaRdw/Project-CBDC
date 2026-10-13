@@ -20,6 +20,19 @@ digital pound, e-krona, eNaira, mBridge, …, in EN/FR/ES/PT/DE/IT/ZH/JA/KO/RU) 
 | Google News | worldwide press, 55 country editions × languages, 2000 → today | headline only | day |
 | GDELT | worldwide press, 2017 → today (blocked by rate limits in this run) | article text (fetched) | day |
 
+## Getting the data
+
+`data/` is not in Git (933 MB; GitHub refuses files over 100 MB). Download `cbdc_data.tar.xz` from the
+repository's **Releases** page (release `data-v1`) and unpack it in the project folder:
+
+```bash
+tar -xf cbdc_data.tar.xz      # recreates data/cbdc_corpus.csv, data/cache/ and data/fulltext/
+```
+
+That is enough to run `scripts/make_slides.py`. Only a full re-harvest needs `data/raw/`.
+To publish a new version: `tar -cf - data/cbdc_corpus.csv data/cache data/fulltext | xz -T0 > cbdc_data.tar.xz`,
+then attach the file to a new release.
+
 ## Run
 
 ```bash
