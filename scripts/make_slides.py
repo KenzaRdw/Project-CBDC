@@ -1355,40 +1355,7 @@ Changes: 2023--26 vs 2014--19, adjusted (logit, 95\% CI). Tone: mean net tone ga
 \begin{itemize}
 \item Recap the five answers: what, who, why, how, when.
 \item Main message: CBDC research moved from a monetary-policy question to one of inclusion, cross-border payments and national projects; the tone has become more positive; attention follows central bank milestones.
-\item Limits are known and measured: each one has a fix in the paper plan.
-\end{itemize}}
-\end{frame}
-\begin{frame}{From this talk to the paper}
-\begin{columns}[T]
-\begin{column}{0.5\textwidth}\scriptsize
-\textbf{Structure}\\[2pt]
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{@{}lll@{}}\toprule
- & \textbf{Section} & \textbf{Status}\\\midrule
-1 & Introduction, research question & to write\\
-2 & Related literature & reading list\\
-3 & Data: corpus, relevance filter & validated\\
-4--8 & What, who, why, how, when (method, then results) & done\\
-9 & Robustness (6 specifications) & done\\
-10 & Discussion, limits & to write\\
-\bottomrule\end{tabular}\\[6pt]
-\textbf{Working title.} \emph{Why central bank digital currencies? Researchers, central bankers and the press, 2014--<<Y1>>.}
-\end{column}
-\begin{column}{0.47\textwidth}\scriptsize
-\textbf{Before submission}
-\begin{itemize}\setlength\itemsep{1pt}
-\item Finish the press harvest and full-text downloads.
-\item Second human coder: the 200-item sheet is ready (\texttt{second\_coder\_sheet.csv}); report inter-coder $\kappa$.
-\item Release the dataset and code with a DOI.
-\item Methods are complete; what is left is data collection and a second reader, not new tools.
-\end{itemize}
-\textbf{Candidate outlets}: \emph{Scientometrics}; \emph{Technological Forecasting and Social Change}; \emph{Research in International Business and Finance} (published the closest review, Hoang et al.\ 2023).
-\end{column}
-\end{columns}
-\note{\textbf{Paper plan (1:00).}
-\begin{itemize}
-\item Data, methods, results and robustness are done; the method for each question was chosen against the alternatives.
-\item What is left: finishing the press harvest, a second human reader, and writing.
+\item Limits are known and measured: what is left is finishing the press harvest and a second human reader, not new methods.
 \item Thank you; questions.
 \end{itemize}}
 \end{frame}
