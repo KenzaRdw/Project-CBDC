@@ -69,6 +69,32 @@
 \note{\textbf{Literature (0:45).}}
 \end{frame}
 
+\begin{frame}{What this paper adds to 77 earlier reviews}
+\footnotesize Five recent bibliometric reviews:\\[2pt]
+\begin{tabular}{@{}llrl@{}}\toprule
+\textbf{Study} & \textbf{Data} & \textbf{Documents} & \textbf{Tools}\\\midrule
+Kvedaravi\v{c}i\={u}t\.{e} \& \v{S}apkauskien\.{e} (2024) & WoS + Scopus & 228 & VOSviewer\\
+Fahad \& Bulut (2024) & Scopus & 169 of 323 & Biblioshiny\\
+Bapat \& Sharma (2025) & Scopus & 371 & bibliometrics + TCCM\\
+Prodan et al.\ (2024) & Scopus + WoS & 747 of 1{,}024 & PRISMA, VOSviewer\\
+Paulovici (2026) & Scopus & 892 & VOSviewer\\\midrule
+\textbf{This study} & \textbf{5 databases, speeches, press\dots} & \textbf{17,709} & \textbf{+ text as data}\\
+\bottomrule\end{tabular}\\[6pt]
+\small
+\begin{itemize}\setlength\itemsep{1pt}
+\item \alert{Gap}: one or two databases (Scopus, WoS), mostly English journal articles: central bankers and the press are absent.
+\item Maps say \emph{what} is studied, not \emph{why}; no measure is validated.
+\item \alert{Here}: every type of text and language, the five W's, and every coder checked on hand-coded texts.
+\end{itemize}
+\scriptsize Found in our own corpus: 77 titles announce a literature, systematic or bibliometric review of CBDCs (2019--2026).
+\note{\textbf{What this paper adds (1:00).}
+\begin{itemize}
+\item The topic is not new for bibliometrics: about 77 reviews, most of them since 2023.
+\item The bibliometric ones rely on Scopus or Web of Science: a few hundred journal articles, often English only (Prodan et al.\ drop non-English texts).
+\item The closest to us is Hoang et al.\ (2023, RIBAF): text mining, but still academic only.
+\item Our angle: every type of text, every language, and measures that are validated.
+\end{itemize}}
+\end{frame}
 \begin{frame}{Approach: one method per question}
 \scriptsize
 \setlength{\tabcolsep}{4pt}
@@ -354,7 +380,7 @@ Reference list & 16\% \\
 \begin{columns}[c]
 \begin{column}{0.47\textwidth}
 \begin{tikzpicture}[font=\scriptsize]
-\draw[gray!60, dashed] (4.99,0) -- (4.99,4.6);
+\draw[gray!60, dashed] (4.30,0) -- (4.30,4.6);
 \draw[gray!60, dashed] (0,3.00) -- (6.4,3.00);
 \draw[-{Stealth}, gray] (0,0) -- (6.6000000000000005,0) node[below, text=gray, pos=0.5, yshift=-1mm] {centrality $\to$};
 \draw[-{Stealth}, gray] (0,0) -- (0,4.8) node[above, text=gray] {density};
@@ -362,14 +388,14 @@ Reference list & 16\% \\
 \node[gray, anchor=south west, font=\scriptsize\bfseries] at (0.1,4.6) {Niche};
 \node[gray, anchor=north west, font=\scriptsize\bfseries] at (0.1,-0.35) {Emerging / declining};
 \node[gray, anchor=north east, font=\scriptsize\bfseries] at (6.4,-0.35) {Basic};
-\fill[c1, opacity=0.8] (4.99,3.79) circle (6.5mm);
-\node[font=\scriptsize, text=white] at (4.99,3.79) {\textbf{1}};
-\fill[c2, opacity=0.8] (5.12,2.78) circle (6.4mm);
-\node[font=\scriptsize, text=white] at (5.12,2.78) {\textbf{2}};
-\fill[c3, opacity=0.8] (4.12,3.00) circle (5.7mm);
-\node[font=\scriptsize, text=white] at (4.12,3.00) {\textbf{3}};
-\fill[c4, opacity=0.8] (0.85,0.41) circle (4.6mm);
-\node[font=\scriptsize, text=white] at (0.85,0.41) {\textbf{4}};
+\fill[c1, opacity=0.8] (4.30,3.66) circle (6.5mm);
+\node[font=\scriptsize, text=white] at (4.30,3.66) {\textbf{1}};
+\fill[c2, opacity=0.8] (4.94,1.50) circle (6.0mm);
+\node[font=\scriptsize, text=white] at (4.94,1.50) {\textbf{2}};
+\fill[c3, opacity=0.8] (2.04,3.00) circle (5.4mm);
+\node[font=\scriptsize, text=white] at (2.04,3.00) {\textbf{3}};
+\fill[c4, opacity=0.8] (1.20,0.64) circle (5.2mm);
+\node[font=\scriptsize, text=white] at (1.20,0.64) {\textbf{4}};
 \end{tikzpicture}
 \end{column}
 \begin{column}{0.51\textwidth}\scriptsize
@@ -378,9 +404,9 @@ Keyword clusters (Callon), with $e_{ij} = c_{ij}^2 / (c_i c_j)$:
 \begin{tabular}{@{}lp{0.62\linewidth}l@{}}\toprule
  & \textbf{Theme} (top keywords) & \textbf{Quadrant}\\\midrule
 \textcolor{c1}{\textbf{1}} & digital transformation in financial services, monetary policy, moneta\dots{} & motor \\
-\textcolor{c2}{\textbf{2}} & blockchain technology applications and security, cryptocurrency, digi\dots{} & basic \\
-\textcolor{c3}{\textbf{3}} & fintech, crowdfunding, digital finance, financial inclusion, digital\dots{} & niche \\
-\textcolor{c4}{\textbf{4}} & digital ruble, international payments, global financial crisis and po\dots{} & emerging or declining \\
+\textcolor{c2}{\textbf{2}} & blockchain technology applications and security, financial inclusion,\dots{} & basic \\
+\textcolor{c3}{\textbf{3}} & fintech, crowdfunding, digital finance, digital payments, digital yuan & niche \\
+\textcolor{c4}{\textbf{4}} & cryptocurrency, digital transformation in law, stablecoin & emerging or declining \\
 \bottomrule\end{tabular}
 \end{column}
 \end{columns}
@@ -513,246 +539,246 @@ Global Government Finance & 59 \\\end{tabular}\end{column}\end{columns}
 \begin{columns}[T]
 \begin{column}{0.7\textwidth}
 \begin{tikzpicture}
-\draw[gray, opacity=0.67, line width=0.35pt] (7.83,2.37) -- (8.99,2.12);
-\draw[gray, opacity=0.59, line width=0.35pt] (8.99,2.12) -- (7.26,1.73);
-\draw[gray, opacity=0.58, line width=0.35pt] (7.83,2.37) -- (7.26,1.73);
-\draw[gray, opacity=0.57, line width=0.35pt] (6.65,3.18) -- (5.47,3.45);
-\draw[gray, opacity=0.57, line width=0.35pt] (7.83,2.37) -- (8.82,1.67);
-\draw[gray, opacity=0.56, line width=0.35pt] (8.82,1.67) -- (7.26,1.73);
-\draw[gray, opacity=0.54, line width=0.35pt] (8.82,1.67) -- (8.99,2.12);
-\draw[gray, opacity=0.54, line width=0.35pt] (7.83,2.37) -- (8.76,2.64);
-\draw[gray, opacity=0.54, line width=0.35pt] (7.83,2.37) -- (5.78,2.76);
-\draw[gray, opacity=0.54, line width=0.35pt] (9.00,0.72) -- (7.26,1.73);
-\draw[gray, opacity=0.54, line width=0.35pt] (8.99,2.12) -- (5.78,2.76);
-\draw[gray, opacity=0.53, line width=0.35pt] (6.64,2.37) -- (7.83,2.37);
-\draw[gray, opacity=0.53, line width=0.35pt] (6.72,4.00) -- (5.47,3.45);
-\draw[gray, opacity=0.51, line width=0.35pt] (6.65,3.18) -- (6.72,4.00);
-\draw[gray, opacity=0.50, line width=0.35pt] (6.65,3.18) -- (5.78,2.76);
-\draw[gray, opacity=0.50, line width=0.35pt] (6.64,2.37) -- (8.76,2.64);
-\draw[gray, opacity=0.50, line width=0.35pt] (8.82,1.67) -- (7.60,0.84);
-\draw[gray, opacity=0.49, line width=0.35pt] (7.83,2.37) -- (9.00,0.72);
-\draw[gray, opacity=0.49, line width=0.35pt] (7.26,1.73) -- (7.60,0.84);
-\draw[gray, opacity=0.48, line width=0.35pt] (5.51,2.23) -- (8.76,2.64);
-\draw[gray, opacity=0.48, line width=0.35pt] (7.83,2.37) -- (5.47,3.45);
-\draw[gray, opacity=0.48, line width=0.35pt] (8.99,2.12) -- (8.76,2.64);
-\draw[gray, opacity=0.48, line width=0.35pt] (3.75,3.43) -- (3.58,3.97);
-\draw[gray, opacity=0.47, line width=0.35pt] (5.51,2.23) -- (6.65,3.18);
-\draw[gray, opacity=0.47, line width=0.35pt] (8.76,2.64) -- (5.78,2.76);
-\draw[gray, opacity=0.47, line width=0.35pt] (8.76,2.64) -- (6.65,3.18);
-\draw[gray, opacity=0.46, line width=0.35pt] (8.82,1.67) -- (9.00,0.72);
-\draw[gray, opacity=0.46, line width=0.35pt] (8.82,1.67) -- (6.69,1.20);
-\draw[gray, opacity=0.46, line width=0.35pt] (7.26,1.73) -- (5.92,1.65);
-\draw[gray, opacity=0.46, line width=0.35pt] (7.60,0.84) -- (6.69,1.20);
-\draw[gray, opacity=0.46, line width=0.35pt] (8.99,2.12) -- (5.92,1.65);
-\draw[gray, opacity=0.46, line width=0.35pt] (7.83,2.37) -- (5.92,1.65);
-\draw[gray, opacity=0.45, line width=0.35pt] (8.99,2.12) -- (7.60,0.84);
-\draw[gray, opacity=0.45, line width=0.35pt] (7.83,2.37) -- (6.65,3.18);
-\draw[gray, opacity=0.45, line width=0.35pt] (8.99,2.12) -- (6.65,3.18);
-\draw[gray, opacity=0.45, line width=0.35pt] (4.27,2.70) -- (3.75,3.43);
-\draw[gray, opacity=0.45, line width=0.35pt] (8.82,1.67) -- (5.51,2.23);
-\draw[gray, opacity=0.45, line width=0.35pt] (7.60,0.84) -- (8.19,1.27);
-\draw[gray, opacity=0.45, line width=0.35pt] (6.64,2.37) -- (8.99,2.12);
-\draw[gray, opacity=0.45, line width=0.35pt] (8.82,1.67) -- (8.76,2.64);
-\draw[gray, opacity=0.44, line width=0.35pt] (7.83,2.37) -- (5.51,2.23);
-\draw[gray, opacity=0.44, line width=0.35pt] (8.76,2.64) -- (7.26,1.73);
-\draw[gray, opacity=0.44, line width=0.35pt] (7.94,3.01) -- (6.65,3.18);
-\draw[gray, opacity=0.44, line width=0.35pt] (5.51,2.23) -- (7.26,1.73);
-\draw[gray, opacity=0.44, line width=0.35pt] (6.64,2.37) -- (5.51,2.23);
-\draw[gray, opacity=0.44, line width=0.35pt] (5.51,2.23) -- (5.78,2.76);
-\draw[gray, opacity=0.43, line width=0.35pt] (3.58,3.97) -- (4.89,4.10);
-\draw[gray, opacity=0.43, line width=0.35pt] (4.76,1.22) -- (4.95,0.00);
-\draw[gray, opacity=0.43, line width=0.35pt] (8.82,1.67) -- (8.19,1.27);
-\draw[gray, opacity=0.43, line width=0.35pt] (7.26,1.73) -- (6.69,1.20);
-\draw[gray, opacity=0.43, line width=0.35pt] (6.64,2.37) -- (5.47,3.45);
-\draw[gray, opacity=0.43, line width=0.35pt] (2.62,2.82) -- (1.53,3.25);
-\draw[gray, opacity=0.43, line width=0.35pt] (6.42,0.62) -- (7.26,1.73);
-\draw[gray, opacity=0.43, line width=0.35pt] (7.83,2.37) -- (7.60,0.84);
-\draw[gray, opacity=0.43, line width=0.35pt] (6.72,4.00) -- (5.78,2.76);
-\draw[gray, opacity=0.42, line width=0.35pt] (6.42,0.62) -- (9.00,0.72);
-\draw[gray, opacity=0.42, line width=0.35pt] (4.27,2.70) -- (5.78,2.76);
-\draw[gray, opacity=0.42, line width=0.35pt] (8.99,2.12) -- (9.00,0.72);
-\draw[gray, opacity=0.42, line width=0.35pt] (7.94,3.01) -- (5.78,2.76);
-\draw[gray, opacity=0.42, line width=0.35pt] (6.64,2.37) -- (8.82,1.67);
-\draw[gray, opacity=0.42, line width=0.35pt] (6.64,2.37) -- (5.78,2.76);
-\draw[gray, opacity=0.42, line width=0.35pt] (8.82,1.67) -- (6.42,0.62);
-\draw[gray, opacity=0.42, line width=0.35pt] (6.64,2.37) -- (6.65,3.18);
-\draw[gray, opacity=0.41, line width=0.35pt] (8.76,2.64) -- (6.69,1.20);
-\draw[gray, opacity=0.41, line width=0.35pt] (7.26,1.73) -- (8.19,1.27);
-\draw[gray, opacity=0.41, line width=0.35pt] (7.83,2.37) -- (6.69,1.20);
-\draw[gray, opacity=0.41, line width=0.35pt] (3.75,3.43) -- (4.89,4.10);
-\draw[gray, opacity=0.41, line width=0.35pt] (9.00,0.72) -- (7.60,0.84);
-\draw[gray, opacity=0.41, line width=0.35pt] (4.76,1.22) -- (2.72,0.39);
-\draw[gray, opacity=0.40, line width=0.35pt] (7.83,2.37) -- (6.42,0.62);
-\draw[gray, opacity=0.40, line width=0.35pt] (8.99,2.12) -- (5.51,2.23);
-\draw[gray, opacity=0.40, line width=0.35pt] (8.99,2.12) -- (7.94,3.01);
-\draw[gray, opacity=0.40, line width=0.35pt] (6.42,0.62) -- (5.92,1.65);
-\draw[gray, opacity=0.40, line width=0.35pt] (4.86,0.56) -- (4.95,0.00);
-\draw[gray, opacity=0.40, line width=0.35pt] (8.76,2.64) -- (7.60,0.84);
-\draw[gray, opacity=0.40, line width=0.35pt] (5.51,2.23) -- (5.47,3.45);
-\draw[gray, opacity=0.40, line width=0.35pt] (6.72,4.00) -- (4.89,4.10);
-\draw[gray, opacity=0.40, line width=0.35pt] (4.27,2.70) -- (6.65,3.18);
-\draw[gray, opacity=0.39, line width=0.35pt] (8.99,2.12) -- (6.69,1.20);
-\draw[gray, opacity=0.39, line width=0.35pt] (6.42,0.62) -- (6.69,1.20);
-\draw[gray, opacity=0.39, line width=0.35pt] (3.75,3.43) -- (5.47,3.45);
-\draw[gray, opacity=0.39, line width=0.35pt] (3.75,3.43) -- (6.65,3.18);
-\draw[gray, opacity=0.39, line width=0.35pt] (5.51,2.23) -- (7.60,0.84);
-\draw[gray, opacity=0.39, line width=0.35pt] (7.83,2.37) -- (8.19,1.27);
-\draw[gray, opacity=0.39, line width=0.35pt] (3.67,0.85) -- (2.72,0.39);
-\draw[gray, opacity=0.39, line width=0.35pt] (8.19,1.27) -- (6.69,1.20);
-\draw[gray, opacity=0.39, line width=0.35pt] (8.76,2.64) -- (5.92,1.65);
-\draw[gray, opacity=0.39, line width=0.35pt] (5.51,2.23) -- (4.50,1.87);
-\draw[gray, opacity=0.38, line width=0.35pt] (6.65,3.18) -- (3.58,3.97);
-\draw[gray, opacity=0.38, line width=0.35pt] (9.00,0.72) -- (5.92,1.65);
-\draw[gray, opacity=0.38, line width=0.35pt] (6.42,0.62) -- (8.99,2.12);
-\draw[gray, opacity=0.38, line width=0.35pt] (2.72,0.39) -- (4.95,0.00);
-\draw[gray, opacity=0.38, line width=0.35pt] (6.42,0.62) -- (8.76,2.64);
-\draw[gray, opacity=0.38, line width=0.35pt] (8.99,2.12) -- (8.19,1.27);
-\draw[gray, opacity=0.38, line width=0.35pt] (3.75,3.43) -- (6.72,4.00);
-\draw[gray, opacity=0.38, line width=0.35pt] (7.83,2.37) -- (7.94,3.01);
-\draw[gray, opacity=0.38, line width=0.35pt] (2.10,1.08) -- (2.72,0.39);
-\draw[gray, opacity=0.38, line width=0.35pt] (6.42,0.62) -- (7.60,0.84);
-\draw[gray, opacity=0.38, line width=0.35pt] (3.58,3.97) -- (5.47,3.45);
-\draw[gray, opacity=0.38, line width=0.35pt] (5.51,2.23) -- (5.92,1.65);
-\draw[gray, opacity=0.37, line width=0.35pt] (6.42,0.62) -- (8.19,1.27);
-\draw[gray, opacity=0.37, line width=0.35pt] (6.64,2.37) -- (6.72,4.00);
-\draw[gray, opacity=0.37, line width=0.35pt] (7.60,0.84) -- (5.92,1.65);
-\draw[gray, opacity=0.37, line width=0.35pt] (8.76,2.64) -- (4.50,1.87);
-\draw[gray, opacity=0.37, line width=0.35pt] (5.51,2.23) -- (6.69,1.20);
-\draw[gray, opacity=0.37, line width=0.35pt] (3.58,3.97) -- (6.72,4.00);
-\draw[gray, opacity=0.37, line width=0.35pt] (8.82,1.67) -- (5.92,1.65);
-\draw[gray, opacity=0.37, line width=0.35pt] (5.92,1.65) -- (6.69,1.20);
-\draw[gray, opacity=0.37, line width=0.35pt] (9.00,0.72) -- (6.69,1.20);
-\draw[gray, opacity=0.37, line width=0.35pt] (8.76,2.64) -- (5.47,3.45);
-\draw[gray, opacity=0.37, line width=0.35pt] (7.94,3.01) -- (7.26,1.73);
-\draw[gray, opacity=0.37, line width=0.35pt] (6.64,2.37) -- (7.26,1.73);
-\draw[gray, opacity=0.37, line width=0.35pt] (4.27,2.70) -- (4.76,1.22);
-\draw[gray, opacity=0.36, line width=0.35pt] (4.76,1.22) -- (4.86,0.56);
-\draw[gray, opacity=0.36, line width=0.35pt] (8.76,2.64) -- (8.19,1.27);
-\draw[gray, opacity=0.36, line width=0.35pt] (7.83,2.37) -- (4.50,1.87);
-\draw[gray, opacity=0.36, line width=0.35pt] (5.51,2.23) -- (8.19,1.27);
-\draw[gray, opacity=0.36, line width=0.35pt] (4.27,2.70) -- (7.83,2.37);
-\draw[gray, opacity=0.36, line width=0.35pt] (8.82,1.67) -- (4.50,1.87);
-\draw[gray, opacity=0.36, line width=0.35pt] (7.83,2.37) -- (6.72,4.00);
-\draw[gray, opacity=0.36, line width=0.35pt] (6.64,2.37) -- (5.92,1.65);
-\draw[gray, opacity=0.36, line width=0.35pt] (4.76,1.22) -- (5.78,2.76);
-\draw[gray, opacity=0.36, line width=0.35pt] (3.75,3.43) -- (5.78,2.76);
-\draw[gray, opacity=0.36, line width=0.35pt] (4.27,2.70) -- (5.47,3.45);
-\draw[gray, opacity=0.36, line width=0.35pt] (2.62,2.82) -- (0.32,2.77);
-\draw[gray, opacity=0.36, line width=0.35pt] (8.76,2.64) -- (9.00,0.72);
-\draw[gray, opacity=0.36, line width=0.35pt] (8.19,1.27) -- (5.78,2.76);
-\draw[gray, opacity=0.35, line width=0.35pt] (9.00,0.72) -- (8.19,1.27);
-\draw[gray, opacity=0.35, line width=0.35pt] (6.64,2.37) -- (6.69,1.20);
-\draw[gray, opacity=0.35, line width=0.35pt] (5.47,3.45) -- (5.78,2.76);
-\draw[gray, opacity=0.35, line width=0.35pt] (6.42,0.62) -- (5.51,2.23);
-\draw[gray, opacity=0.35, line width=0.35pt] (5.92,1.65) -- (8.19,1.27);
-\draw[gray, opacity=0.35, line width=0.35pt] (7.94,3.01) -- (8.76,2.64);
-\draw[gray, opacity=0.35, line width=0.35pt] (8.82,1.67) -- (7.94,3.01);
-\draw[gray, opacity=0.35, line width=0.35pt] (6.64,2.37) -- (7.60,0.84);
-\draw[gray, opacity=0.35, line width=0.35pt] (4.50,1.87) -- (6.69,1.20);
-\draw[gray, opacity=0.35, line width=0.35pt] (4.76,1.22) -- (7.26,1.73);
-\draw[gray, opacity=0.35, line width=0.35pt] (4.27,2.70) -- (2.10,1.08);
-\draw[gray, opacity=0.35, line width=0.35pt] (8.99,2.12) -- (5.47,3.45);
-\draw[gray, opacity=0.35, line width=0.35pt] (4.27,2.70) -- (6.72,4.00);
-\draw[gray, opacity=0.35, line width=0.35pt] (9.00,0.72) -- (5.78,2.76);
-\draw[gray, opacity=0.35, line width=0.35pt] (6.64,2.37) -- (7.94,3.01);
-\draw[gray, opacity=0.35, line width=0.35pt] (8.00,3.59) -- (5.47,3.45);
-\draw[gray, opacity=0.35, line width=0.35pt] (7.94,3.01) -- (5.51,2.23);
-\draw[gray, opacity=0.35, line width=0.35pt] (2.10,1.08) -- (2.76,1.58);
-\draw[gray, opacity=0.35, line width=0.35pt] (5.92,1.65) -- (5.78,2.76);
-\draw[gray, opacity=0.35, line width=0.35pt] (4.27,2.70) -- (2.76,1.58);
-\draw[gray, opacity=0.34, line width=0.35pt] (6.65,3.18) -- (8.00,3.59);
-\draw[gray, opacity=0.34, line width=0.35pt] (2.62,2.82) -- (1.28,1.83);
-\draw[gray, opacity=0.34, line width=0.35pt] (6.64,2.37) -- (4.50,1.87);
-\draw[gray, opacity=0.34, line width=0.35pt] (6.42,0.62) -- (4.50,1.87);
-\draw[gray, opacity=0.34, line width=0.35pt] (2.10,1.08) -- (4.76,1.22);
-\draw[gray, opacity=0.34, line width=0.35pt] (6.64,2.37) -- (4.27,2.70);
-\draw[gray, opacity=0.34, line width=0.35pt] (3.75,3.43) -- (2.62,2.82);
-\draw[gray, opacity=0.34, line width=0.35pt] (7.26,1.73) -- (4.50,1.87);
-\draw[gray, opacity=0.34, line width=0.35pt] (8.82,1.67) -- (6.65,3.18);
-\draw[gray, opacity=0.34, line width=0.35pt] (7.60,0.84) -- (5.78,2.76);
-\draw[gray, opacity=0.34, line width=0.35pt] (4.50,1.87) -- (7.60,0.84);
-\draw[gray, opacity=0.34, line width=0.35pt] (3.05,2.22) -- (2.76,1.58);
-\draw[gray, opacity=0.34, line width=0.35pt] (6.64,2.37) -- (4.76,1.22);
-\fill[c1, opacity=0.85] (6.64,2.37) circle (2.59mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.81mm, inner sep=0.5pt] at (6.64,2.37) {Davoodalhosseini (2021)};
-\fill[c2, opacity=0.85] (0.00,3.09) circle (2.15mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.51mm, inner sep=0.5pt] at (0.00,3.09) {Yankovskiy (2020)};
-\fill[c3, opacity=0.85] (4.27,2.70) circle (1.99mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.39mm, inner sep=0.5pt] at (4.27,2.70) {Bindseil (2019)};
-\fill[c1, opacity=0.85] (7.83,2.37) circle (2.01mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.41mm, inner sep=0.5pt] at (7.83,2.37) {Williamson (2021)};
-\fill[c2, opacity=0.85] (2.10,1.08) circle (1.97mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.38mm, inner sep=0.5pt] at (2.10,1.08) {Barontini (2019)};
-\fill[c2, opacity=0.85] (4.76,1.22) circle (2.27mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.59mm, inner sep=0.5pt] at (4.76,1.22) {Meaning (2018)};
-\fill[c2, opacity=0.85] (3.67,0.85) circle (2.52mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.76mm, inner sep=0.5pt] at (3.67,0.85) {Bindseil (2020)};
-\fill[c1, opacity=0.85] (8.82,1.67) circle (2.29mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.60mm, inner sep=0.5pt] at (8.82,1.67) {Williamson (2022)};
-\fill[c1, opacity=0.85] (6.42,0.62) circle (2.91mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=2.04mm, inner sep=0.5pt] at (6.42,0.62) {Brunnermeier (2019)};
-\fill[c1, opacity=0.85] (8.99,2.12) circle (2.02mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.41mm, inner sep=0.5pt] at (8.99,2.12) {Keister (2022b)};
-\fill[c3, opacity=0.85] (7.94,3.01) circle (2.46mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.72mm, inner sep=0.5pt] at (7.94,3.01) {KIM (2022)};
-\fill[c3, opacity=0.85] (3.75,3.43) circle (2.27mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.59mm, inner sep=0.5pt] at (3.75,3.43) {Lee (2021)};
-\fill[c1, opacity=0.85] (5.51,2.23) circle (2.43mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.70mm, inner sep=0.5pt] at (5.51,2.23) {Minesso (2022)};
-\fill[c1, opacity=0.85] (8.76,2.64) circle (2.46mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.72mm, inner sep=0.5pt] at (8.76,2.64) {Barrdear (2021)};
-\fill[c1, opacity=0.85] (9.00,0.72) circle (2.05mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.43mm, inner sep=0.5pt] at (9.00,0.72) {Diamond (1983)};
-\fill[c3, opacity=0.85] (6.65,3.18) circle (1.92mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (6.65,3.18) {Chen (2022)};
-\fill[c2, opacity=0.85] (0.12,1.14) circle (2.35mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.65mm, inner sep=0.5pt] at (0.12,1.14) {Nakamoto (2008)};
-\fill[c2, opacity=0.85] (1.54,2.42) circle (2.86mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=2.00mm, inner sep=0.5pt] at (1.54,2.42) {Auer (2020a)};
-\fill[c1, opacity=0.85] (7.26,1.73) circle (2.13mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.49mm, inner sep=0.5pt] at (7.26,1.73) {Schilling (2020)};
-\fill[c2, opacity=0.85] (2.72,0.39) circle (2.49mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.74mm, inner sep=0.5pt] at (2.72,0.39) {Kumhof (2018)};
-\fill[c2, opacity=0.85] (2.62,2.82) circle (2.42mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.69mm, inner sep=0.5pt] at (2.62,2.82) {Kiff (2020)};
-\fill[c3, opacity=0.85] (3.58,3.97) circle (1.89mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.33mm, inner sep=0.5pt] at (3.58,3.97) {Söilen (2021)};
-\fill[c1, opacity=0.85] (4.50,1.87) circle (3.15mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=2.20mm, inner sep=0.5pt] at (4.50,1.87) {Agur (2019)};
-\fill[c1, opacity=0.85] (7.60,0.84) circle (2.73mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.91mm, inner sep=0.5pt] at (7.60,0.84) {Chiu (2022)};
-\fill[c2, opacity=0.85] (1.28,1.83) circle (2.22mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.55mm, inner sep=0.5pt] at (1.28,1.83) {Auer (2020b)};
-\fill[c3, opacity=0.85] (8.00,3.59) circle (2.58mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.81mm, inner sep=0.5pt] at (8.00,3.59) {Auer (2022)};
-\fill[c1, opacity=0.85] (5.92,1.65) circle (2.91mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=2.04mm, inner sep=0.5pt] at (5.92,1.65) {Fernández-Villaverde (2\dots{}};
-\fill[c3, opacity=0.85] (6.72,4.00) circle (2.26mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.58mm, inner sep=0.5pt] at (6.72,4.00) {Allen (2022)};
-\fill[c3, opacity=0.85] (4.89,4.10) circle (2.35mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.64mm, inner sep=0.5pt] at (4.89,4.10) {Ozili (2022)};
-\fill[c2, opacity=0.85] (1.53,3.25) circle (2.16mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.52mm, inner sep=0.5pt] at (1.53,3.25) {Allen (2020)};
-\fill[c3, opacity=0.85] (5.47,3.45) circle (1.89mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.33mm, inner sep=0.5pt] at (5.47,3.45) {Wang (2022)};
-\fill[c2, opacity=0.85] (3.05,2.22) circle (2.19mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.54mm, inner sep=0.5pt] at (3.05,2.22) {Adrian (2019)};
-\fill[c2, opacity=0.85] (0.32,2.77) circle (2.01mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.40mm, inner sep=0.5pt] at (0.32,2.77) {Bossu (2020)};
-\fill[c2, opacity=0.85] (0.93,1.05) circle (2.07mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.45mm, inner sep=0.5pt] at (0.93,1.05) {Sun (2019)};
-\fill[c2, opacity=0.85] (4.86,0.56) circle (3.03mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=2.12mm, inner sep=0.5pt] at (4.86,0.56) {Bordo (2017)};
-\fill[c1, opacity=0.85] (8.19,1.27) circle (3.20mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=2.24mm, inner sep=0.5pt] at (8.19,1.27) {Andolfatto (2020)};
-\fill[c3, opacity=0.85] (5.78,2.76) circle (2.01mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.40mm, inner sep=0.5pt] at (5.78,2.76) {Kumhof (2021)};
-\fill[c1, opacity=0.85] (6.69,1.20) circle (2.88mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=2.02mm, inner sep=0.5pt] at (6.69,1.20) {Keister (2022a)};
-\fill[c2, opacity=0.85] (2.76,1.58) circle (2.48mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.74mm, inner sep=0.5pt] at (2.76,1.58) {Agur (n.d.)};
-\fill[c2, opacity=0.85] (4.95,0.00) circle (2.45mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.72mm, inner sep=0.5pt] at (4.95,0.00) {Barrdear (2016)};
+\draw[gray, opacity=0.67, line width=0.35pt] (0.40,1.64) -- (1.09,1.25);
+\draw[gray, opacity=0.59, line width=0.35pt] (0.40,1.64) -- (1.94,2.42);
+\draw[gray, opacity=0.58, line width=0.35pt] (1.09,1.25) -- (1.94,2.42);
+\draw[gray, opacity=0.57, line width=0.35pt] (2.61,0.75) -- (3.79,0.69);
+\draw[gray, opacity=0.57, line width=0.35pt] (1.18,2.02) -- (1.09,1.25);
+\draw[gray, opacity=0.56, line width=0.35pt] (1.18,2.02) -- (1.94,2.42);
+\draw[gray, opacity=0.54, line width=0.35pt] (1.18,2.02) -- (0.40,1.64);
+\draw[gray, opacity=0.54, line width=0.35pt] (1.09,1.25) -- (1.85,1.52);
+\draw[gray, opacity=0.54, line width=0.35pt] (1.09,1.25) -- (2.91,1.30);
+\draw[gray, opacity=0.54, line width=0.35pt] (1.94,2.42) -- (0.00,3.08);
+\draw[gray, opacity=0.54, line width=0.35pt] (0.40,1.64) -- (2.91,1.30);
+\draw[gray, opacity=0.53, line width=0.35pt] (1.09,1.25) -- (3.90,1.48);
+\draw[gray, opacity=0.53, line width=0.35pt] (4.20,0.00) -- (3.79,0.69);
+\draw[gray, opacity=0.51, line width=0.35pt] (4.20,0.00) -- (2.61,0.75);
+\draw[gray, opacity=0.50, line width=0.35pt] (2.61,0.75) -- (2.91,1.30);
+\draw[gray, opacity=0.50, line width=0.35pt] (1.85,1.52) -- (3.90,1.48);
+\draw[gray, opacity=0.50, line width=0.35pt] (1.18,2.02) -- (1.03,2.76);
+\draw[gray, opacity=0.49, line width=0.35pt] (1.09,1.25) -- (0.00,3.08);
+\draw[gray, opacity=0.49, line width=0.35pt] (1.03,2.76) -- (1.94,2.42);
+\draw[gray, opacity=0.48, line width=0.35pt] (3.32,1.85) -- (1.85,1.52);
+\draw[gray, opacity=0.48, line width=0.35pt] (1.09,1.25) -- (3.79,0.69);
+\draw[gray, opacity=0.48, line width=0.35pt] (0.40,1.64) -- (1.85,1.52);
+\draw[gray, opacity=0.48, line width=0.35pt] (6.16,0.80) -- (5.84,0.18);
+\draw[gray, opacity=0.47, line width=0.35pt] (3.32,1.85) -- (2.61,0.75);
+\draw[gray, opacity=0.47, line width=0.35pt] (1.85,1.52) -- (2.91,1.30);
+\draw[gray, opacity=0.47, line width=0.35pt] (1.85,1.52) -- (2.61,0.75);
+\draw[gray, opacity=0.46, line width=0.35pt] (1.18,2.02) -- (0.00,3.08);
+\draw[gray, opacity=0.46, line width=0.35pt] (1.18,2.02) -- (0.33,2.27);
+\draw[gray, opacity=0.46, line width=0.35pt] (2.94,2.34) -- (1.94,2.42);
+\draw[gray, opacity=0.46, line width=0.35pt] (1.03,2.76) -- (0.33,2.27);
+\draw[gray, opacity=0.46, line width=0.35pt] (2.94,2.34) -- (0.40,1.64);
+\draw[gray, opacity=0.46, line width=0.35pt] (2.94,2.34) -- (1.09,1.25);
+\draw[gray, opacity=0.45, line width=0.35pt] (1.03,2.76) -- (0.40,1.64);
+\draw[gray, opacity=0.45, line width=0.35pt] (1.09,1.25) -- (2.61,0.75);
+\draw[gray, opacity=0.45, line width=0.35pt] (0.40,1.64) -- (2.61,0.75);
+\draw[gray, opacity=0.45, line width=0.35pt] (6.16,0.80) -- (5.12,1.50);
+\draw[gray, opacity=0.45, line width=0.35pt] (1.18,2.02) -- (3.32,1.85);
+\draw[gray, opacity=0.45, line width=0.35pt] (1.03,2.76) -- (2.51,3.00);
+\draw[gray, opacity=0.45, line width=0.35pt] (0.40,1.64) -- (3.90,1.48);
+\draw[gray, opacity=0.45, line width=0.35pt] (1.18,2.02) -- (1.85,1.52);
+\draw[gray, opacity=0.44, line width=0.35pt] (1.09,1.25) -- (3.32,1.85);
+\draw[gray, opacity=0.44, line width=0.35pt] (1.94,2.42) -- (1.85,1.52);
+\draw[gray, opacity=0.44, line width=0.35pt] (2.61,0.75) -- (1.42,0.77);
+\draw[gray, opacity=0.44, line width=0.35pt] (3.32,1.85) -- (1.94,2.42);
+\draw[gray, opacity=0.44, line width=0.35pt] (3.32,1.85) -- (2.91,1.30);
+\draw[gray, opacity=0.44, line width=0.35pt] (3.32,1.85) -- (3.90,1.48);
+\draw[gray, opacity=0.43, line width=0.35pt] (3.22,0.06) -- (5.84,0.18);
+\draw[gray, opacity=0.43, line width=0.35pt] (3.94,2.87) -- (3.05,3.99);
+\draw[gray, opacity=0.43, line width=0.35pt] (1.18,2.02) -- (2.51,3.00);
+\draw[gray, opacity=0.43, line width=0.35pt] (1.94,2.42) -- (0.33,2.27);
+\draw[gray, opacity=0.43, line width=0.35pt] (3.79,0.69) -- (3.90,1.48);
+\draw[gray, opacity=0.43, line width=0.35pt] (6.53,1.58) -- (7.70,1.28);
+\draw[gray, opacity=0.43, line width=0.35pt] (1.94,2.42) -- (1.78,3.32);
+\draw[gray, opacity=0.43, line width=0.35pt] (1.03,2.76) -- (1.09,1.25);
+\draw[gray, opacity=0.43, line width=0.35pt] (4.20,0.00) -- (2.91,1.30);
+\draw[gray, opacity=0.42, line width=0.35pt] (0.00,3.08) -- (1.78,3.32);
+\draw[gray, opacity=0.42, line width=0.35pt] (2.91,1.30) -- (5.12,1.50);
+\draw[gray, opacity=0.42, line width=0.35pt] (0.40,1.64) -- (0.00,3.08);
+\draw[gray, opacity=0.42, line width=0.35pt] (1.42,0.77) -- (2.91,1.30);
+\draw[gray, opacity=0.42, line width=0.35pt] (1.18,2.02) -- (3.90,1.48);
+\draw[gray, opacity=0.42, line width=0.35pt] (2.91,1.30) -- (3.90,1.48);
+\draw[gray, opacity=0.42, line width=0.35pt] (1.18,2.02) -- (1.78,3.32);
+\draw[gray, opacity=0.42, line width=0.35pt] (2.61,0.75) -- (3.90,1.48);
+\draw[gray, opacity=0.41, line width=0.35pt] (1.85,1.52) -- (0.33,2.27);
+\draw[gray, opacity=0.41, line width=0.35pt] (1.94,2.42) -- (2.51,3.00);
+\draw[gray, opacity=0.41, line width=0.35pt] (1.09,1.25) -- (0.33,2.27);
+\draw[gray, opacity=0.41, line width=0.35pt] (3.22,0.06) -- (6.16,0.80);
+\draw[gray, opacity=0.41, line width=0.35pt] (1.03,2.76) -- (0.00,3.08);
+\draw[gray, opacity=0.41, line width=0.35pt] (3.94,2.87) -- (6.01,3.62);
+\draw[gray, opacity=0.40, line width=0.35pt] (1.09,1.25) -- (1.78,3.32);
+\draw[gray, opacity=0.40, line width=0.35pt] (0.40,1.64) -- (3.32,1.85);
+\draw[gray, opacity=0.40, line width=0.35pt] (0.40,1.64) -- (1.42,0.77);
+\draw[gray, opacity=0.40, line width=0.35pt] (2.94,2.34) -- (1.78,3.32);
+\draw[gray, opacity=0.40, line width=0.35pt] (4.87,3.23) -- (3.05,3.99);
+\draw[gray, opacity=0.40, line width=0.35pt] (1.03,2.76) -- (1.85,1.52);
+\draw[gray, opacity=0.40, line width=0.35pt] (3.32,1.85) -- (3.79,0.69);
+\draw[gray, opacity=0.40, line width=0.35pt] (4.20,0.00) -- (3.22,0.06);
+\draw[gray, opacity=0.40, line width=0.35pt] (2.61,0.75) -- (5.12,1.50);
+\draw[gray, opacity=0.39, line width=0.35pt] (0.40,1.64) -- (0.33,2.27);
+\draw[gray, opacity=0.39, line width=0.35pt] (1.78,3.32) -- (0.33,2.27);
+\draw[gray, opacity=0.39, line width=0.35pt] (6.16,0.80) -- (3.79,0.69);
+\draw[gray, opacity=0.39, line width=0.35pt] (6.16,0.80) -- (2.61,0.75);
+\draw[gray, opacity=0.39, line width=0.35pt] (1.03,2.76) -- (3.32,1.85);
+\draw[gray, opacity=0.39, line width=0.35pt] (1.09,1.25) -- (2.51,3.00);
+\draw[gray, opacity=0.39, line width=0.35pt] (6.01,3.62) -- (3.85,3.54);
+\draw[gray, opacity=0.39, line width=0.35pt] (2.51,3.00) -- (0.33,2.27);
+\draw[gray, opacity=0.39, line width=0.35pt] (2.94,2.34) -- (1.85,1.52);
+\draw[gray, opacity=0.39, line width=0.35pt] (3.32,1.85) -- (4.31,2.24);
+\draw[gray, opacity=0.38, line width=0.35pt] (2.61,0.75) -- (5.84,0.18);
+\draw[gray, opacity=0.38, line width=0.35pt] (2.94,2.34) -- (0.00,3.08);
+\draw[gray, opacity=0.38, line width=0.35pt] (0.40,1.64) -- (1.78,3.32);
+\draw[gray, opacity=0.38, line width=0.35pt] (6.01,3.62) -- (3.05,3.99);
+\draw[gray, opacity=0.38, line width=0.35pt] (1.85,1.52) -- (1.78,3.32);
+\draw[gray, opacity=0.38, line width=0.35pt] (0.40,1.64) -- (2.51,3.00);
+\draw[gray, opacity=0.38, line width=0.35pt] (4.20,0.00) -- (6.16,0.80);
+\draw[gray, opacity=0.38, line width=0.35pt] (1.09,1.25) -- (1.42,0.77);
+\draw[gray, opacity=0.38, line width=0.35pt] (6.76,3.11) -- (6.01,3.62);
+\draw[gray, opacity=0.38, line width=0.35pt] (1.03,2.76) -- (1.78,3.32);
+\draw[gray, opacity=0.38, line width=0.35pt] (3.79,0.69) -- (5.84,0.18);
+\draw[gray, opacity=0.38, line width=0.35pt] (2.94,2.34) -- (3.32,1.85);
+\draw[gray, opacity=0.37, line width=0.35pt] (2.51,3.00) -- (1.78,3.32);
+\draw[gray, opacity=0.37, line width=0.35pt] (4.20,0.00) -- (3.90,1.48);
+\draw[gray, opacity=0.37, line width=0.35pt] (2.94,2.34) -- (1.03,2.76);
+\draw[gray, opacity=0.37, line width=0.35pt] (1.85,1.52) -- (4.31,2.24);
+\draw[gray, opacity=0.37, line width=0.35pt] (3.32,1.85) -- (0.33,2.27);
+\draw[gray, opacity=0.37, line width=0.35pt] (4.20,0.00) -- (5.84,0.18);
+\draw[gray, opacity=0.37, line width=0.35pt] (2.94,2.34) -- (1.18,2.02);
+\draw[gray, opacity=0.37, line width=0.35pt] (2.94,2.34) -- (0.33,2.27);
+\draw[gray, opacity=0.37, line width=0.35pt] (0.00,3.08) -- (0.33,2.27);
+\draw[gray, opacity=0.37, line width=0.35pt] (1.85,1.52) -- (3.79,0.69);
+\draw[gray, opacity=0.37, line width=0.35pt] (1.94,2.42) -- (1.42,0.77);
+\draw[gray, opacity=0.37, line width=0.35pt] (1.94,2.42) -- (3.90,1.48);
+\draw[gray, opacity=0.37, line width=0.35pt] (3.94,2.87) -- (5.12,1.50);
+\draw[gray, opacity=0.36, line width=0.35pt] (3.94,2.87) -- (4.87,3.23);
+\draw[gray, opacity=0.36, line width=0.35pt] (1.85,1.52) -- (2.51,3.00);
+\draw[gray, opacity=0.36, line width=0.35pt] (1.09,1.25) -- (4.31,2.24);
+\draw[gray, opacity=0.36, line width=0.35pt] (3.32,1.85) -- (2.51,3.00);
+\draw[gray, opacity=0.36, line width=0.35pt] (1.09,1.25) -- (5.12,1.50);
+\draw[gray, opacity=0.36, line width=0.35pt] (1.18,2.02) -- (4.31,2.24);
+\draw[gray, opacity=0.36, line width=0.35pt] (4.20,0.00) -- (1.09,1.25);
+\draw[gray, opacity=0.36, line width=0.35pt] (2.94,2.34) -- (3.90,1.48);
+\draw[gray, opacity=0.36, line width=0.35pt] (3.94,2.87) -- (2.91,1.30);
+\draw[gray, opacity=0.36, line width=0.35pt] (6.16,0.80) -- (2.91,1.30);
+\draw[gray, opacity=0.36, line width=0.35pt] (3.79,0.69) -- (5.12,1.50);
+\draw[gray, opacity=0.36, line width=0.35pt] (8.65,1.81) -- (6.53,1.58);
+\draw[gray, opacity=0.36, line width=0.35pt] (1.85,1.52) -- (0.00,3.08);
+\draw[gray, opacity=0.36, line width=0.35pt] (2.91,1.30) -- (2.51,3.00);
+\draw[gray, opacity=0.35, line width=0.35pt] (0.00,3.08) -- (2.51,3.00);
+\draw[gray, opacity=0.35, line width=0.35pt] (3.90,1.48) -- (0.33,2.27);
+\draw[gray, opacity=0.35, line width=0.35pt] (3.79,0.69) -- (2.91,1.30);
+\draw[gray, opacity=0.35, line width=0.35pt] (3.32,1.85) -- (1.78,3.32);
+\draw[gray, opacity=0.35, line width=0.35pt] (2.94,2.34) -- (2.51,3.00);
+\draw[gray, opacity=0.35, line width=0.35pt] (1.85,1.52) -- (1.42,0.77);
+\draw[gray, opacity=0.35, line width=0.35pt] (1.18,2.02) -- (1.42,0.77);
+\draw[gray, opacity=0.35, line width=0.35pt] (1.03,2.76) -- (3.90,1.48);
+\draw[gray, opacity=0.35, line width=0.35pt] (4.31,2.24) -- (0.33,2.27);
+\draw[gray, opacity=0.35, line width=0.35pt] (3.94,2.87) -- (1.94,2.42);
+\draw[gray, opacity=0.35, line width=0.35pt] (6.76,3.11) -- (5.12,1.50);
+\draw[gray, opacity=0.35, line width=0.35pt] (0.40,1.64) -- (3.79,0.69);
+\draw[gray, opacity=0.35, line width=0.35pt] (4.20,0.00) -- (5.12,1.50);
+\draw[gray, opacity=0.35, line width=0.35pt] (0.00,3.08) -- (2.91,1.30);
+\draw[gray, opacity=0.35, line width=0.35pt] (1.42,0.77) -- (3.90,1.48);
+\draw[gray, opacity=0.35, line width=0.35pt] (4.90,0.69) -- (3.79,0.69);
+\draw[gray, opacity=0.35, line width=0.35pt] (3.32,1.85) -- (1.42,0.77);
+\draw[gray, opacity=0.35, line width=0.35pt] (6.76,3.11) -- (6.41,2.50);
+\draw[gray, opacity=0.35, line width=0.35pt] (2.94,2.34) -- (2.91,1.30);
+\draw[gray, opacity=0.35, line width=0.35pt] (6.41,2.50) -- (5.12,1.50);
+\draw[gray, opacity=0.34, line width=0.35pt] (4.90,0.69) -- (2.61,0.75);
+\draw[gray, opacity=0.34, line width=0.35pt] (7.57,2.66) -- (6.53,1.58);
+\draw[gray, opacity=0.34, line width=0.35pt] (4.31,2.24) -- (3.90,1.48);
+\draw[gray, opacity=0.34, line width=0.35pt] (1.78,3.32) -- (4.31,2.24);
+\draw[gray, opacity=0.34, line width=0.35pt] (3.94,2.87) -- (6.76,3.11);
+\draw[gray, opacity=0.34, line width=0.35pt] (5.12,1.50) -- (3.90,1.48);
+\draw[gray, opacity=0.34, line width=0.35pt] (6.16,0.80) -- (6.53,1.58);
+\draw[gray, opacity=0.34, line width=0.35pt] (1.94,2.42) -- (4.31,2.24);
+\draw[gray, opacity=0.34, line width=0.35pt] (1.18,2.02) -- (2.61,0.75);
+\draw[gray, opacity=0.34, line width=0.35pt] (1.03,2.76) -- (2.91,1.30);
+\draw[gray, opacity=0.34, line width=0.35pt] (1.03,2.76) -- (4.31,2.24);
+\draw[gray, opacity=0.34, line width=0.35pt] (5.50,2.34) -- (6.41,2.50);
+\draw[gray, opacity=0.34, line width=0.35pt] (3.94,2.87) -- (3.90,1.48);
+\fill[c2, opacity=0.85] (9.00,2.27) circle (2.15mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.51mm, inner sep=0.5pt] at (9.00,2.27) {Yankovskiy (2020)};
+\fill[c1, opacity=0.85] (2.94,2.34) circle (2.91mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=2.04mm, inner sep=0.5pt] at (2.94,2.34) {Fernández-Villaverde (2\dots{}};
+\fill[c1, opacity=0.85] (1.18,2.02) circle (2.29mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.60mm, inner sep=0.5pt] at (1.18,2.02) {Williamson (2022)};
+\fill[c3, opacity=0.85] (4.20,0.00) circle (2.26mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.58mm, inner sep=0.5pt] at (4.20,0.00) {Allen (2022)};
+\fill[c3, opacity=0.85] (3.22,0.06) circle (2.35mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.64mm, inner sep=0.5pt] at (3.22,0.06) {Ozili (2022)};
+\fill[c1, opacity=0.85] (1.03,2.76) circle (2.73mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.91mm, inner sep=0.5pt] at (1.03,2.76) {Chiu (2022)};
+\fill[c2, opacity=0.85] (7.82,3.65) circle (2.35mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.65mm, inner sep=0.5pt] at (7.82,3.65) {Nakamoto (2008)};
+\fill[c2, opacity=0.85] (3.94,2.87) circle (2.27mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.59mm, inner sep=0.5pt] at (3.94,2.87) {Meaning (2018)};
+\fill[c1, opacity=0.85] (0.40,1.64) circle (2.02mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.41mm, inner sep=0.5pt] at (0.40,1.64) {Keister (2022b)};
+\fill[c1, opacity=0.85] (1.09,1.25) circle (2.01mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.41mm, inner sep=0.5pt] at (1.09,1.25) {Williamson (2021)};
+\fill[c1, opacity=0.85] (3.32,1.85) circle (2.43mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.70mm, inner sep=0.5pt] at (3.32,1.85) {Minesso (2022)};
+\fill[c2, opacity=0.85] (5.50,2.34) circle (2.19mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.54mm, inner sep=0.5pt] at (5.50,2.34) {Adrian (2019)};
+\fill[c1, opacity=0.85] (1.94,2.42) circle (2.13mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.49mm, inner sep=0.5pt] at (1.94,2.42) {Schilling (2020)};
+\fill[c3, opacity=0.85] (6.16,0.80) circle (2.27mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.59mm, inner sep=0.5pt] at (6.16,0.80) {Lee (2021)};
+\fill[c2, opacity=0.85] (6.76,3.11) circle (1.97mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.38mm, inner sep=0.5pt] at (6.76,3.11) {Barontini (2019)};
+\fill[c2, opacity=0.85] (7.57,2.66) circle (2.22mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.55mm, inner sep=0.5pt] at (7.57,2.66) {Auer (2020b)};
+\fill[c1, opacity=0.85] (1.85,1.52) circle (2.46mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.72mm, inner sep=0.5pt] at (1.85,1.52) {Barrdear (2021)};
+\fill[c2, opacity=0.85] (4.87,3.23) circle (3.03mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=2.12mm, inner sep=0.5pt] at (4.87,3.23) {Bordo (2017)};
+\fill[c2, opacity=0.85] (6.01,3.62) circle (2.49mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.74mm, inner sep=0.5pt] at (6.01,3.62) {Kumhof (2018)};
+\fill[c3, opacity=0.85] (4.90,0.69) circle (2.58mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.81mm, inner sep=0.5pt] at (4.90,0.69) {Auer (2022)};
+\fill[c1, opacity=0.85] (0.00,3.08) circle (2.05mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.43mm, inner sep=0.5pt] at (0.00,3.08) {Diamond (1983)};
+\fill[c2, opacity=0.85] (3.05,3.99) circle (2.45mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.72mm, inner sep=0.5pt] at (3.05,3.99) {Barrdear (2016)};
+\fill[c2, opacity=0.85] (6.41,2.50) circle (2.48mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.74mm, inner sep=0.5pt] at (6.41,2.50) {Agur (n.d.)};
+\fill[c2, opacity=0.85] (8.65,1.81) circle (2.01mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.40mm, inner sep=0.5pt] at (8.65,1.81) {Bossu (2020)};
+\fill[c2, opacity=0.85] (5.15,4.10) circle (2.07mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.45mm, inner sep=0.5pt] at (5.15,4.10) {Sun (2019)};
+\fill[c3, opacity=0.85] (2.61,0.75) circle (1.92mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (2.61,0.75) {Chen (2022)};
+\fill[c3, opacity=0.85] (1.42,0.77) circle (2.46mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.72mm, inner sep=0.5pt] at (1.42,0.77) {KIM (2022)};
+\fill[c3, opacity=0.85] (3.79,0.69) circle (1.89mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.33mm, inner sep=0.5pt] at (3.79,0.69) {Wang (2022)};
+\fill[c3, opacity=0.85] (2.91,1.30) circle (2.01mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.40mm, inner sep=0.5pt] at (2.91,1.30) {Kumhof (2021)};
+\fill[c1, opacity=0.85] (2.51,3.00) circle (3.20mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=2.24mm, inner sep=0.5pt] at (2.51,3.00) {Andolfatto (2020)};
+\fill[c2, opacity=0.85] (3.85,3.54) circle (2.52mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.76mm, inner sep=0.5pt] at (3.85,3.54) {Bindseil (2020)};
+\fill[c3, opacity=0.85] (5.12,1.50) circle (1.99mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.39mm, inner sep=0.5pt] at (5.12,1.50) {Bindseil (2019)};
+\fill[c2, opacity=0.85] (7.37,2.02) circle (2.86mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=2.00mm, inner sep=0.5pt] at (7.37,2.02) {Auer (2020a)};
+\fill[c1, opacity=0.85] (1.78,3.32) circle (2.91mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=2.04mm, inner sep=0.5pt] at (1.78,3.32) {Brunnermeier (2019)};
+\fill[c1, opacity=0.85] (4.31,2.24) circle (3.15mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=2.20mm, inner sep=0.5pt] at (4.31,2.24) {Agur (2019)};
+\fill[c1, opacity=0.85] (3.90,1.48) circle (2.59mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.81mm, inner sep=0.5pt] at (3.90,1.48) {Davoodalhosseini (2021)};
+\fill[c3, opacity=0.85] (5.84,0.18) circle (1.89mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.33mm, inner sep=0.5pt] at (5.84,0.18) {Söilen (2021)};
+\fill[c2, opacity=0.85] (6.53,1.58) circle (2.42mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.69mm, inner sep=0.5pt] at (6.53,1.58) {Kiff (2020)};
+\fill[c2, opacity=0.85] (7.70,1.28) circle (2.16mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.52mm, inner sep=0.5pt] at (7.70,1.28) {Allen (2020)};
+\fill[c1, opacity=0.85] (0.33,2.27) circle (2.88mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=2.02mm, inner sep=0.5pt] at (0.33,2.27) {Keister (2022a)};
 \end{tikzpicture}
 \end{column}
 \begin{column}{0.28\textwidth}\scriptsize
@@ -792,116 +818,116 @@ Chiu (2022) & 241 \\\end{tabular}
 \draw[gray, opacity=0.67, line width=0.35pt] (5.60,2.13) -- (7.84,2.07);
 \draw[gray, opacity=0.67, line width=0.35pt] (6.74,4.20) -- (6.70,0.00);
 \draw[gray, opacity=0.67, line width=0.35pt] (6.74,4.20) -- (7.84,2.07);
-\draw[gray, opacity=0.67, line width=0.35pt] (6.70,0.00) -- (7.84,2.07);
-\draw[gray, opacity=0.64, line width=0.35pt] (4.79,3.73) -- (5.04,3.99);
-\draw[gray, opacity=0.56, line width=0.35pt] (4.59,0.25) -- (4.45,0.53);
-\draw[gray, opacity=0.54, line width=0.35pt] (2.24,4.20) -- (2.05,4.02);
-\draw[gray, opacity=0.49, line width=0.35pt] (4.37,0.06) -- (4.59,0.25);
-\draw[gray, opacity=0.47, line width=0.35pt] (0.65,3.27) -- (0.46,3.43);
-\draw[gray, opacity=0.47, line width=0.35pt] (4.62,0.00) -- (4.37,0.06);
-\draw[gray, opacity=0.47, line width=0.35pt] (4.62,0.00) -- (4.59,0.25);
-\draw[gray, opacity=0.43, line width=0.35pt] (4.81,4.20) -- (5.04,3.99);
-\draw[gray, opacity=0.43, line width=0.35pt] (0.31,3.30) -- (0.46,3.43);
-\draw[gray, opacity=0.43, line width=0.35pt] (0.46,3.43) -- (0.46,2.87);
-\draw[gray, opacity=0.37, line width=0.35pt] (4.62,0.00) -- (4.45,0.53);
-\draw[gray, opacity=0.36, line width=0.35pt] (4.79,3.73) -- (4.81,4.20);
-\draw[gray, opacity=0.36, line width=0.35pt] (4.37,0.06) -- (4.45,0.53);
-\draw[gray, opacity=0.36, line width=0.35pt] (0.31,3.30) -- (0.46,2.87);
-\draw[gray, opacity=0.36, line width=0.35pt] (0.65,3.27) -- (0.84,2.88);
-\draw[gray, opacity=0.33, line width=0.35pt] (0.84,2.88) -- (0.46,2.87);
-\draw[gray, opacity=0.33, line width=0.35pt] (0.44,2.06) -- (0.46,2.87);
-\draw[gray, opacity=0.32, line width=0.35pt] (0.84,2.88) -- (0.44,2.06);
-\draw[gray, opacity=0.30, line width=0.35pt] (0.65,3.27) -- (0.46,2.87);
-\draw[gray, opacity=0.30, line width=0.35pt] (0.65,3.27) -- (0.31,3.30);
-\draw[gray, opacity=0.30, line width=0.35pt] (4.79,3.73) -- (4.35,3.08);
-\draw[gray, opacity=0.30, line width=0.35pt] (3.97,1.79) -- (4.36,1.84);
-\draw[gray, opacity=0.27, line width=0.35pt] (3.84,3.25) -- (4.35,3.08);
-\draw[gray, opacity=0.25, line width=0.35pt] (0.10,3.96) -- (0.46,3.43);
-\draw[gray, opacity=0.25, line width=0.35pt] (0.28,1.36) -- (0.44,2.06);
-\draw[gray, opacity=0.25, line width=0.35pt] (0.84,2.88) -- (0.46,3.43);
-\draw[gray, opacity=0.24, line width=0.35pt] (0.28,1.36) -- (0.00,1.41);
-\draw[gray, opacity=0.24, line width=0.35pt] (0.00,1.41) -- (0.44,2.06);
-\draw[gray, opacity=0.23, line width=0.35pt] (1.54,2.90) -- (1.43,2.46);
-\draw[gray, opacity=0.22, line width=0.35pt] (0.10,3.96) -- (0.31,3.30);
-\draw[gray, opacity=0.22, line width=0.35pt] (0.31,3.30) -- (0.84,2.88);
-\draw[gray, opacity=0.21, line width=0.35pt] (1.43,2.46) -- (0.84,2.88);
-\draw[gray, opacity=0.20, line width=0.35pt] (4.81,4.20) -- (4.25,4.05);
-\draw[gray, opacity=0.20, line width=0.35pt] (1.54,2.90) -- (0.84,2.88);
-\draw[gray, opacity=0.20, line width=0.35pt] (0.28,1.36) -- (0.28,0.82);
-\draw[gray, opacity=0.20, line width=0.35pt] (0.44,2.06) -- (0.28,0.82);
-\draw[gray, opacity=0.19, line width=0.35pt] (0.00,1.41) -- (0.28,0.82);
-\draw[gray, opacity=0.18, line width=0.35pt] (0.38,0.00) -- (0.28,0.82);
-\draw[gray, opacity=0.18, line width=0.35pt] (4.35,3.08) -- (4.25,4.05);
-\draw[gray, opacity=0.18, line width=0.35pt] (4.35,3.08) -- (4.36,1.84);
-\draw[gray, opacity=0.17, line width=0.35pt] (4.36,1.84) -- (4.45,0.53);
-\draw[gray, opacity=0.16, line width=0.35pt] (4.35,3.08) -- (3.97,1.79);
-\draw[gray, opacity=0.15, line width=0.35pt] (0.84,2.88) -- (2.05,4.02);
-\draw[gray, opacity=0.15, line width=0.35pt] (3.97,1.79) -- (4.45,0.53);
-\draw[gray, opacity=0.15, line width=0.35pt] (2.80,1.50) -- (3.97,1.79);
-\fill[c2, opacity=0.85] (0.65,3.27) circle (2.02mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.41mm, inner sep=0.5pt] at (0.65,3.27) {Bechara};
+\draw[gray, opacity=0.67, line width=0.35pt] (7.84,2.07) -- (6.70,0.00);
+\draw[gray, opacity=0.64, line width=0.35pt] (4.62,0.37) -- (4.70,0.00);
+\draw[gray, opacity=0.56, line width=0.35pt] (3.98,3.64) -- (3.90,3.95);
+\draw[gray, opacity=0.54, line width=0.35pt] (2.08,3.95) -- (2.24,4.20);
+\draw[gray, opacity=0.49, line width=0.35pt] (3.90,3.95) -- (4.11,4.09);
+\draw[gray, opacity=0.47, line width=0.35pt] (0.48,2.78) -- (0.78,2.80);
+\draw[gray, opacity=0.47, line width=0.35pt] (3.91,4.20) -- (4.11,4.09);
+\draw[gray, opacity=0.47, line width=0.35pt] (3.91,4.20) -- (3.90,3.95);
+\draw[gray, opacity=0.43, line width=0.35pt] (0.48,2.78) -- (0.56,3.00);
+\draw[gray, opacity=0.43, line width=0.35pt] (0.48,2.78) -- (0.62,2.41);
+\draw[gray, opacity=0.43, line width=0.35pt] (4.93,0.13) -- (4.70,0.00);
+\draw[gray, opacity=0.37, line width=0.35pt] (3.91,4.20) -- (3.98,3.64);
+\draw[gray, opacity=0.36, line width=0.35pt] (3.98,3.64) -- (4.11,4.09);
+\draw[gray, opacity=0.36, line width=0.35pt] (0.56,3.00) -- (0.62,2.41);
+\draw[gray, opacity=0.36, line width=0.35pt] (4.62,0.37) -- (4.93,0.13);
+\draw[gray, opacity=0.36, line width=0.35pt] (1.03,2.49) -- (0.78,2.80);
+\draw[gray, opacity=0.33, line width=0.35pt] (0.62,1.67) -- (0.62,2.41);
+\draw[gray, opacity=0.33, line width=0.35pt] (1.03,2.49) -- (0.62,2.41);
+\draw[gray, opacity=0.32, line width=0.35pt] (0.62,1.67) -- (1.03,2.49);
+\draw[gray, opacity=0.30, line width=0.35pt] (0.56,3.00) -- (0.78,2.80);
+\draw[gray, opacity=0.30, line width=0.35pt] (0.62,2.41) -- (0.78,2.80);
+\draw[gray, opacity=0.30, line width=0.35pt] (4.62,0.37) -- (4.37,1.12);
+\draw[gray, opacity=0.30, line width=0.35pt] (3.81,2.29) -- (4.15,2.33);
+\draw[gray, opacity=0.27, line width=0.35pt] (3.98,0.82) -- (4.37,1.12);
+\draw[gray, opacity=0.25, line width=0.35pt] (0.62,1.67) -- (0.27,1.08);
+\draw[gray, opacity=0.25, line width=0.35pt] (0.11,3.34) -- (0.48,2.78);
+\draw[gray, opacity=0.25, line width=0.35pt] (0.48,2.78) -- (1.03,2.49);
+\draw[gray, opacity=0.24, line width=0.35pt] (0.62,1.67) -- (0.60,0.90);
+\draw[gray, opacity=0.24, line width=0.35pt] (0.60,0.90) -- (0.27,1.08);
+\draw[gray, opacity=0.23, line width=0.35pt] (1.83,2.58) -- (1.73,2.17);
+\draw[gray, opacity=0.22, line width=0.35pt] (0.11,3.34) -- (0.56,3.00);
+\draw[gray, opacity=0.22, line width=0.35pt] (1.03,2.49) -- (0.56,3.00);
+\draw[gray, opacity=0.21, line width=0.35pt] (1.73,2.17) -- (1.03,2.49);
+\draw[gray, opacity=0.20, line width=0.35pt] (5.04,0.76) -- (4.93,0.13);
+\draw[gray, opacity=0.20, line width=0.35pt] (0.62,1.67) -- (0.24,0.54);
+\draw[gray, opacity=0.20, line width=0.35pt] (1.83,2.58) -- (1.03,2.49);
+\draw[gray, opacity=0.20, line width=0.35pt] (0.27,1.08) -- (0.24,0.54);
+\draw[gray, opacity=0.19, line width=0.35pt] (0.60,0.90) -- (0.24,0.54);
+\draw[gray, opacity=0.18, line width=0.35pt] (5.04,0.76) -- (4.37,1.12);
+\draw[gray, opacity=0.18, line width=0.35pt] (0.00,0.00) -- (0.24,0.54);
+\draw[gray, opacity=0.18, line width=0.35pt] (4.15,2.33) -- (4.37,1.12);
+\draw[gray, opacity=0.17, line width=0.35pt] (3.98,3.64) -- (4.15,2.33);
+\draw[gray, opacity=0.16, line width=0.35pt] (3.81,2.29) -- (4.37,1.12);
+\draw[gray, opacity=0.15, line width=0.35pt] (2.08,3.95) -- (1.03,2.49);
+\draw[gray, opacity=0.15, line width=0.35pt] (3.81,2.29) -- (3.98,3.64);
+\draw[gray, opacity=0.15, line width=0.35pt] (3.81,2.29) -- (2.80,2.26);
+\fill[c1, opacity=0.85] (3.81,2.29) circle (3.20mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=2.24mm, inner sep=0.5pt] at (3.81,2.29) {Frost};
+\fill[c1, opacity=0.85] (3.98,0.82) circle (2.26mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.58mm, inner sep=0.5pt] at (3.98,0.82) {Assenmacher};
+\fill[c5, opacity=0.85] (0.62,1.67) circle (1.92mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (0.62,1.67) {Agur};
 \fill[c4, opacity=0.85] (5.60,2.13) circle (2.33mm);
 \node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (5.60,2.13) {Mobius};
-\fill[c1, opacity=0.85] (4.79,3.73) circle (2.10mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (4.79,3.73) {Chiu};
-\fill[c3, opacity=0.85] (4.62,0.00) circle (2.78mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.95mm, inner sep=0.5pt] at (4.62,0.00) {Buckley};
-\fill[c2, opacity=0.85] (1.54,2.90) circle (2.33mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (1.54,2.90) {Tronnier};
-\fill[c5, opacity=0.85] (0.38,0.00) circle (2.10mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (0.38,0.00) {Moser};
-\fill[c1, opacity=0.85] (4.81,4.20) circle (2.10mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (4.81,4.20) {Zhu};
-\fill[c3, opacity=0.85] (4.37,0.06) circle (2.10mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (4.37,0.06) {Didenko};
-\fill[c1, opacity=0.85] (3.84,3.25) circle (2.26mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.58mm, inner sep=0.5pt] at (3.84,3.25) {Assenmacher};
-\fill[c2, opacity=0.85] (0.10,3.96) circle (1.92mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (0.10,3.96) {Tan};
-\fill[c5, opacity=0.85] (0.28,1.36) circle (1.92mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (0.28,1.36) {Bordo};
 \fill[c4, opacity=0.85] (6.74,4.20) circle (2.33mm);
 \node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (6.74,4.20) {Casanova};
-\fill[c4, opacity=0.85] (6.70,0.00) circle (2.33mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (6.70,0.00) {Ninia};
-\fill[c2, opacity=0.85] (0.31,3.30) circle (2.10mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (0.31,3.30) {Soderberg};
-\fill[c6, opacity=0.85] (2.24,4.20) circle (2.18mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.53mm, inner sep=0.5pt] at (2.24,4.20) {Sandner};
+\fill[c6, opacity=0.85] (2.08,3.95) circle (2.47mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.73mm, inner sep=0.5pt] at (2.08,3.95) {Groß};
+\fill[c2, opacity=0.85] (1.83,2.58) circle (2.33mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (1.83,2.58) {Tronnier};
+\fill[c2, opacity=0.85] (1.73,2.17) circle (2.18mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.53mm, inner sep=0.5pt] at (1.73,2.17) {Atangana};
+\fill[c2, opacity=0.85] (0.11,3.34) circle (1.92mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (0.11,3.34) {Tan};
+\fill[c3, opacity=0.85] (3.91,4.20) circle (2.78mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.95mm, inner sep=0.5pt] at (3.91,4.20) {Buckley};
+\fill[c3, opacity=0.85] (3.98,3.64) circle (2.54mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.78mm, inner sep=0.5pt] at (3.98,3.64) {Arner};
 \fill[c4, opacity=0.85] (7.84,2.07) circle (2.33mm);
 \node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (7.84,2.07) {Pandit};
-\fill[c2, opacity=0.85] (1.43,2.46) circle (2.18mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.53mm, inner sep=0.5pt] at (1.43,2.46) {Atangana};
-\fill[c1, opacity=0.85] (4.35,3.08) circle (2.33mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (4.35,3.08) {Monnet};
-\fill[c3, opacity=0.85] (4.59,0.25) circle (2.02mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.41mm, inner sep=0.5pt] at (4.59,0.25) {Zetzsche};
-\fill[c5, opacity=0.85] (0.00,1.41) circle (2.02mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.41mm, inner sep=0.5pt] at (0.00,1.41) {Masciandaro};
-\fill[c2, opacity=0.85] (0.84,2.88) circle (2.47mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.73mm, inner sep=0.5pt] at (0.84,2.88) {Kiff};
-\fill[c1, opacity=0.85] (2.80,1.50) circle (2.10mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (2.80,1.50) {Uhlig};
-\fill[c2, opacity=0.85] (0.46,3.43) circle (1.92mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (0.46,3.43) {Lannquist};
-\fill[c1, opacity=0.85] (4.25,4.05) circle (2.10mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (4.25,4.05) {Keister};
-\fill[c1, opacity=0.85] (5.04,3.99) circle (1.92mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (5.04,3.99) {Davoodalhosseini};
-\fill[c1, opacity=0.85] (3.97,1.79) circle (3.20mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=2.24mm, inner sep=0.5pt] at (3.97,1.79) {Frost};
-\fill[c1, opacity=0.85] (4.36,1.84) circle (2.78mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.95mm, inner sep=0.5pt] at (4.36,1.84) {Auer};
-\fill[c3, opacity=0.85] (4.45,0.53) circle (2.54mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.78mm, inner sep=0.5pt] at (4.45,0.53) {Arner};
-\fill[c5, opacity=0.85] (0.44,2.06) circle (1.92mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (0.44,2.06) {Agur};
-\fill[c6, opacity=0.85] (2.05,4.02) circle (2.47mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.73mm, inner sep=0.5pt] at (2.05,4.02) {Groß};
-\fill[c5, opacity=0.85] (0.28,0.82) circle (2.33mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (0.28,0.82) {Niepelt};
-\fill[c2, opacity=0.85] (0.46,2.87) circle (2.10mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (0.46,2.87) {Tourpe};
+\fill[c1, opacity=0.85] (2.80,2.26) circle (2.10mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (2.80,2.26) {Uhlig};
+\fill[c2, opacity=0.85] (0.48,2.78) circle (1.92mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (0.48,2.78) {Lannquist};
+\fill[c2, opacity=0.85] (1.03,2.49) circle (2.47mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.73mm, inner sep=0.5pt] at (1.03,2.49) {Kiff};
+\fill[c2, opacity=0.85] (0.56,3.00) circle (2.10mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (0.56,3.00) {Soderberg};
+\fill[c5, opacity=0.85] (0.60,0.90) circle (2.02mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.41mm, inner sep=0.5pt] at (0.60,0.90) {Masciandaro};
+\fill[c2, opacity=0.85] (0.62,2.41) circle (2.10mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (0.62,2.41) {Tourpe};
+\fill[c5, opacity=0.85] (0.27,1.08) circle (1.92mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (0.27,1.08) {Bordo};
+\fill[c1, opacity=0.85] (5.04,0.76) circle (2.10mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (5.04,0.76) {Keister};
+\fill[c1, opacity=0.85] (4.62,0.37) circle (2.10mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (4.62,0.37) {Chiu};
+\fill[c1, opacity=0.85] (4.15,2.33) circle (2.78mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.95mm, inner sep=0.5pt] at (4.15,2.33) {Auer};
+\fill[c3, opacity=0.85] (3.90,3.95) circle (2.02mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.41mm, inner sep=0.5pt] at (3.90,3.95) {Zetzsche};
+\fill[c1, opacity=0.85] (4.93,0.13) circle (2.10mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (4.93,0.13) {Zhu};
+\fill[c4, opacity=0.85] (6.70,0.00) circle (2.33mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (6.70,0.00) {Ninia};
+\fill[c5, opacity=0.85] (0.00,0.00) circle (2.10mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (0.00,0.00) {Moser};
+\fill[c5, opacity=0.85] (0.24,0.54) circle (2.33mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (0.24,0.54) {Niepelt};
+\fill[c3, opacity=0.85] (4.11,4.09) circle (2.10mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (4.11,4.09) {Didenko};
+\fill[c2, opacity=0.85] (0.78,2.80) circle (2.02mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.41mm, inner sep=0.5pt] at (0.78,2.80) {Bechara};
+\fill[c1, opacity=0.85] (4.37,1.12) circle (2.33mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (4.37,1.12) {Monnet};
+\fill[c6, opacity=0.85] (2.24,4.20) circle (2.18mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.53mm, inner sep=0.5pt] at (2.24,4.20) {Sandner};
+\fill[c1, opacity=0.85] (4.70,0.00) circle (1.92mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (4.70,0.00) {Davoodalhosseini};
 \end{tikzpicture}
 \end{column}
 \begin{column}{0.36\textwidth}\scriptsize
@@ -1470,31 +1496,6 @@ positive & 1 & 12 & 17 & 0.57 \\
 \note{\textbf{Backup (only if asked).} Errors are almost all ``toned vs.\ neutral'': FinBERT was trained on financial news, where descriptive sentences about a new product read as positive.}
 \end{frame}
 
-\begin{frame}{Backup: 77 earlier reviews of CBDC research}
-\footnotesize Five recent bibliometric reviews:\\[2pt]
-\begin{tabular}{@{}llrl@{}}\toprule
-\textbf{Study} & \textbf{Data} & \textbf{Documents} & \textbf{Tools}\\\midrule
-Kvedaravi\v{c}i\={u}t\.{e} \& \v{S}apkauskien\.{e} (2024) & WoS + Scopus & 228 & VOSviewer\\
-Fahad \& Bulut (2024) & Scopus & 169 of 323 & Biblioshiny\\
-Bapat \& Sharma (2025) & Scopus & 371 & bibliometrics + TCCM\\
-Prodan et al.\ (2024) & Scopus + WoS & 747 of 1{,}024 & PRISMA, VOSviewer\\
-Paulovici (2026) & Scopus & 892 & VOSviewer\\\midrule
-\textbf{This study} & \textbf{5 databases, speeches, press\dots} & \textbf{17,709} & \textbf{+ text as data}\\
-\bottomrule\end{tabular}\\[6pt]
-\small
-\begin{itemize}\setlength\itemsep{1pt}
-\item \alert{Gap}: one or two databases (Scopus, WoS), mostly English journal articles: central bankers and the press are absent.
-\item Maps say \emph{what} is studied, not \emph{why}; no measure is validated.
-\end{itemize}
-\scriptsize Found in our own corpus: 77 titles announce a literature, systematic or bibliometric review of CBDCs (2019--2026).
-\note{\textbf{Backup (only if asked).}
-\begin{itemize}
-\item The topic is not new for bibliometrics: about 77 reviews, most of them since 2023.
-\item The bibliometric ones rely on Scopus or Web of Science: a few hundred journal articles, often English only (Prodan et al.\ drop non-English texts).
-\item The closest to us is Hoang et al.\ (2023, RIBAF): text mining, but still academic only.
-\item Our angle: every type of text, every language, and measures that are validated.
-\end{itemize}}
-\end{frame}
 \begin{frame}{References}
 \scriptsize
 \begin{itemize}\setlength\itemsep{1pt}

@@ -692,6 +692,32 @@ TEMPLATE = r"""\PassOptionsToPackage{table}{xcolor}
 \note{\textbf{Literature (0:45).}}
 \end{frame}
 
+\begin{frame}{What this paper adds to <<N_REVIEWS>> earlier reviews}
+\footnotesize Five recent bibliometric reviews:\\[2pt]
+\begin{tabular}{@{}llrl@{}}\toprule
+\textbf{Study} & \textbf{Data} & \textbf{Documents} & \textbf{Tools}\\\midrule
+Kvedaravi\v{c}i\={u}t\.{e} \& \v{S}apkauskien\.{e} (2024) & WoS + Scopus & 228 & VOSviewer\\
+Fahad \& Bulut (2024) & Scopus & 169 of 323 & Biblioshiny\\
+Bapat \& Sharma (2025) & Scopus & 371 & bibliometrics + TCCM\\
+Prodan et al.\ (2024) & Scopus + WoS & 747 of 1{,}024 & PRISMA, VOSviewer\\
+Paulovici (2026) & Scopus & 892 & VOSviewer\\\midrule
+\textbf{This study} & \textbf{5 databases, speeches, press\dots} & \textbf{<<N>>} & \textbf{+ text as data}\\
+\bottomrule\end{tabular}\\[6pt]
+\small
+\begin{itemize}\setlength\itemsep{1pt}
+\item \alert{Gap}: one or two databases (Scopus, WoS), mostly English journal articles: central bankers and the press are absent.
+\item Maps say \emph{what} is studied, not \emph{why}; no measure is validated.
+\item \alert{Here}: every type of text and language, the five W's, and every coder checked on hand-coded texts.
+\end{itemize}
+\scriptsize Found in our own corpus: <<N_REVIEWS>> titles announce a literature, systematic or bibliometric review of CBDCs (<<REV_Y0>>--<<REV_Y1>>).
+\note{\textbf{What this paper adds (1:00).}
+\begin{itemize}
+\item The topic is not new for bibliometrics: about <<N_REVIEWS>> reviews, most of them since 2023.
+\item The bibliometric ones rely on Scopus or Web of Science: a few hundred journal articles, often English only (Prodan et al.\ drop non-English texts).
+\item The closest to us is Hoang et al.\ (2023, RIBAF): text mining, but still academic only.
+\item Our angle: every type of text, every language, and measures that are validated.
+\end{itemize}}
+\end{frame}
 \begin{frame}{Approach: one method per question}
 \scriptsize
 \setlength{\tabcolsep}{4pt}
@@ -1472,31 +1498,6 @@ def key(r):
 \note{\textbf{Backup (only if asked).} Errors are almost all ``toned vs.\ neutral'': FinBERT was trained on financial news, where descriptive sentences about a new product read as positive.}
 \end{frame}
 
-\begin{frame}{Backup: <<N_REVIEWS>> earlier reviews of CBDC research}
-\footnotesize Five recent bibliometric reviews:\\[2pt]
-\begin{tabular}{@{}llrl@{}}\toprule
-\textbf{Study} & \textbf{Data} & \textbf{Documents} & \textbf{Tools}\\\midrule
-Kvedaravi\v{c}i\={u}t\.{e} \& \v{S}apkauskien\.{e} (2024) & WoS + Scopus & 228 & VOSviewer\\
-Fahad \& Bulut (2024) & Scopus & 169 of 323 & Biblioshiny\\
-Bapat \& Sharma (2025) & Scopus & 371 & bibliometrics + TCCM\\
-Prodan et al.\ (2024) & Scopus + WoS & 747 of 1{,}024 & PRISMA, VOSviewer\\
-Paulovici (2026) & Scopus & 892 & VOSviewer\\\midrule
-\textbf{This study} & \textbf{5 databases, speeches, press\dots} & \textbf{<<N>>} & \textbf{+ text as data}\\
-\bottomrule\end{tabular}\\[6pt]
-\small
-\begin{itemize}\setlength\itemsep{1pt}
-\item \alert{Gap}: one or two databases (Scopus, WoS), mostly English journal articles: central bankers and the press are absent.
-\item Maps say \emph{what} is studied, not \emph{why}; no measure is validated.
-\end{itemize}
-\scriptsize Found in our own corpus: <<N_REVIEWS>> titles announce a literature, systematic or bibliometric review of CBDCs (<<REV_Y0>>--<<REV_Y1>>).
-\note{\textbf{Backup (only if asked).}
-\begin{itemize}
-\item The topic is not new for bibliometrics: about <<N_REVIEWS>> reviews, most of them since 2023.
-\item The bibliometric ones rely on Scopus or Web of Science: a few hundred journal articles, often English only (Prodan et al.\ drop non-English texts).
-\item The closest to us is Hoang et al.\ (2023, RIBAF): text mining, but still academic only.
-\item Our angle: every type of text, every language, and measures that are validated.
-\end{itemize}}
-\end{frame}
 \begin{frame}{References}
 \scriptsize
 \begin{itemize}\setlength\itemsep{1pt}
