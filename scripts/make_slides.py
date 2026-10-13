@@ -674,40 +674,45 @@ TEMPLATE = r"""\PassOptionsToPackage{table}{xcolor}
 \item Headline: <<N_ALL>> texts collected, <<N>> keep CBDC as a theme.
 \end{itemize}}
 \end{frame}
-
-\begin{frame}{Related work: <<N_REVIEWS>> reviews already exist}
-\footnotesize Five recent bibliometric reviews:\\[2pt]
-\begin{tabular}{@{}llrl@{}}\toprule
-\textbf{Study} & \textbf{Data} & \textbf{Documents} & \textbf{Tools}\\\midrule
-Kvedaravi\v{c}i\={u}t\.{e} \& \v{S}apkauskien\.{e} (2024) & WoS + Scopus & 228 & VOSviewer\\
-Fahad \& Bulut (2024) & Scopus & 169 of 323 & Biblioshiny\\
-Bapat \& Sharma (2025) & Scopus & 371 & bibliometrics + TCCM\\
-Prodan et al.\ (2024) & Scopus + WoS & 747 of 1{,}024 & PRISMA, VOSviewer\\
-Paulovici (2026) & Scopus & 892 & VOSviewer\\\midrule
-\textbf{This study} & \textbf{5 databases, speeches, press\dots} & \textbf{<<N>>} & \textbf{+ text as data}\\
-\bottomrule\end{tabular}\\[6pt]
-\small
-\begin{itemize}\setlength\itemsep{1pt}
-\item \alert{Gap}: one or two databases (Scopus, WoS), mostly English journal articles: central bankers and the press are absent.
-\item Maps say \emph{what} is studied, not \emph{why}; no measure is validated.
-\end{itemize}
-\scriptsize Found in our own corpus: <<N_REVIEWS>> titles announce a literature, systematic or bibliometric review of CBDCs (<<REV_Y0>>--<<REV_Y1>>).
-\note{\textbf{Related work (0:50).}
-\begin{itemize}
-\item The topic is not new for bibliometrics: about <<N_REVIEWS>> reviews, most of them since 2023.
-\item The bibliometric ones rely on Scopus or Web of Science: a few hundred journal articles, often English only (Prodan et al.\ drop non-English texts).
-\item The closest to us is Hoang et al.\ (2023, RIBAF): text mining, but still academic only.
-\item Our angle: every type of text, every language, and measures that are validated.
-\end{itemize}}
-\end{frame}
-
 \begin{frame}{Outline}
 \tableofcontents
-\note{\textbf{Outline (0:15).} Method first (collection, scoring), then results (corpus, maps, why and when).}
+\note{\textbf{Outline (0:15).} Data first, then one section per question (what, who, why, how, when), each opening with its method; robustness; conclusion.}
 \end{frame}
 
 % =====================================================================
-\section{Collecting the texts}
+\section{Introduction}
+
+\begin{frame}{Related literature: CBDCs}
+% to be completed from the reading list
+\note{\textbf{Literature (0:45).}}
+\end{frame}
+
+\begin{frame}{Related literature: what the field builds on}
+% to be completed: reading list + co-citation clusters (section ``Who'')
+\note{\textbf{Literature (0:45).}}
+\end{frame}
+
+\begin{frame}{Approach: one method per question}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lp{0.43\textwidth}p{0.36\textwidth}@{}}\toprule
+\textbf{Question} & \textbf{Used} & \textbf{Also tested, and why not}\\\midrule
+What? & topics: \alert{BERTopic} (SBERT, UMAP, HDBSCAN), labels by \alert{c-TF-IDF}; co-word and Callon map; \alert{covariate logit} on topic shares & LDA / STM: bag of words, one language at a time; their covariate model is applied to BERTopic instead\\
+Who? & co-citation, co-authorship, Lotka, Bradford, \alert{affiliations}; \alert{log-odds} with Dirichlet prior & plain TF-IDF: no shrinkage of rare words\\
+Why? & motivations: \alert{validated codebook}, $\kappa = <<MVAL_CB>>$; covariate logit & SBERT, NLI, local LLMs: $\kappa \le <<MVAL_BEST_ALT>>$\\
+How? & tone: \alert{FinBERT} on CBDC sentences, $\kappa = <<TONE_KAPPA>>$; stance: levels by reading, changes by a \alert{local LLM} on a stratified sample, $\kappa = <<STANCE_K>>$ & stance: <<ST_ALT_LIST>>\\
+When? & vocabulary: \alert{c-TF-IDF} by period; \alert{Kleinberg bursts}; \alert{event study} with placebo dates & Poisson $z$-test: <<EV_P>>\% false positives\\\midrule
+All & six robustness specifications; every coder checked on hand-coded texts & \\
+\bottomrule\end{tabular}
+\note{\textbf{Approach (0:45).}
+\begin{itemize}
+\item One row per question; the middle column is what the results use.
+\item The right column matters for the paper: each alternative was run against the same hand-coded texts, and lost.
+\item Remaining improvements are tuning (more labels, bigger language models), not new methods.
+\end{itemize}}
+\end{frame}
+% =====================================================================
+\section{Data}
 
 \begin{frame}{Pipeline}
 \begin{center}
@@ -737,7 +742,6 @@ Paulovici (2026) & Scopus & 892 & VOSviewer\\\midrule
 \item Design choice: collect broadly, decide relevance later.
 \end{itemize}}
 \end{frame}
-
 \begin{frame}[fragile]{Press: recursive bisection of time windows}
 \begin{columns}[T]
 \begin{column}{0.53\textwidth}
@@ -771,10 +775,6 @@ A search returns at most $C=100$ items. For a window $W=[a,b)$ with $N(W)$ artic
 \item A month needs at most 5 levels of splitting; the cost is $2L-1$ requests.
 \end{itemize}}
 \end{frame}
-
-% =====================================================================
-\section{Scoring relevance}
-
 \begin{frame}[fragile]{Step 1: is it really \emph{Central Bank Digital Currency}?}
 \begin{columns}[T]
 \begin{column}{0.5\textwidth}
@@ -811,7 +811,6 @@ TERMS = {
 \item ``CBDC'' also means \emph{chronic bullous dermatosis of childhood}: an ambiguous term only counts if the text also talks about money or payments.
 \end{itemize}}
 \end{frame}
-
 \begin{frame}{Step 2: how central is CBDC to the text?}
 Each available field $f$ gets a centrality $c_f \in [0,1]$:
 \begin{align*}
@@ -833,7 +832,6 @@ $\rho$ = mentions per 1{,}000 words; $\sigma$ = share of the ten slices of the t
 \item The max rewards one clear signal; the mean rewards consistency. Keywords weigh less: partly machine-assigned.
 \end{itemize}}
 \end{frame}
-
 \begin{frame}{Step 3: labels, and how good is the filter?}
 \begin{columns}[T]
 \begin{column}{0.58\textwidth}\scriptsize
@@ -863,10 +861,6 @@ Strata $h$ weighted by size $N_h$; $T$ = theme labels:
 \item Recall loss comes mainly from press items whose text could not be fetched.
 \end{itemize}}
 \end{frame}
-
-% =====================================================================
-\section{The corpus}
-
 \begin{frame}{Sources and completeness}
 \begin{columns}[T]
 \begin{column}{0.46\textwidth}\footnotesize
@@ -893,7 +887,6 @@ Strata $h$ weighted by size $N_h$; $T$ = theme labels:
 \item Completeness: most texts are dated to the day; full text and references are the scarcest fields.
 \end{itemize}}
 \end{frame}
-
 \begin{frame}{A literature that took off after 2020}
 \begin{center}
 \begin{tikzpicture}
@@ -912,7 +905,6 @@ Strata $h$ weighted by size $N_h$; $T$ = theme labels:
 \item Turning point 2020: COVID and the decline of cash, Libra (2019), the ECB report on a digital euro (Oct.\ 2020).\item Caution: the press bar for <<THIS_YEAR>> is mostly a harvesting effect (news search returns recent articles first); in the paper, press is normalised by its coverage.
 \end{itemize}}
 \end{frame}
-
 \begin{frame}{Languages}
 \begin{columns}[c]
 \begin{column}{0.58\textwidth}
@@ -935,85 +927,23 @@ Strata $h$ weighted by size $N_h$; $T$ = theme labels:
 \end{columns}
 \note{\textbf{Languages (0:25).} English dominates, but <<LANG2>> is a large second block: a reminder that English-only databases miss part of the debate.}
 \end{frame}
-
-\begin{frame}{Academic literature}
-\begin{columns}[T]
-\begin{column}{0.4\textwidth}\scriptsize\textbf{Main outlets}\\[2pt]
-\begin{tabular}{@{}p{0.8\linewidth}r@{}}<<VENUE_ROWS>>\end{tabular}\\[4pt]
-Working papers (SSRN, RePEc) outweigh journals.\\[4pt]
-\textbf{Bibliometric laws.} <<LAWS>>
-\end{column}
-\begin{column}{0.58\textwidth}\scriptsize\textbf{Most cited papers} (global citations)\\[2pt]
-\begin{tabular}{@{}p{0.2\linewidth}p{0.66\linewidth}r@{}}
-<<CITED_ROWS>>
-\end{tabular}
-\end{column}
-\end{columns}
-\note{\textbf{Academic literature (0:45).}
-\begin{itemize}
-\item Much of the debate happens in working papers, often by central bank economists.
-\item The most cited papers are macro-modelling papers from 2016--2020.
-\item Laws: output grows <<CAGR>>\% a year; most authors write once (a Lotka exponent above 2): a young, open field around a small core of sources.
-\end{itemize}}
-\end{frame}
-
-\begin{frame}{Who speaks: central banks, authorities, press}
-<<VOICES>>
-\note{\textbf{Voices (0:35).}
-\begin{itemize}
-\item <<TOP_BANK>> leads the speeches: the digital euro project makes it the most vocal institution.
-\item The press is led by specialised fintech outlets before generalist media.
-\end{itemize}}
-\end{frame}
-
 % =====================================================================
-\section{Mapping the field}
+\section{What is written}
 
-\begin{frame}{Co-citation: the intellectual base}
-\begin{columns}[T]
-\begin{column}{0.7\textwidth}
-<<COCIT_NET>>
-\end{column}
-\begin{column}{0.28\textwidth}\scriptsize
-\textbf{Most cited within the corpus}\\[2pt]
-\begin{tabular}{@{}lr@{}}<<COCIT_TOP>>\end{tabular}
-\end{column}
-\end{columns}
-\vspace{2pt}
-\scriptsize\textbf{Clusters} (largest members):
-\begin{itemize}\setlength\itemsep{0pt}
-<<COCIT_CLUSTERS>>
+\begin{frame}{Method: science maps}
+\begin{itemize}
+\item \textbf{Networks.} Nodes = references, authors or keywords; $c_{ij}$ = documents where $i$ and $j$ appear together, $c_i$ = occurrences of $i$. Edges weighted by \alert{association strength}:
+\[ s_{ij} = \frac{c_{ij}}{c_i\,c_j} \]
+\item \textbf{Clusters.} Louvain algorithm, maximising modularity
+\[ Q = \frac{1}{2m}\sum_{i,j}\Big[s_{ij} - \frac{k_i k_j}{2m}\Big]\,\delta(g_i,g_j) \]
+\item \textbf{Layout.} Force-directed: linked nodes end up close. Size $\propto \sqrt{c_i}$, colour = cluster.
 \end{itemize}
-<<COCIT_STATS>>
-\note{\textbf{Co-citation (0:50).}
+\note{\textbf{Method (0:40).}
 \begin{itemize}
-\item Method in one line: two items are linked when they appear in the same paper, weighted by association strength, grouped by the Louvain algorithm (details in backup).
-\item Two references are linked when the same paper cites both: this shows what the field builds on.
-\item Core: <<COCIT_CORE>>.
-\item Clusters read as schools: CBDC design and bank intermediation models; central bank policy reports; adoption studies.
+\item Association strength corrects for popularity: two very frequent items co-occur often by chance.
+\item Louvain groups nodes so that links are dense inside groups and sparse between them; $Q$ measures how clear the grouping is.
 \end{itemize}}
 \end{frame}
-
-\begin{frame}{Co-authorship: research communities}
-\begin{columns}[T]
-\begin{column}{0.62\textwidth}
-<<COAUTH_NET>>
-\end{column}
-\begin{column}{0.36\textwidth}\scriptsize
-\textbf{Most productive authors}\\[2pt]
-\begin{tabular}{@{}lr@{}}<<COAUTH_TOP>>\end{tabular}\\[6pt]
-<<COAUTH_STATS>>\\[4pt]
-<<CB_AUTH>>
-\end{column}
-\end{columns}
-\note{\textbf{Co-authorship (0:45).}
-\begin{itemize}
-\item Small, separate teams: the field is fragmented, around institutions (BIS, IMF, academic groups).
-\item Productivity is concentrated on a few very prolific authors.
-\item Who sets the agenda: central bank and international-institution economists write few of the papers but collect a third of the citations, though their share of papers is shrinking as the field opens up.
-\end{itemize}}
-\end{frame}
-
 \begin{frame}{Thematic map: which themes drive the field?}
 \begin{columns}[c]
 \begin{column}{0.47\textwidth}
@@ -1035,7 +965,6 @@ Keyword clusters (Callon), with $e_{ij} = c_{ij}^2 / (c_i c_j)$:
 \item Niche themes are developed but isolated; basic themes are transversal but less structured.
 \end{itemize}}
 \end{frame}
-
 \begin{frame}{How the themes evolve}
 \scriptsize
 \begin{tabular}{@{}p{0.42\textwidth}rrrr@{}}\toprule
@@ -1051,30 +980,6 @@ Sorted by change between the last two periods. Darker = more frequent.\\[3pt]
 \item Bottom line, TF-IDF answers ``when'': each period's vocabulary compared to the others.
 \end{itemize}}
 \end{frame}
-
-% =====================================================================
-\section{Text as data: what, why, how, when}
-
-\begin{frame}{Toolbox: the method chosen for each question}
-\scriptsize
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{@{}lp{0.43\textwidth}p{0.36\textwidth}@{}}\toprule
-\textbf{Question} & \textbf{Used} & \textbf{Also tested, and why not}\\\midrule
-What? & topics: \alert{BERTopic} (SBERT, UMAP, HDBSCAN), labels by \alert{c-TF-IDF}; co-word and Callon map; \alert{covariate logit} on topic shares & LDA / STM: bag of words, one language at a time; their covariate model is applied to BERTopic instead\\
-Who? & co-citation, co-authorship, Lotka, Bradford, \alert{affiliations}; \alert{log-odds} with Dirichlet prior & plain TF-IDF: no shrinkage of rare words\\
-Why? & motivations: \alert{validated codebook}, $\kappa = <<MVAL_CB>>$; covariate logit & SBERT, NLI, local LLMs: $\kappa \le <<MVAL_BEST_ALT>>$\\
-How? & tone: \alert{FinBERT} on CBDC sentences, $\kappa = <<TONE_KAPPA>>$; stance: levels by reading, changes by a \alert{local LLM} on a stratified sample, $\kappa = <<STANCE_K>>$ & stance: <<ST_ALT_LIST>>\\
-When? & vocabulary: \alert{c-TF-IDF} by period; \alert{Kleinberg bursts}; \alert{event study} with placebo dates & Poisson $z$-test: <<EV_P>>\% false positives\\\midrule
-All & six robustness specifications; every coder checked on hand-coded texts & \\
-\bottomrule\end{tabular}
-\note{\textbf{Toolbox (0:45).}
-\begin{itemize}
-\item One row per question; the middle column is what the results use.
-\item The right column matters for the paper: each alternative was run against the same hand-coded texts, and lost.
-\item Remaining improvements are tuning (more labels, bigger language models), not new methods.
-\end{itemize}}
-\end{frame}
-
 \begin{frame}{What: topics found by meaning (SBERT + BERTopic)}
 \scriptsize
 \setlength{\tabcolsep}{4pt}
@@ -1093,8 +998,80 @@ All & six robustness specifications; every coder checked on hand-coded texts & \
 \item Central banks dominate one topic, the digital euro; researchers the rest.
 \end{itemize}}
 \end{frame}
+% =====================================================================
+\section{Who writes}
 
-
+\begin{frame}{Academic literature}
+\begin{columns}[T]
+\begin{column}{0.4\textwidth}\scriptsize\textbf{Main outlets}\\[2pt]
+\begin{tabular}{@{}p{0.8\linewidth}r@{}}<<VENUE_ROWS>>\end{tabular}\\[4pt]
+Working papers (SSRN, RePEc) outweigh journals.\\[4pt]
+\textbf{Bibliometric laws.} <<LAWS>>
+\end{column}
+\begin{column}{0.58\textwidth}\scriptsize\textbf{Most cited papers} (global citations)\\[2pt]
+\begin{tabular}{@{}p{0.2\linewidth}p{0.66\linewidth}r@{}}
+<<CITED_ROWS>>
+\end{tabular}
+\end{column}
+\end{columns}
+\note{\textbf{Academic literature (0:45).}
+\begin{itemize}
+\item Much of the debate happens in working papers, often by central bank economists.
+\item The most cited papers are macro-modelling papers from 2016--2020.
+\item Laws: output grows <<CAGR>>\% a year; most authors write once (a Lotka exponent above 2): a young, open field around a small core of sources.
+\end{itemize}}
+\end{frame}
+\begin{frame}{Who speaks: central banks, authorities, press}
+<<VOICES>>
+\note{\textbf{Voices (0:35).}
+\begin{itemize}
+\item <<TOP_BANK>> leads the speeches: the digital euro project makes it the most vocal institution.
+\item The press is led by specialised fintech outlets before generalist media.
+\end{itemize}}
+\end{frame}
+\begin{frame}{Co-citation: the intellectual base}
+\begin{columns}[T]
+\begin{column}{0.7\textwidth}
+<<COCIT_NET>>
+\end{column}
+\begin{column}{0.28\textwidth}\scriptsize
+\textbf{Most cited within the corpus}\\[2pt]
+\begin{tabular}{@{}lr@{}}<<COCIT_TOP>>\end{tabular}
+\end{column}
+\end{columns}
+\vspace{2pt}
+\scriptsize\textbf{Clusters} (largest members):
+\begin{itemize}\setlength\itemsep{0pt}
+<<COCIT_CLUSTERS>>
+\end{itemize}
+<<COCIT_STATS>>
+\note{\textbf{Co-citation (0:50).}
+\begin{itemize}
+\item Same method as the keyword maps: here the items are references.
+\item Two references are linked when the same paper cites both: this shows what the field builds on.
+\item Core: <<COCIT_CORE>>.
+\item Clusters read as schools: CBDC design and bank intermediation models; central bank policy reports; adoption studies.
+\end{itemize}}
+\end{frame}
+\begin{frame}{Co-authorship: research communities}
+\begin{columns}[T]
+\begin{column}{0.62\textwidth}
+<<COAUTH_NET>>
+\end{column}
+\begin{column}{0.36\textwidth}\scriptsize
+\textbf{Most productive authors}\\[2pt]
+\begin{tabular}{@{}lr@{}}<<COAUTH_TOP>>\end{tabular}\\[6pt]
+<<COAUTH_STATS>>\\[4pt]
+<<CB_AUTH>>
+\end{column}
+\end{columns}
+\note{\textbf{Co-authorship (0:45).}
+\begin{itemize}
+\item Small, separate teams: the field is fragmented, around institutions (BIS, IMF, academic groups).
+\item Productivity is concentrated on a few very prolific authors.
+\item Who sets the agenda: central bank and international-institution economists write few of the papers but collect a third of the citations, though their share of papers is shrinking as the field opens up.
+\end{itemize}}
+\end{frame}
 \begin{frame}{Who says what: academics, central bankers, press}
 \scriptsize
 Distinctive words, \alert{log-odds ratio with informative Dirichlet prior} (Monroe, Colaresi \& Quinn, 2008), group $i$ vs.\ others $j$:
@@ -1114,6 +1091,8 @@ Distinctive words, \alert{log-odds ratio with informative Dirichlet prior} (Monr
 \item <<DIST_TAKE>>.
 \end{itemize}}
 \end{frame}
+% =====================================================================
+\section{Why study CBDCs?}
 
 \begin{frame}[fragile]{Why study CBDCs? Coding stated motivations}
 \begin{columns}[T]
@@ -1151,7 +1130,6 @@ MOTIVES = {
 \item Validation: codebook tuned on 100 texts, then tested on 50 others never used for tuning. High precision, modest recall: what is found is right, but about half is missed (non-English texts, paraphrases). Details in the backup slide.
 \end{itemize}}
 \end{frame}
-
 \begin{frame}{Why study CBDCs? Results}
 \scriptsize
 \setlength{\tabcolsep}{4pt}
@@ -1173,7 +1151,6 @@ Logit of each motivation on period, actor and English; average marginal effects,
 \item Central bankers and academics do not give the same reasons.
 \end{itemize}}
 \end{frame}
-
 \begin{frame}{Why: is the codebook the best coder?}
 \begin{columns}[T]
 \begin{column}{0.58\textwidth}\scriptsize
@@ -1198,6 +1175,8 @@ Logit of each motivation on period, actor and English; average marginal effects,
 \item A larger LLM behind an API could do better; it would be checked the same way. That is tuning, not a new method.
 \end{itemize}}
 \end{frame}
+% =====================================================================
+\section{How CBDCs are discussed}
 
 \begin{frame}{How: the tone of what is said about CBDCs}
 \begin{columns}[T]
@@ -1228,7 +1207,6 @@ FinBERT on the <<N_SENT>> English sentences that name a CBDC (central banks: spe
 \item Validation: FinBERT rarely confuses positive with negative, but sees tone in neutral sentences: compare groups and years, do not read levels.
 \end{itemize}}
 \end{frame}
-
 \begin{frame}{How: stance towards CBDCs}
 \begin{columns}[T]
 \begin{column}{0.44\textwidth}\scriptsize
@@ -1257,6 +1235,8 @@ The LLM (Qwen2.5 7B, $\kappa = <<STANCE_K>>$, best of five coders) calls <<STANC
 \item Changes come from the language model, run on a random sample: central banks have become much more favourable since 2020, as their own projects advanced.
 \end{itemize}}
 \end{frame}
+% =====================================================================
+\section{When attention rises}
 
 \begin{frame}{When: which themes burst, and when}
 \hspace*{3.3cm}<<BURSTS>>\\[2pt]
@@ -1268,7 +1248,6 @@ The LLM (Qwen2.5 7B, $\kappa = <<STANCE_K>>$, best of five coders) calls <<STANC
 \item Read with the topics: the field moves from monetary policy to sovereignty, tokenisation and national projects.
 \end{itemize}}
 \end{frame}
-
 \begin{frame}{When? Attention around policy events}
 \begin{columns}[c]
 \begin{column}{0.5\textwidth}
@@ -1301,6 +1280,8 @@ Baseline $\lambda$ = daily rate over $[-90,-15]$ days; $E = 15\lambda$; ratio $=
 \item Attention follows institutional milestones (central bank reports, legislation) more than market news. Sand Dollar comes 18 days after the ECB report: the two windows overlap.
 \end{itemize}}
 \end{frame}
+% =====================================================================
+\section{Robustness}
 
 \begin{frame}{Robustness}
 \scriptsize
@@ -1318,7 +1299,6 @@ Changes: 2023--26 vs 2014--19, adjusted (logit, 95\% CI). Tone: mean net tone ga
 \item The direction of every result is unchanged; magnitudes move a little. This is the table that answers a referee's ``what if''.
 \end{itemize}}
 \end{frame}
-
 % =====================================================================
 \section{Conclusion}
 
@@ -1352,7 +1332,6 @@ Changes: 2023--26 vs 2014--19, adjusted (logit, 95\% CI). Tone: mean net tone ga
 \item Limits are known and measured: each one has a fix in the paper plan.
 \end{itemize}}
 \end{frame}
-
 \begin{frame}{From this talk to the paper}
 \begin{columns}[T]
 \begin{column}{0.5\textwidth}\scriptsize
@@ -1361,12 +1340,11 @@ Changes: 2023--26 vs 2014--19, adjusted (logit, 95\% CI). Tone: mean net tone ga
 \begin{tabular}{@{}lll@{}}\toprule
  & \textbf{Section} & \textbf{Status}\\\midrule
 1 & Introduction, research question & to write\\
-2 & Related work (<<N_REVIEWS>> reviews) & material\\
+2 & Related literature & reading list\\
 3 & Data: corpus, relevance filter & validated\\
-4 & Methods: maps, topics, coders, tone, stance, events & done\\
-5 & Results: what, who, why, how, when & done\\
-6 & Robustness (6 specifications) & done\\
-7 & Discussion, limits & to write\\
+4--8 & What, who, why, how, when (method, then results) & done\\
+9 & Robustness (6 specifications) & done\\
+10 & Discussion, limits & to write\\
 \bottomrule\end{tabular}\\[6pt]
 \textbf{Working title.} \emph{Why central bank digital currencies? Researchers, central bankers and the press, 2014--<<Y1>>.}
 \end{column}
@@ -1388,7 +1366,6 @@ Changes: 2023--26 vs 2014--19, adjusted (logit, 95\% CI). Tone: mean net tone ga
 \item Thank you; questions.
 \end{itemize}}
 \end{frame}
-
 \appendix
 \begin{frame}{Backup: validation of the motivation coding}
 \footnotesize
@@ -1402,20 +1379,6 @@ Codebook tuned on 100 texts (development set), then evaluated on 50 \alert{held-
 \bottomrule\end{tabular}\\[3pt]
 \scriptsize Read = texts where the reading found the motivation; Coded = texts flagged by the codebook. Files: \texttt{presentation/validation\_motivations\_dev.csv}, \texttt{\_test.csv}.
 \note{\textbf{Backup (only if asked).} The reference coding was done by reading each text against the codebook definitions (AI-assisted, spot-checked). Payment efficiency is the weakest category: it is expressed in too many ways for keywords.}
-\end{frame}
-\begin{frame}{Backup: how the science maps are built}
-\begin{itemize}
-\item \textbf{Networks.} Nodes = references, authors or keywords; $c_{ij}$ = documents where $i$ and $j$ appear together, $c_i$ = occurrences of $i$. Edges weighted by \alert{association strength}:
-\[ s_{ij} = \frac{c_{ij}}{c_i\,c_j} \]
-\item \textbf{Clusters.} Louvain algorithm, maximising modularity
-\[ Q = \frac{1}{2m}\sum_{i,j}\Big[s_{ij} - \frac{k_i k_j}{2m}\Big]\,\delta(g_i,g_j) \]
-\item \textbf{Layout.} Force-directed: linked nodes end up close. Size $\propto \sqrt{c_i}$, colour = cluster.
-\end{itemize}
-\note{\textbf{Backup (only if asked).}
-\begin{itemize}
-\item Association strength corrects for popularity: two very frequent items co-occur often by chance.
-\item Louvain groups nodes so that links are dense inside groups and sparse between them; $Q$ measures how clear the grouping is.
-\end{itemize}}
 \end{frame}
 
 \begin{frame}{Backup: how the score behaves}
@@ -1509,6 +1472,31 @@ def key(r):
 \note{\textbf{Backup (only if asked).} Errors are almost all ``toned vs.\ neutral'': FinBERT was trained on financial news, where descriptive sentences about a new product read as positive.}
 \end{frame}
 
+\begin{frame}{Backup: <<N_REVIEWS>> earlier reviews of CBDC research}
+\footnotesize Five recent bibliometric reviews:\\[2pt]
+\begin{tabular}{@{}llrl@{}}\toprule
+\textbf{Study} & \textbf{Data} & \textbf{Documents} & \textbf{Tools}\\\midrule
+Kvedaravi\v{c}i\={u}t\.{e} \& \v{S}apkauskien\.{e} (2024) & WoS + Scopus & 228 & VOSviewer\\
+Fahad \& Bulut (2024) & Scopus & 169 of 323 & Biblioshiny\\
+Bapat \& Sharma (2025) & Scopus & 371 & bibliometrics + TCCM\\
+Prodan et al.\ (2024) & Scopus + WoS & 747 of 1{,}024 & PRISMA, VOSviewer\\
+Paulovici (2026) & Scopus & 892 & VOSviewer\\\midrule
+\textbf{This study} & \textbf{5 databases, speeches, press\dots} & \textbf{<<N>>} & \textbf{+ text as data}\\
+\bottomrule\end{tabular}\\[6pt]
+\small
+\begin{itemize}\setlength\itemsep{1pt}
+\item \alert{Gap}: one or two databases (Scopus, WoS), mostly English journal articles: central bankers and the press are absent.
+\item Maps say \emph{what} is studied, not \emph{why}; no measure is validated.
+\end{itemize}
+\scriptsize Found in our own corpus: <<N_REVIEWS>> titles announce a literature, systematic or bibliometric review of CBDCs (<<REV_Y0>>--<<REV_Y1>>).
+\note{\textbf{Backup (only if asked).}
+\begin{itemize}
+\item The topic is not new for bibliometrics: about <<N_REVIEWS>> reviews, most of them since 2023.
+\item The bibliometric ones rely on Scopus or Web of Science: a few hundred journal articles, often English only (Prodan et al.\ drop non-English texts).
+\item The closest to us is Hoang et al.\ (2023, RIBAF): text mining, but still academic only.
+\item Our angle: every type of text, every language, and measures that are validated.
+\end{itemize}}
+\end{frame}
 \begin{frame}{References}
 \scriptsize
 \begin{itemize}\setlength\itemsep{1pt}

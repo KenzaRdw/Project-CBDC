@@ -22,7 +22,7 @@
 
 \title{A Bibliometric Corpus on Central Bank Digital Currencies}
 \subtitle{Data, methods and first results of a paper in progress}
-\author{Group Louis, Kenza, Ad}
+\author{Adriel Mazere}
 \institute{M2 -- Private crypto}
 \date{October 2026}
 \begin{document}
@@ -51,40 +51,45 @@
 \item Headline: 48,188 texts collected, 17,709 keep CBDC as a theme.
 \end{itemize}}
 \end{frame}
-
-\begin{frame}{Related work: 77 reviews already exist}
-\footnotesize Five recent bibliometric reviews:\\[2pt]
-\begin{tabular}{@{}llrl@{}}\toprule
-\textbf{Study} & \textbf{Data} & \textbf{Documents} & \textbf{Tools}\\\midrule
-Kvedaravi\v{c}i\={u}t\.{e} \& \v{S}apkauskien\.{e} (2024) & WoS + Scopus & 228 & VOSviewer\\
-Fahad \& Bulut (2024) & Scopus & 169 of 323 & Biblioshiny\\
-Bapat \& Sharma (2025) & Scopus & 371 & bibliometrics + TCCM\\
-Prodan et al.\ (2024) & Scopus + WoS & 747 of 1{,}024 & PRISMA, VOSviewer\\
-Paulovici (2026) & Scopus & 892 & VOSviewer\\\midrule
-\textbf{This study} & \textbf{5 databases, speeches, press\dots} & \textbf{17,709} & \textbf{+ text as data}\\
-\bottomrule\end{tabular}\\[6pt]
-\small
-\begin{itemize}\setlength\itemsep{1pt}
-\item \alert{Gap}: one or two databases (Scopus, WoS), mostly English journal articles: central bankers and the press are absent.
-\item Maps say \emph{what} is studied, not \emph{why}; no measure is validated.
-\end{itemize}
-\scriptsize Found in our own corpus: 77 titles announce a literature, systematic or bibliometric review of CBDCs (2019--2026).
-\note{\textbf{Related work (0:50).}
-\begin{itemize}
-\item The topic is not new for bibliometrics: about 77 reviews, most of them since 2023.
-\item The bibliometric ones rely on Scopus or Web of Science: a few hundred journal articles, often English only (Prodan et al.\ drop non-English texts).
-\item The closest to us is Hoang et al.\ (2023, RIBAF): text mining, but still academic only.
-\item Our angle: every type of text, every language, and measures that are validated.
-\end{itemize}}
-\end{frame}
-
 \begin{frame}{Outline}
 \tableofcontents
-\note{\textbf{Outline (0:15).} Method first (collection, scoring), then results (corpus, maps, why and when).}
+\note{\textbf{Outline (0:15).} Data first, then one section per question (what, who, why, how, when), each opening with its method; robustness; conclusion.}
 \end{frame}
 
 % =====================================================================
-\section{Collecting the texts}
+\section{Introduction}
+
+\begin{frame}{Related literature: CBDCs}
+% to be completed from the reading list
+\note{\textbf{Literature (0:45).}}
+\end{frame}
+
+\begin{frame}{Related literature: what the field builds on}
+% to be completed: reading list + co-citation clusters (section ``Who'')
+\note{\textbf{Literature (0:45).}}
+\end{frame}
+
+\begin{frame}{Approach: one method per question}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lp{0.43\textwidth}p{0.36\textwidth}@{}}\toprule
+\textbf{Question} & \textbf{Used} & \textbf{Also tested, and why not}\\\midrule
+What? & topics: \alert{BERTopic} (SBERT, UMAP, HDBSCAN), labels by \alert{c-TF-IDF}; co-word and Callon map; \alert{covariate logit} on topic shares & LDA / STM: bag of words, one language at a time; their covariate model is applied to BERTopic instead\\
+Who? & co-citation, co-authorship, Lotka, Bradford, \alert{affiliations}; \alert{log-odds} with Dirichlet prior & plain TF-IDF: no shrinkage of rare words\\
+Why? & motivations: \alert{validated codebook}, $\kappa = 0.53$; covariate logit & SBERT, NLI, local LLMs: $\kappa \le 0.33$\\
+How? & tone: \alert{FinBERT} on CBDC sentences, $\kappa = 0.52$; stance: levels by reading, changes by a \alert{local LLM} on a stratified sample, $\kappa = 0.41$ & stance: LLM Qwen2.5 7B 0.41, NLI zero-shot 0.28, FinBERT tone 0.17, SBERT classifier 0.16\\
+When? & vocabulary: \alert{c-TF-IDF} by period; \alert{Kleinberg bursts}; \alert{event study} with placebo dates & Poisson $z$-test: 24\% false positives\\\midrule
+All & six robustness specifications; every coder checked on hand-coded texts & \\
+\bottomrule\end{tabular}
+\note{\textbf{Approach (0:45).}
+\begin{itemize}
+\item One row per question; the middle column is what the results use.
+\item The right column matters for the paper: each alternative was run against the same hand-coded texts, and lost.
+\item Remaining improvements are tuning (more labels, bigger language models), not new methods.
+\end{itemize}}
+\end{frame}
+% =====================================================================
+\section{Data}
 
 \begin{frame}{Pipeline}
 \begin{center}
@@ -114,7 +119,6 @@ Paulovici (2026) & Scopus & 892 & VOSviewer\\\midrule
 \item Design choice: collect broadly, decide relevance later.
 \end{itemize}}
 \end{frame}
-
 \begin{frame}[fragile]{Press: recursive bisection of time windows}
 \begin{columns}[T]
 \begin{column}{0.53\textwidth}
@@ -148,10 +152,6 @@ A search returns at most $C=100$ items. For a window $W=[a,b)$ with $N(W)$ artic
 \item A month needs at most 5 levels of splitting; the cost is $2L-1$ requests.
 \end{itemize}}
 \end{frame}
-
-% =====================================================================
-\section{Scoring relevance}
-
 \begin{frame}[fragile]{Step 1: is it really \emph{Central Bank Digital Currency}?}
 \begin{columns}[T]
 \begin{column}{0.5\textwidth}
@@ -188,7 +188,6 @@ TERMS = {
 \item ``CBDC'' also means \emph{chronic bullous dermatosis of childhood}: an ambiguous term only counts if the text also talks about money or payments.
 \end{itemize}}
 \end{frame}
-
 \begin{frame}{Step 2: how central is CBDC to the text?}
 Each available field $f$ gets a centrality $c_f \in [0,1]$:
 \begin{align*}
@@ -210,7 +209,6 @@ $\rho$ = mentions per 1{,}000 words; $\sigma$ = share of the ten slices of the t
 \item The max rewards one clear signal; the mean rewards consistency. Keywords weigh less: partly machine-assigned.
 \end{itemize}}
 \end{frame}
-
 \begin{frame}{Step 3: labels, and how good is the filter?}
 \begin{columns}[T]
 \begin{column}{0.58\textwidth}\scriptsize
@@ -246,10 +244,6 @@ Strata $h$ weighted by size $N_h$; $T$ = theme labels:
 \item Recall loss comes mainly from press items whose text could not be fetched.
 \end{itemize}}
 \end{frame}
-
-% =====================================================================
-\section{The corpus}
-
 \begin{frame}{Sources and completeness}
 \begin{columns}[T]
 \begin{column}{0.46\textwidth}\footnotesize
@@ -292,7 +286,6 @@ Reference list & 16\% \\
 \item Completeness: most texts are dated to the day; full text and references are the scarcest fields.
 \end{itemize}}
 \end{frame}
-
 \begin{frame}{A literature that took off after 2020}
 \begin{center}
 \begin{tikzpicture}
@@ -318,7 +311,6 @@ Reference list & 16\% \\
 \item Turning point 2020: COVID and the decline of cash, Libra (2019), the ECB report on a digital euro (Oct.\ 2020).\item Caution: the press bar for 2026 is mostly a harvesting effect (news search returns recent articles first); in the paper, press is normalised by its coverage.
 \end{itemize}}
 \end{frame}
-
 \begin{frame}{Languages}
 \begin{columns}[c]
 \begin{column}{0.58\textwidth}
@@ -341,6 +333,122 @@ Reference list & 16\% \\
 \end{columns}
 \note{\textbf{Languages (0:25).} English dominates, but Russian is a large second block: a reminder that English-only databases miss part of the debate.}
 \end{frame}
+% =====================================================================
+\section{What is written}
+
+\begin{frame}{Method: science maps}
+\begin{itemize}
+\item \textbf{Networks.} Nodes = references, authors or keywords; $c_{ij}$ = documents where $i$ and $j$ appear together, $c_i$ = occurrences of $i$. Edges weighted by \alert{association strength}:
+\[ s_{ij} = \frac{c_{ij}}{c_i\,c_j} \]
+\item \textbf{Clusters.} Louvain algorithm, maximising modularity
+\[ Q = \frac{1}{2m}\sum_{i,j}\Big[s_{ij} - \frac{k_i k_j}{2m}\Big]\,\delta(g_i,g_j) \]
+\item \textbf{Layout.} Force-directed: linked nodes end up close. Size $\propto \sqrt{c_i}$, colour = cluster.
+\end{itemize}
+\note{\textbf{Method (0:40).}
+\begin{itemize}
+\item Association strength corrects for popularity: two very frequent items co-occur often by chance.
+\item Louvain groups nodes so that links are dense inside groups and sparse between them; $Q$ measures how clear the grouping is.
+\end{itemize}}
+\end{frame}
+\begin{frame}{Thematic map: which themes drive the field?}
+\begin{columns}[c]
+\begin{column}{0.47\textwidth}
+\begin{tikzpicture}[font=\scriptsize]
+\draw[gray!60, dashed] (4.99,0) -- (4.99,4.6);
+\draw[gray!60, dashed] (0,3.00) -- (6.4,3.00);
+\draw[-{Stealth}, gray] (0,0) -- (6.6000000000000005,0) node[below, text=gray, pos=0.5, yshift=-1mm] {centrality $\to$};
+\draw[-{Stealth}, gray] (0,0) -- (0,4.8) node[above, text=gray] {density};
+\node[gray, anchor=south east, font=\scriptsize\bfseries] at (6.4,4.6) {Motor};
+\node[gray, anchor=south west, font=\scriptsize\bfseries] at (0.1,4.6) {Niche};
+\node[gray, anchor=north west, font=\scriptsize\bfseries] at (0.1,-0.35) {Emerging / declining};
+\node[gray, anchor=north east, font=\scriptsize\bfseries] at (6.4,-0.35) {Basic};
+\fill[c1, opacity=0.8] (4.99,3.79) circle (6.5mm);
+\node[font=\scriptsize, text=white] at (4.99,3.79) {\textbf{1}};
+\fill[c2, opacity=0.8] (5.12,2.78) circle (6.4mm);
+\node[font=\scriptsize, text=white] at (5.12,2.78) {\textbf{2}};
+\fill[c3, opacity=0.8] (4.12,3.00) circle (5.7mm);
+\node[font=\scriptsize, text=white] at (4.12,3.00) {\textbf{3}};
+\fill[c4, opacity=0.8] (0.85,0.41) circle (4.6mm);
+\node[font=\scriptsize, text=white] at (0.85,0.41) {\textbf{4}};
+\end{tikzpicture}
+\end{column}
+\begin{column}{0.51\textwidth}\scriptsize
+Keyword clusters (Callon), with $e_{ij} = c_{ij}^2 / (c_i c_j)$:
+\[ \text{centrality} = 10\!\!\sum_{i\in C,\,j\notin C}\!\! e_{ij}, \qquad \text{density} = \frac{100}{|C|}\!\sum_{i,j\in C}\! e_{ij} \]
+\begin{tabular}{@{}lp{0.62\linewidth}l@{}}\toprule
+ & \textbf{Theme} (top keywords) & \textbf{Quadrant}\\\midrule
+\textcolor{c1}{\textbf{1}} & digital transformation in financial services, monetary policy, moneta\dots{} & motor \\
+\textcolor{c2}{\textbf{2}} & blockchain technology applications and security, cryptocurrency, digi\dots{} & basic \\
+\textcolor{c3}{\textbf{3}} & fintech, crowdfunding, digital finance, financial inclusion, digital\dots{} & niche \\
+\textcolor{c4}{\textbf{4}} & digital ruble, international payments, global financial crisis and po\dots{} & emerging or declining \\
+\bottomrule\end{tabular}
+\end{column}
+\end{columns}
+\note{\textbf{Thematic map (0:50).}
+\begin{itemize}
+\item Centrality: how connected a theme is to the others. Density: how developed it is internally.
+\item Motor themes (central and developed): digital transformation in financial services.
+\item Niche themes are developed but isolated; basic themes are transversal but less structured.
+\end{itemize}}
+\end{frame}
+\begin{frame}{How the themes evolve}
+\scriptsize
+\begin{tabular}{@{}p{0.42\textwidth}rrrr@{}}\toprule
+\textbf{Keyword} (\% of the period's papers) & \textbf{2014--2019} & \textbf{2020--2022} & \textbf{2023--2026} & \textbf{Change}\\
+\textit{papers in period} & \textit{232} & \textit{1,360} & \textit{5,368} &\\\midrule
+financial inclusion & \cellcolor{c1!5}5.6 & \cellcolor{c1!9}9.2 & \cellcolor{c1!15}15.9 & \textcolor{c4}{$+6.7$} \\
+digital euro & \cellcolor{c1!3}3.0 & \cellcolor{c1!6}6.8 & \cellcolor{c1!9}9.7 & \textcolor{c4}{$+2.9$} \\
+financial stability & \cellcolor{c1!15}15.9 & \cellcolor{c1!10}10.7 & \cellcolor{c1!12}12.6 & \textcolor{c4}{$+1.9$} \\
+blockchain & \cellcolor{c1!12}12.1 & \cellcolor{c1!11}11.7 & \cellcolor{c1!13}13.3 & \textcolor{c4}{$+1.6$} \\
+digital ruble & \cellcolor{c1!0}0.0 & \cellcolor{c1!8}8.8 & \cellcolor{c1!9}9.6 & \textcolor{c4}{$+0.8$} \\
+stablecoin & \cellcolor{c1!1}1.7 & \cellcolor{c1!10}10.7 & \cellcolor{c1!10}11.0 & \textcolor{c4}{$+0.3$} \\
+digital transformation in law & \cellcolor{c1!11}11.2 & \cellcolor{c1!15}15.7 & \cellcolor{c1!14}15.0 & \textcolor{c2}{$-0.7$} \\
+banking stability, regulation, efficien\dots{} & \cellcolor{c1!14}14.2 & \cellcolor{c1!10}10.5 & \cellcolor{c1!9}9.6 & \textcolor{c2}{$-0.9$} \\
+fintech, crowdfunding, digital finance & \cellcolor{c1!50}50.4 & \cellcolor{c1!57}57.1 & \cellcolor{c1!55}55.4 & \textcolor{c2}{$-1.7$} \\
+digital payments & \cellcolor{c1!8}8.6 & \cellcolor{c1!11}11.1 & \cellcolor{c1!8}8.7 & \textcolor{c2}{$-2.4$} \\
+monetary policy and economic impact & \cellcolor{c1!35}35.8 & \cellcolor{c1!15}15.1 & \cellcolor{c1!12}12.4 & \textcolor{c2}{$-2.7$} \\
+payment systems & \cellcolor{c1!11}11.6 & \cellcolor{c1!12}12.6 & \cellcolor{c1!8}8.1 & \textcolor{c2}{$-4.5$} \\
+\bottomrule\end{tabular}\\[4pt]
+Sorted by change between the last two periods. Darker = more frequent.\\[3pt]
+\textbf{New in each period} (c-TF-IDF, periods as classes): \textbf{2014--2019}: \emph{cash, cryptocurrencies, e-krona, riksbank, bitcoin, legal}; \textbf{2020--2022}: \emph{china, euro, cash, blockchain, world, cryptocurrencies}; \textbf{2023--2026}: \emph{euro, legal, blockchain, finance, framework, inclusion}.
+\note{\textbf{Evolution (0:35).}
+\begin{itemize}
+\item Rising fastest: financial inclusion; falling most: payment systems (shares, while the field itself grows).
+\item The literature moves from ``how would it work'' to ``who adopts it and for whom''.
+\item Bottom line, TF-IDF answers ``when'': each period's vocabulary compared to the others.
+\end{itemize}}
+\end{frame}
+\begin{frame}{What: topics found by meaning (SBERT + BERTopic)}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}rp{0.4\textwidth}rrrrrr@{}}\toprule
+ & \textbf{Topic} (top c-TF-IDF terms) & \textbf{Texts} & \multicolumn{3}{c}{\textbf{\% of the period's texts}} & \multicolumn{2}{c}{\textbf{Adjusted, points}}\\
+ & & & \textbf{2014--2019} & \textbf{2020--2022} & \textbf{2023--2026} & \textbf{change} & \textbf{CB}\\\midrule
+1 & retail, implementation, interest, inclusion & 1,495 & \cellcolor{c1!38}13.0 & \cellcolor{c1!54}18.0 & \cellcolor{c1!55}18.4 & {+3.4} & \textbf{-17.4} \\
+2 & euro, european, ecb, europe & 1,050 & \cellcolor{c1!58}19.6 & \cellcolor{c1!41}13.8 & \cellcolor{c1!36}12.3 & {+2.3} & \textbf{+71.0} \\
+3 & cryptocurrencies, traditional, cash, legal & 771 & \cellcolor{c1!43}14.5 & \cellcolor{c1!32}10.9 & \cellcolor{c1!26}8.8 & \textbf{-7.8} & \textbf{-8.7} \\
+4 & pound, japan, retail, pilot & 636 & \cellcolor{c1!48}16.3 & \cellcolor{c1!32}10.8 & \cellcolor{c1!17}5.9 & \textbf{-11.6} & \textbf{-4.5} \\
+5 & ruble, russian, russia, legal & 627 & \cellcolor{c1!2}0.9 & \cellcolor{c1!19}6.3 & \cellcolor{c1!23}8.0 & \textbf{+6.7} & \textbf{-6.9} \\
+6 & blockchain, privacy, offline, security & 584 & \cellcolor{c1!18}6.3 & \cellcolor{c1!22}7.5 & \cellcolor{c1!21}7.3 & {-0.1} & \textbf{-7.4} \\
+7 & china, e-cny, rmb, yuan & 432 & \cellcolor{c1!2}0.9 & \cellcolor{c1!19}6.3 & \cellcolor{c1!15}5.3 & \textbf{+4.2} & \textbf{-5.8} \\
+8 & cryptocurrencies, cryptocurrency, bitcoin, cr\dots{} & 362 & \cellcolor{c1!19}6.6 & \cellcolor{c1!11}3.9 & \cellcolor{c1!13}4.5 & \textbf{-2.8} & \textbf{-3.3} \\
+9 & debt, dollar, reserve, crisis & 342 & \cellcolor{c1!9}3.3 & \cellcolor{c1!11}3.8 & \cellcolor{c1!13}4.4 & {+0.8} & \textbf{-2.2} \\
+10 & india, rupee, intention, indian & 324 & \cellcolor{c1!0}0.0 & \cellcolor{c1!5}1.7 & \cellcolor{c1!14}4.9 & {+4.8} & \textbf{-4.2} \\
+11 & fintech, services, finance, innovation & 260 & \cellcolor{c1!12}4.2 & \cellcolor{c1!5}1.9 & \cellcolor{c1!10}3.5 & {-0.9} & {-1.0} \\
+12 & indonesia, rupiah, islamic, legal & 205 & \cellcolor{c1!1}0.6 & \cellcolor{c1!5}1.7 & \cellcolor{c1!8}2.9 & \textbf{+2.2} & \textbf{-1.6} \\
+\bottomrule\end{tabular}\\[3pt]
+8,213 texts (research, speeches, official), multilingual SBERT; 20 topics (24\% outliers reassigned). Labels: $W_{t,c} = \frac{\text{tf}_{t,c}}{|c|}\log\!\big(1+\frac{A}{f_t}\big)$. Adjusted: logit of topic membership on period, actor, English (the covariate model of an STM); change = 2023--26 vs 2014--19; CB = central banks vs academics; \textbf{bold}: 95\% CI excludes 0.\\[2pt]
+\small Topics tied to \alert{one jurisdiction}: 41--43\% of texts in every period, but the mix shifts: \emph{pound}, \emph{euro} fall; \emph{ruble}, \emph{india}, \emph{china} rise.
+\note{\textbf{Topics (1:00).}
+\begin{itemize}
+\item Unlike keywords, embeddings group texts by meaning and across languages: a Russian and an English paper on the digital ruble land together.
+\item Two kinds of topics: issues (privacy, cross-border, stablecoins, adoption) and jurisdictions (digital euro, ruble, e-CNY, rupee).
+\item Jurisdiction topics keep a stable share, but move away from the digital euro towards the ruble, the e-CNY and the rupee: the literature follows national projects.
+\item Central banks dominate one topic, the digital euro; researchers the rest.
+\end{itemize}}
+\end{frame}
+% =====================================================================
+\section{Who writes}
 
 \begin{frame}{Academic literature}
 \begin{columns}[T]
@@ -372,7 +480,6 @@ Barrdear (2016) & The Macroeconomics of Central Bank Issued Digital Currenc\dots
 \item Laws: output grows 58\% a year; most authors write once (a Lotka exponent above 2): a young, open field around a small core of sources.
 \end{itemize}}
 \end{frame}
-
 \begin{frame}{Who speaks: central banks, authorities, press}
 \begin{columns}[T]\begin{column}{0.32\textwidth}\scriptsize\textbf{Speeches}\\[2pt]\begin{tabular}{@{}p{0.8\linewidth}r@{}}European Central Bank & 118 \\
 Deutsche Bundesbank & 63 \\
@@ -402,254 +509,250 @@ Global Government Finance & 59 \\\end{tabular}\end{column}\end{columns}
 \item The press is led by specialised fintech outlets before generalist media.
 \end{itemize}}
 \end{frame}
-
-% =====================================================================
-\section{Mapping the field}
-
 \begin{frame}{Co-citation: the intellectual base}
 \begin{columns}[T]
 \begin{column}{0.7\textwidth}
 \begin{tikzpicture}
-\draw[gray, opacity=0.67, line width=0.35pt] (1.25,2.35) -- (0.00,2.10);
-\draw[gray, opacity=0.59, line width=0.35pt] (0.00,2.10) -- (1.96,1.65);
-\draw[gray, opacity=0.58, line width=0.35pt] (1.25,2.35) -- (1.96,1.65);
-\draw[gray, opacity=0.57, line width=0.35pt] (1.70,2.98) -- (3.65,3.43);
-\draw[gray, opacity=0.57, line width=0.35pt] (0.63,1.72) -- (1.25,2.35);
-\draw[gray, opacity=0.56, line width=0.35pt] (0.63,1.72) -- (1.96,1.65);
-\draw[gray, opacity=0.54, line width=0.35pt] (0.63,1.72) -- (0.00,2.10);
-\draw[gray, opacity=0.54, line width=0.35pt] (0.38,2.65) -- (1.25,2.35);
-\draw[gray, opacity=0.54, line width=0.35pt] (1.25,2.35) -- (3.31,2.75);
-\draw[gray, opacity=0.54, line width=0.35pt] (0.51,0.56) -- (1.96,1.65);
-\draw[gray, opacity=0.54, line width=0.35pt] (3.31,2.75) -- (0.00,2.10);
-\draw[gray, opacity=0.53, line width=0.35pt] (1.25,2.35) -- (3.64,2.23);
-\draw[gray, opacity=0.53, line width=0.35pt] (3.65,3.43) -- (2.28,3.99);
-\draw[gray, opacity=0.51, line width=0.35pt] (1.70,2.98) -- (2.28,3.99);
-\draw[gray, opacity=0.50, line width=0.35pt] (1.70,2.98) -- (3.31,2.75);
-\draw[gray, opacity=0.50, line width=0.35pt] (0.38,2.65) -- (3.64,2.23);
-\draw[gray, opacity=0.50, line width=0.35pt] (0.63,1.72) -- (0.25,1.27);
-\draw[gray, opacity=0.49, line width=0.35pt] (1.25,2.35) -- (0.51,0.56);
-\draw[gray, opacity=0.49, line width=0.35pt] (0.25,1.27) -- (1.96,1.65);
-\draw[gray, opacity=0.48, line width=0.35pt] (0.38,2.65) -- (2.52,2.30);
-\draw[gray, opacity=0.48, line width=0.35pt] (1.25,2.35) -- (3.65,3.43);
-\draw[gray, opacity=0.48, line width=0.35pt] (0.38,2.65) -- (0.00,2.10);
-\draw[gray, opacity=0.48, line width=0.35pt] (5.57,3.99) -- (5.40,3.45);
-\draw[gray, opacity=0.47, line width=0.35pt] (1.70,2.98) -- (2.52,2.30);
-\draw[gray, opacity=0.47, line width=0.35pt] (0.38,2.65) -- (3.31,2.75);
-\draw[gray, opacity=0.47, line width=0.35pt] (1.70,2.98) -- (0.38,2.65);
-\draw[gray, opacity=0.46, line width=0.35pt] (0.63,1.72) -- (0.51,0.56);
-\draw[gray, opacity=0.46, line width=0.35pt] (0.63,1.72) -- (1.48,1.13);
-\draw[gray, opacity=0.46, line width=0.35pt] (3.20,1.62) -- (1.96,1.65);
-\draw[gray, opacity=0.46, line width=0.35pt] (1.48,1.13) -- (0.25,1.27);
-\draw[gray, opacity=0.46, line width=0.35pt] (3.20,1.62) -- (0.00,2.10);
-\draw[gray, opacity=0.46, line width=0.35pt] (3.20,1.62) -- (1.25,2.35);
-\draw[gray, opacity=0.45, line width=0.35pt] (0.00,2.10) -- (0.25,1.27);
-\draw[gray, opacity=0.45, line width=0.35pt] (1.70,2.98) -- (1.25,2.35);
-\draw[gray, opacity=0.45, line width=0.35pt] (1.70,2.98) -- (0.00,2.10);
-\draw[gray, opacity=0.45, line width=0.35pt] (4.85,2.73) -- (5.40,3.45);
-\draw[gray, opacity=0.45, line width=0.35pt] (0.63,1.72) -- (2.52,2.30);
-\draw[gray, opacity=0.45, line width=0.35pt] (2.83,1.00) -- (0.25,1.27);
-\draw[gray, opacity=0.45, line width=0.35pt] (3.64,2.23) -- (0.00,2.10);
-\draw[gray, opacity=0.45, line width=0.35pt] (0.63,1.72) -- (0.38,2.65);
-\draw[gray, opacity=0.44, line width=0.35pt] (1.25,2.35) -- (2.52,2.30);
-\draw[gray, opacity=0.44, line width=0.35pt] (0.38,2.65) -- (1.96,1.65);
-\draw[gray, opacity=0.44, line width=0.35pt] (1.70,2.98) -- (2.39,3.25);
-\draw[gray, opacity=0.44, line width=0.35pt] (2.52,2.30) -- (1.96,1.65);
-\draw[gray, opacity=0.44, line width=0.35pt] (3.64,2.23) -- (2.52,2.30);
-\draw[gray, opacity=0.44, line width=0.35pt] (3.31,2.75) -- (2.52,2.30);
-\draw[gray, opacity=0.43, line width=0.35pt] (5.57,3.99) -- (4.22,4.10);
-\draw[gray, opacity=0.43, line width=0.35pt] (4.44,1.21) -- (4.05,0.00);
-\draw[gray, opacity=0.43, line width=0.35pt] (0.63,1.72) -- (2.83,1.00);
-\draw[gray, opacity=0.43, line width=0.35pt] (1.48,1.13) -- (1.96,1.65);
-\draw[gray, opacity=0.43, line width=0.35pt] (3.65,3.43) -- (3.64,2.23);
-\draw[gray, opacity=0.43, line width=0.35pt] (8.53,2.57) -- (6.67,2.92);
-\draw[gray, opacity=0.43, line width=0.35pt] (2.37,0.57) -- (1.96,1.65);
-\draw[gray, opacity=0.43, line width=0.35pt] (1.25,2.35) -- (0.25,1.27);
-\draw[gray, opacity=0.43, line width=0.35pt] (3.31,2.75) -- (2.28,3.99);
-\draw[gray, opacity=0.42, line width=0.35pt] (0.51,0.56) -- (2.37,0.57);
-\draw[gray, opacity=0.42, line width=0.35pt] (4.85,2.73) -- (3.31,2.75);
-\draw[gray, opacity=0.42, line width=0.35pt] (0.51,0.56) -- (0.00,2.10);
-\draw[gray, opacity=0.42, line width=0.35pt] (2.39,3.25) -- (3.31,2.75);
-\draw[gray, opacity=0.42, line width=0.35pt] (0.63,1.72) -- (3.64,2.23);
-\draw[gray, opacity=0.42, line width=0.35pt] (3.64,2.23) -- (3.31,2.75);
-\draw[gray, opacity=0.42, line width=0.35pt] (0.63,1.72) -- (2.37,0.57);
-\draw[gray, opacity=0.42, line width=0.35pt] (1.70,2.98) -- (3.64,2.23);
-\draw[gray, opacity=0.41, line width=0.35pt] (1.48,1.13) -- (0.38,2.65);
-\draw[gray, opacity=0.41, line width=0.35pt] (2.83,1.00) -- (1.96,1.65);
-\draw[gray, opacity=0.41, line width=0.35pt] (1.48,1.13) -- (1.25,2.35);
-\draw[gray, opacity=0.41, line width=0.35pt] (5.40,3.45) -- (4.22,4.10);
-\draw[gray, opacity=0.41, line width=0.35pt] (0.51,0.56) -- (0.25,1.27);
-\draw[gray, opacity=0.41, line width=0.35pt] (7.04,0.72) -- (4.44,1.21);
-\draw[gray, opacity=0.40, line width=0.35pt] (1.25,2.35) -- (2.37,0.57);
-\draw[gray, opacity=0.40, line width=0.35pt] (2.52,2.30) -- (0.00,2.10);
-\draw[gray, opacity=0.40, line width=0.35pt] (2.39,3.25) -- (0.00,2.10);
-\draw[gray, opacity=0.40, line width=0.35pt] (3.20,1.62) -- (2.37,0.57);
-\draw[gray, opacity=0.40, line width=0.35pt] (4.43,0.56) -- (4.05,0.00);
-\draw[gray, opacity=0.40, line width=0.35pt] (0.38,2.65) -- (0.25,1.27);
-\draw[gray, opacity=0.40, line width=0.35pt] (3.65,3.43) -- (2.52,2.30);
-\draw[gray, opacity=0.40, line width=0.35pt] (2.28,3.99) -- (4.22,4.10);
-\draw[gray, opacity=0.40, line width=0.35pt] (1.70,2.98) -- (4.85,2.73);
-\draw[gray, opacity=0.39, line width=0.35pt] (1.48,1.13) -- (0.00,2.10);
-\draw[gray, opacity=0.39, line width=0.35pt] (1.48,1.13) -- (2.37,0.57);
-\draw[gray, opacity=0.39, line width=0.35pt] (3.65,3.43) -- (5.40,3.45);
-\draw[gray, opacity=0.39, line width=0.35pt] (1.70,2.98) -- (5.40,3.45);
-\draw[gray, opacity=0.39, line width=0.35pt] (2.52,2.30) -- (0.25,1.27);
-\draw[gray, opacity=0.39, line width=0.35pt] (1.25,2.35) -- (2.83,1.00);
-\draw[gray, opacity=0.39, line width=0.35pt] (5.60,0.90) -- (7.04,0.72);
-\draw[gray, opacity=0.39, line width=0.35pt] (1.48,1.13) -- (2.83,1.00);
-\draw[gray, opacity=0.39, line width=0.35pt] (3.20,1.62) -- (0.38,2.65);
-\draw[gray, opacity=0.39, line width=0.35pt] (4.66,1.86) -- (2.52,2.30);
-\draw[gray, opacity=0.38, line width=0.35pt] (1.70,2.98) -- (5.57,3.99);
-\draw[gray, opacity=0.38, line width=0.35pt] (3.20,1.62) -- (0.51,0.56);
-\draw[gray, opacity=0.38, line width=0.35pt] (0.00,2.10) -- (2.37,0.57);
-\draw[gray, opacity=0.38, line width=0.35pt] (7.04,0.72) -- (4.05,0.00);
-\draw[gray, opacity=0.38, line width=0.35pt] (0.38,2.65) -- (2.37,0.57);
-\draw[gray, opacity=0.38, line width=0.35pt] (2.83,1.00) -- (0.00,2.10);
-\draw[gray, opacity=0.38, line width=0.35pt] (5.40,3.45) -- (2.28,3.99);
-\draw[gray, opacity=0.38, line width=0.35pt] (1.25,2.35) -- (2.39,3.25);
-\draw[gray, opacity=0.38, line width=0.35pt] (7.04,0.72) -- (7.79,1.29);
-\draw[gray, opacity=0.38, line width=0.35pt] (0.25,1.27) -- (2.37,0.57);
-\draw[gray, opacity=0.38, line width=0.35pt] (5.57,3.99) -- (3.65,3.43);
-\draw[gray, opacity=0.38, line width=0.35pt] (3.20,1.62) -- (2.52,2.30);
-\draw[gray, opacity=0.37, line width=0.35pt] (2.83,1.00) -- (2.37,0.57);
-\draw[gray, opacity=0.37, line width=0.35pt] (3.64,2.23) -- (2.28,3.99);
-\draw[gray, opacity=0.37, line width=0.35pt] (3.20,1.62) -- (0.25,1.27);
-\draw[gray, opacity=0.37, line width=0.35pt] (0.38,2.65) -- (4.66,1.86);
-\draw[gray, opacity=0.37, line width=0.35pt] (1.48,1.13) -- (2.52,2.30);
-\draw[gray, opacity=0.37, line width=0.35pt] (5.57,3.99) -- (2.28,3.99);
-\draw[gray, opacity=0.37, line width=0.35pt] (3.20,1.62) -- (0.63,1.72);
-\draw[gray, opacity=0.37, line width=0.35pt] (3.20,1.62) -- (1.48,1.13);
-\draw[gray, opacity=0.37, line width=0.35pt] (1.48,1.13) -- (0.51,0.56);
-\draw[gray, opacity=0.37, line width=0.35pt] (0.38,2.65) -- (3.65,3.43);
-\draw[gray, opacity=0.37, line width=0.35pt] (2.39,3.25) -- (1.96,1.65);
-\draw[gray, opacity=0.37, line width=0.35pt] (3.64,2.23) -- (1.96,1.65);
-\draw[gray, opacity=0.37, line width=0.35pt] (4.85,2.73) -- (4.44,1.21);
-\draw[gray, opacity=0.36, line width=0.35pt] (4.43,0.56) -- (4.44,1.21);
-\draw[gray, opacity=0.36, line width=0.35pt] (0.38,2.65) -- (2.83,1.00);
-\draw[gray, opacity=0.36, line width=0.35pt] (1.25,2.35) -- (4.66,1.86);
-\draw[gray, opacity=0.36, line width=0.35pt] (2.83,1.00) -- (2.52,2.30);
-\draw[gray, opacity=0.36, line width=0.35pt] (1.25,2.35) -- (4.85,2.73);
-\draw[gray, opacity=0.36, line width=0.35pt] (0.63,1.72) -- (4.66,1.86);
-\draw[gray, opacity=0.36, line width=0.35pt] (1.25,2.35) -- (2.28,3.99);
-\draw[gray, opacity=0.36, line width=0.35pt] (3.20,1.62) -- (3.64,2.23);
-\draw[gray, opacity=0.36, line width=0.35pt] (5.40,3.45) -- (3.31,2.75);
-\draw[gray, opacity=0.36, line width=0.35pt] (4.44,1.21) -- (3.31,2.75);
-\draw[gray, opacity=0.36, line width=0.35pt] (3.65,3.43) -- (4.85,2.73);
-\draw[gray, opacity=0.36, line width=0.35pt] (8.09,3.31) -- (6.67,2.92);
-\draw[gray, opacity=0.36, line width=0.35pt] (0.38,2.65) -- (0.51,0.56);
-\draw[gray, opacity=0.36, line width=0.35pt] (2.83,1.00) -- (3.31,2.75);
-\draw[gray, opacity=0.35, line width=0.35pt] (2.83,1.00) -- (0.51,0.56);
-\draw[gray, opacity=0.35, line width=0.35pt] (1.48,1.13) -- (3.64,2.23);
-\draw[gray, opacity=0.35, line width=0.35pt] (3.65,3.43) -- (3.31,2.75);
-\draw[gray, opacity=0.35, line width=0.35pt] (2.52,2.30) -- (2.37,0.57);
-\draw[gray, opacity=0.35, line width=0.35pt] (3.20,1.62) -- (2.83,1.00);
-\draw[gray, opacity=0.35, line width=0.35pt] (0.38,2.65) -- (2.39,3.25);
-\draw[gray, opacity=0.35, line width=0.35pt] (0.63,1.72) -- (2.39,3.25);
-\draw[gray, opacity=0.35, line width=0.35pt] (3.64,2.23) -- (0.25,1.27);
-\draw[gray, opacity=0.35, line width=0.35pt] (1.48,1.13) -- (4.66,1.86);
-\draw[gray, opacity=0.35, line width=0.35pt] (4.44,1.21) -- (1.96,1.65);
-\draw[gray, opacity=0.35, line width=0.35pt] (4.85,2.73) -- (7.79,1.29);
-\draw[gray, opacity=0.35, line width=0.35pt] (3.65,3.43) -- (0.00,2.10);
-\draw[gray, opacity=0.35, line width=0.35pt] (4.85,2.73) -- (2.28,3.99);
-\draw[gray, opacity=0.35, line width=0.35pt] (0.51,0.56) -- (3.31,2.75);
-\draw[gray, opacity=0.35, line width=0.35pt] (3.64,2.23) -- (2.39,3.25);
-\draw[gray, opacity=0.35, line width=0.35pt] (0.71,3.46) -- (3.65,3.43);
-\draw[gray, opacity=0.35, line width=0.35pt] (2.39,3.25) -- (2.52,2.30);
-\draw[gray, opacity=0.35, line width=0.35pt] (6.43,1.60) -- (7.79,1.29);
-\draw[gray, opacity=0.35, line width=0.35pt] (3.20,1.62) -- (3.31,2.75);
-\draw[gray, opacity=0.35, line width=0.35pt] (6.43,1.60) -- (4.85,2.73);
-\draw[gray, opacity=0.34, line width=0.35pt] (0.71,3.46) -- (1.70,2.98);
-\draw[gray, opacity=0.34, line width=0.35pt] (7.97,1.81) -- (6.67,2.92);
-\draw[gray, opacity=0.34, line width=0.35pt] (3.64,2.23) -- (4.66,1.86);
-\draw[gray, opacity=0.34, line width=0.35pt] (4.66,1.86) -- (2.37,0.57);
-\draw[gray, opacity=0.34, line width=0.35pt] (4.44,1.21) -- (7.79,1.29);
-\draw[gray, opacity=0.34, line width=0.35pt] (4.85,2.73) -- (3.64,2.23);
-\draw[gray, opacity=0.34, line width=0.35pt] (5.40,3.45) -- (6.67,2.92);
-\draw[gray, opacity=0.34, line width=0.35pt] (4.66,1.86) -- (1.96,1.65);
-\draw[gray, opacity=0.34, line width=0.35pt] (0.63,1.72) -- (1.70,2.98);
-\draw[gray, opacity=0.34, line width=0.35pt] (3.31,2.75) -- (0.25,1.27);
-\draw[gray, opacity=0.34, line width=0.35pt] (4.66,1.86) -- (0.25,1.27);
-\draw[gray, opacity=0.34, line width=0.35pt] (6.43,1.60) -- (6.00,2.31);
-\draw[gray, opacity=0.34, line width=0.35pt] (3.64,2.23) -- (4.44,1.21);
-\fill[c2, opacity=0.85] (9.00,3.11) circle (2.15mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.51mm, inner sep=0.5pt] at (9.00,3.11) {Yankovskiy (2020)};
-\fill[c3, opacity=0.85] (0.71,3.46) circle (2.58mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.81mm, inner sep=0.5pt] at (0.71,3.46) {Auer (2022)};
-\fill[c1, opacity=0.85] (3.20,1.62) circle (2.91mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=2.04mm, inner sep=0.5pt] at (3.20,1.62) {Fernández-Villaverde (2\dots{}};
-\fill[c2, opacity=0.85] (5.60,0.90) circle (2.52mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.76mm, inner sep=0.5pt] at (5.60,0.90) {Bindseil (2020)};
-\fill[c1, opacity=0.85] (0.63,1.72) circle (2.29mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.60mm, inner sep=0.5pt] at (0.63,1.72) {Williamson (2022)};
-\fill[c3, opacity=0.85] (1.70,2.98) circle (1.92mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (1.70,2.98) {Chen (2022)};
-\fill[c1, opacity=0.85] (1.48,1.13) circle (2.88mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=2.02mm, inner sep=0.5pt] at (1.48,1.13) {Keister (2022a)};
-\fill[c3, opacity=0.85] (5.57,3.99) circle (1.89mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.33mm, inner sep=0.5pt] at (5.57,3.99) {Söilen (2021)};
-\fill[c1, opacity=0.85] (0.38,2.65) circle (2.46mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.72mm, inner sep=0.5pt] at (0.38,2.65) {Barrdear (2021)};
-\fill[c1, opacity=0.85] (1.25,2.35) circle (2.01mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.41mm, inner sep=0.5pt] at (1.25,2.35) {Williamson (2021)};
-\fill[c2, opacity=0.85] (4.43,0.56) circle (3.03mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=2.12mm, inner sep=0.5pt] at (4.43,0.56) {Bordo (2017)};
-\fill[c3, opacity=0.85] (3.65,3.43) circle (1.89mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.33mm, inner sep=0.5pt] at (3.65,3.43) {Wang (2022)};
-\fill[c2, opacity=0.85] (8.53,2.57) circle (2.16mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.52mm, inner sep=0.5pt] at (8.53,2.57) {Allen (2020)};
-\fill[c2, opacity=0.85] (7.97,1.81) circle (2.22mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.55mm, inner sep=0.5pt] at (7.97,1.81) {Auer (2020b)};
-\fill[c2, opacity=0.85] (6.43,1.60) circle (2.48mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.74mm, inner sep=0.5pt] at (6.43,1.60) {Agur (n.d.)};
-\fill[c3, opacity=0.85] (4.85,2.73) circle (1.99mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.39mm, inner sep=0.5pt] at (4.85,2.73) {Bindseil (2019)};
-\fill[c1, opacity=0.85] (2.83,1.00) circle (3.20mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=2.24mm, inner sep=0.5pt] at (2.83,1.00) {Andolfatto (2020)};
-\fill[c1, opacity=0.85] (3.64,2.23) circle (2.59mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.81mm, inner sep=0.5pt] at (3.64,2.23) {Davoodalhosseini (2021)};
-\fill[c2, opacity=0.85] (7.04,0.72) circle (2.49mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.74mm, inner sep=0.5pt] at (7.04,0.72) {Kumhof (2018)};
-\fill[c2, opacity=0.85] (8.72,0.99) circle (2.35mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.65mm, inner sep=0.5pt] at (8.72,0.99) {Nakamoto (2008)};
-\fill[c3, opacity=0.85] (5.40,3.45) circle (2.27mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.59mm, inner sep=0.5pt] at (5.40,3.45) {Lee (2021)};
-\fill[c2, opacity=0.85] (7.40,2.36) circle (2.86mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=2.00mm, inner sep=0.5pt] at (7.40,2.36) {Auer (2020a)};
-\fill[c3, opacity=0.85] (2.39,3.25) circle (2.46mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.72mm, inner sep=0.5pt] at (2.39,3.25) {KIM (2022)};
-\fill[c2, opacity=0.85] (4.44,1.21) circle (2.27mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.59mm, inner sep=0.5pt] at (4.44,1.21) {Meaning (2018)};
-\fill[c1, opacity=0.85] (0.51,0.56) circle (2.05mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.43mm, inner sep=0.5pt] at (0.51,0.56) {Diamond (1983)};
-\fill[c2, opacity=0.85] (4.05,0.00) circle (2.45mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.72mm, inner sep=0.5pt] at (4.05,0.00) {Barrdear (2016)};
-\fill[c2, opacity=0.85] (7.79,1.29) circle (1.97mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.38mm, inner sep=0.5pt] at (7.79,1.29) {Barontini (2019)};
-\fill[c2, opacity=0.85] (6.33,0.13) circle (2.07mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.45mm, inner sep=0.5pt] at (6.33,0.13) {Sun (2019)};
-\fill[c3, opacity=0.85] (3.31,2.75) circle (2.01mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.40mm, inner sep=0.5pt] at (3.31,2.75) {Kumhof (2021)};
-\fill[c2, opacity=0.85] (8.09,3.31) circle (2.01mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.40mm, inner sep=0.5pt] at (8.09,3.31) {Bossu (2020)};
-\fill[c3, opacity=0.85] (2.28,3.99) circle (2.26mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.58mm, inner sep=0.5pt] at (2.28,3.99) {Allen (2022)};
-\fill[c1, opacity=0.85] (4.66,1.86) circle (3.15mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=2.20mm, inner sep=0.5pt] at (4.66,1.86) {Agur (2019)};
-\fill[c1, opacity=0.85] (2.52,2.30) circle (2.43mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.70mm, inner sep=0.5pt] at (2.52,2.30) {Minesso (2022)};
-\fill[c3, opacity=0.85] (4.22,4.10) circle (2.35mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.64mm, inner sep=0.5pt] at (4.22,4.10) {Ozili (2022)};
-\fill[c1, opacity=0.85] (0.00,2.10) circle (2.02mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.41mm, inner sep=0.5pt] at (0.00,2.10) {Keister (2022b)};
-\fill[c1, opacity=0.85] (0.25,1.27) circle (2.73mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.91mm, inner sep=0.5pt] at (0.25,1.27) {Chiu (2022)};
-\fill[c1, opacity=0.85] (2.37,0.57) circle (2.91mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=2.04mm, inner sep=0.5pt] at (2.37,0.57) {Brunnermeier (2019)};
-\fill[c2, opacity=0.85] (6.00,2.31) circle (2.19mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.54mm, inner sep=0.5pt] at (6.00,2.31) {Adrian (2019)};
-\fill[c1, opacity=0.85] (1.96,1.65) circle (2.13mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.49mm, inner sep=0.5pt] at (1.96,1.65) {Schilling (2020)};
-\fill[c2, opacity=0.85] (6.67,2.92) circle (2.42mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.69mm, inner sep=0.5pt] at (6.67,2.92) {Kiff (2020)};
+\draw[gray, opacity=0.67, line width=0.35pt] (7.83,2.37) -- (8.99,2.12);
+\draw[gray, opacity=0.59, line width=0.35pt] (8.99,2.12) -- (7.26,1.73);
+\draw[gray, opacity=0.58, line width=0.35pt] (7.83,2.37) -- (7.26,1.73);
+\draw[gray, opacity=0.57, line width=0.35pt] (6.65,3.18) -- (5.47,3.45);
+\draw[gray, opacity=0.57, line width=0.35pt] (7.83,2.37) -- (8.82,1.67);
+\draw[gray, opacity=0.56, line width=0.35pt] (8.82,1.67) -- (7.26,1.73);
+\draw[gray, opacity=0.54, line width=0.35pt] (8.82,1.67) -- (8.99,2.12);
+\draw[gray, opacity=0.54, line width=0.35pt] (7.83,2.37) -- (8.76,2.64);
+\draw[gray, opacity=0.54, line width=0.35pt] (7.83,2.37) -- (5.78,2.76);
+\draw[gray, opacity=0.54, line width=0.35pt] (9.00,0.72) -- (7.26,1.73);
+\draw[gray, opacity=0.54, line width=0.35pt] (8.99,2.12) -- (5.78,2.76);
+\draw[gray, opacity=0.53, line width=0.35pt] (6.64,2.37) -- (7.83,2.37);
+\draw[gray, opacity=0.53, line width=0.35pt] (6.72,4.00) -- (5.47,3.45);
+\draw[gray, opacity=0.51, line width=0.35pt] (6.65,3.18) -- (6.72,4.00);
+\draw[gray, opacity=0.50, line width=0.35pt] (6.65,3.18) -- (5.78,2.76);
+\draw[gray, opacity=0.50, line width=0.35pt] (6.64,2.37) -- (8.76,2.64);
+\draw[gray, opacity=0.50, line width=0.35pt] (8.82,1.67) -- (7.60,0.84);
+\draw[gray, opacity=0.49, line width=0.35pt] (7.83,2.37) -- (9.00,0.72);
+\draw[gray, opacity=0.49, line width=0.35pt] (7.26,1.73) -- (7.60,0.84);
+\draw[gray, opacity=0.48, line width=0.35pt] (5.51,2.23) -- (8.76,2.64);
+\draw[gray, opacity=0.48, line width=0.35pt] (7.83,2.37) -- (5.47,3.45);
+\draw[gray, opacity=0.48, line width=0.35pt] (8.99,2.12) -- (8.76,2.64);
+\draw[gray, opacity=0.48, line width=0.35pt] (3.75,3.43) -- (3.58,3.97);
+\draw[gray, opacity=0.47, line width=0.35pt] (5.51,2.23) -- (6.65,3.18);
+\draw[gray, opacity=0.47, line width=0.35pt] (8.76,2.64) -- (5.78,2.76);
+\draw[gray, opacity=0.47, line width=0.35pt] (8.76,2.64) -- (6.65,3.18);
+\draw[gray, opacity=0.46, line width=0.35pt] (8.82,1.67) -- (9.00,0.72);
+\draw[gray, opacity=0.46, line width=0.35pt] (8.82,1.67) -- (6.69,1.20);
+\draw[gray, opacity=0.46, line width=0.35pt] (7.26,1.73) -- (5.92,1.65);
+\draw[gray, opacity=0.46, line width=0.35pt] (7.60,0.84) -- (6.69,1.20);
+\draw[gray, opacity=0.46, line width=0.35pt] (8.99,2.12) -- (5.92,1.65);
+\draw[gray, opacity=0.46, line width=0.35pt] (7.83,2.37) -- (5.92,1.65);
+\draw[gray, opacity=0.45, line width=0.35pt] (8.99,2.12) -- (7.60,0.84);
+\draw[gray, opacity=0.45, line width=0.35pt] (7.83,2.37) -- (6.65,3.18);
+\draw[gray, opacity=0.45, line width=0.35pt] (8.99,2.12) -- (6.65,3.18);
+\draw[gray, opacity=0.45, line width=0.35pt] (4.27,2.70) -- (3.75,3.43);
+\draw[gray, opacity=0.45, line width=0.35pt] (8.82,1.67) -- (5.51,2.23);
+\draw[gray, opacity=0.45, line width=0.35pt] (7.60,0.84) -- (8.19,1.27);
+\draw[gray, opacity=0.45, line width=0.35pt] (6.64,2.37) -- (8.99,2.12);
+\draw[gray, opacity=0.45, line width=0.35pt] (8.82,1.67) -- (8.76,2.64);
+\draw[gray, opacity=0.44, line width=0.35pt] (7.83,2.37) -- (5.51,2.23);
+\draw[gray, opacity=0.44, line width=0.35pt] (8.76,2.64) -- (7.26,1.73);
+\draw[gray, opacity=0.44, line width=0.35pt] (7.94,3.01) -- (6.65,3.18);
+\draw[gray, opacity=0.44, line width=0.35pt] (5.51,2.23) -- (7.26,1.73);
+\draw[gray, opacity=0.44, line width=0.35pt] (6.64,2.37) -- (5.51,2.23);
+\draw[gray, opacity=0.44, line width=0.35pt] (5.51,2.23) -- (5.78,2.76);
+\draw[gray, opacity=0.43, line width=0.35pt] (3.58,3.97) -- (4.89,4.10);
+\draw[gray, opacity=0.43, line width=0.35pt] (4.76,1.22) -- (4.95,0.00);
+\draw[gray, opacity=0.43, line width=0.35pt] (8.82,1.67) -- (8.19,1.27);
+\draw[gray, opacity=0.43, line width=0.35pt] (7.26,1.73) -- (6.69,1.20);
+\draw[gray, opacity=0.43, line width=0.35pt] (6.64,2.37) -- (5.47,3.45);
+\draw[gray, opacity=0.43, line width=0.35pt] (2.62,2.82) -- (1.53,3.25);
+\draw[gray, opacity=0.43, line width=0.35pt] (6.42,0.62) -- (7.26,1.73);
+\draw[gray, opacity=0.43, line width=0.35pt] (7.83,2.37) -- (7.60,0.84);
+\draw[gray, opacity=0.43, line width=0.35pt] (6.72,4.00) -- (5.78,2.76);
+\draw[gray, opacity=0.42, line width=0.35pt] (6.42,0.62) -- (9.00,0.72);
+\draw[gray, opacity=0.42, line width=0.35pt] (4.27,2.70) -- (5.78,2.76);
+\draw[gray, opacity=0.42, line width=0.35pt] (8.99,2.12) -- (9.00,0.72);
+\draw[gray, opacity=0.42, line width=0.35pt] (7.94,3.01) -- (5.78,2.76);
+\draw[gray, opacity=0.42, line width=0.35pt] (6.64,2.37) -- (8.82,1.67);
+\draw[gray, opacity=0.42, line width=0.35pt] (6.64,2.37) -- (5.78,2.76);
+\draw[gray, opacity=0.42, line width=0.35pt] (8.82,1.67) -- (6.42,0.62);
+\draw[gray, opacity=0.42, line width=0.35pt] (6.64,2.37) -- (6.65,3.18);
+\draw[gray, opacity=0.41, line width=0.35pt] (8.76,2.64) -- (6.69,1.20);
+\draw[gray, opacity=0.41, line width=0.35pt] (7.26,1.73) -- (8.19,1.27);
+\draw[gray, opacity=0.41, line width=0.35pt] (7.83,2.37) -- (6.69,1.20);
+\draw[gray, opacity=0.41, line width=0.35pt] (3.75,3.43) -- (4.89,4.10);
+\draw[gray, opacity=0.41, line width=0.35pt] (9.00,0.72) -- (7.60,0.84);
+\draw[gray, opacity=0.41, line width=0.35pt] (4.76,1.22) -- (2.72,0.39);
+\draw[gray, opacity=0.40, line width=0.35pt] (7.83,2.37) -- (6.42,0.62);
+\draw[gray, opacity=0.40, line width=0.35pt] (8.99,2.12) -- (5.51,2.23);
+\draw[gray, opacity=0.40, line width=0.35pt] (8.99,2.12) -- (7.94,3.01);
+\draw[gray, opacity=0.40, line width=0.35pt] (6.42,0.62) -- (5.92,1.65);
+\draw[gray, opacity=0.40, line width=0.35pt] (4.86,0.56) -- (4.95,0.00);
+\draw[gray, opacity=0.40, line width=0.35pt] (8.76,2.64) -- (7.60,0.84);
+\draw[gray, opacity=0.40, line width=0.35pt] (5.51,2.23) -- (5.47,3.45);
+\draw[gray, opacity=0.40, line width=0.35pt] (6.72,4.00) -- (4.89,4.10);
+\draw[gray, opacity=0.40, line width=0.35pt] (4.27,2.70) -- (6.65,3.18);
+\draw[gray, opacity=0.39, line width=0.35pt] (8.99,2.12) -- (6.69,1.20);
+\draw[gray, opacity=0.39, line width=0.35pt] (6.42,0.62) -- (6.69,1.20);
+\draw[gray, opacity=0.39, line width=0.35pt] (3.75,3.43) -- (5.47,3.45);
+\draw[gray, opacity=0.39, line width=0.35pt] (3.75,3.43) -- (6.65,3.18);
+\draw[gray, opacity=0.39, line width=0.35pt] (5.51,2.23) -- (7.60,0.84);
+\draw[gray, opacity=0.39, line width=0.35pt] (7.83,2.37) -- (8.19,1.27);
+\draw[gray, opacity=0.39, line width=0.35pt] (3.67,0.85) -- (2.72,0.39);
+\draw[gray, opacity=0.39, line width=0.35pt] (8.19,1.27) -- (6.69,1.20);
+\draw[gray, opacity=0.39, line width=0.35pt] (8.76,2.64) -- (5.92,1.65);
+\draw[gray, opacity=0.39, line width=0.35pt] (5.51,2.23) -- (4.50,1.87);
+\draw[gray, opacity=0.38, line width=0.35pt] (6.65,3.18) -- (3.58,3.97);
+\draw[gray, opacity=0.38, line width=0.35pt] (9.00,0.72) -- (5.92,1.65);
+\draw[gray, opacity=0.38, line width=0.35pt] (6.42,0.62) -- (8.99,2.12);
+\draw[gray, opacity=0.38, line width=0.35pt] (2.72,0.39) -- (4.95,0.00);
+\draw[gray, opacity=0.38, line width=0.35pt] (6.42,0.62) -- (8.76,2.64);
+\draw[gray, opacity=0.38, line width=0.35pt] (8.99,2.12) -- (8.19,1.27);
+\draw[gray, opacity=0.38, line width=0.35pt] (3.75,3.43) -- (6.72,4.00);
+\draw[gray, opacity=0.38, line width=0.35pt] (7.83,2.37) -- (7.94,3.01);
+\draw[gray, opacity=0.38, line width=0.35pt] (2.10,1.08) -- (2.72,0.39);
+\draw[gray, opacity=0.38, line width=0.35pt] (6.42,0.62) -- (7.60,0.84);
+\draw[gray, opacity=0.38, line width=0.35pt] (3.58,3.97) -- (5.47,3.45);
+\draw[gray, opacity=0.38, line width=0.35pt] (5.51,2.23) -- (5.92,1.65);
+\draw[gray, opacity=0.37, line width=0.35pt] (6.42,0.62) -- (8.19,1.27);
+\draw[gray, opacity=0.37, line width=0.35pt] (6.64,2.37) -- (6.72,4.00);
+\draw[gray, opacity=0.37, line width=0.35pt] (7.60,0.84) -- (5.92,1.65);
+\draw[gray, opacity=0.37, line width=0.35pt] (8.76,2.64) -- (4.50,1.87);
+\draw[gray, opacity=0.37, line width=0.35pt] (5.51,2.23) -- (6.69,1.20);
+\draw[gray, opacity=0.37, line width=0.35pt] (3.58,3.97) -- (6.72,4.00);
+\draw[gray, opacity=0.37, line width=0.35pt] (8.82,1.67) -- (5.92,1.65);
+\draw[gray, opacity=0.37, line width=0.35pt] (5.92,1.65) -- (6.69,1.20);
+\draw[gray, opacity=0.37, line width=0.35pt] (9.00,0.72) -- (6.69,1.20);
+\draw[gray, opacity=0.37, line width=0.35pt] (8.76,2.64) -- (5.47,3.45);
+\draw[gray, opacity=0.37, line width=0.35pt] (7.94,3.01) -- (7.26,1.73);
+\draw[gray, opacity=0.37, line width=0.35pt] (6.64,2.37) -- (7.26,1.73);
+\draw[gray, opacity=0.37, line width=0.35pt] (4.27,2.70) -- (4.76,1.22);
+\draw[gray, opacity=0.36, line width=0.35pt] (4.76,1.22) -- (4.86,0.56);
+\draw[gray, opacity=0.36, line width=0.35pt] (8.76,2.64) -- (8.19,1.27);
+\draw[gray, opacity=0.36, line width=0.35pt] (7.83,2.37) -- (4.50,1.87);
+\draw[gray, opacity=0.36, line width=0.35pt] (5.51,2.23) -- (8.19,1.27);
+\draw[gray, opacity=0.36, line width=0.35pt] (4.27,2.70) -- (7.83,2.37);
+\draw[gray, opacity=0.36, line width=0.35pt] (8.82,1.67) -- (4.50,1.87);
+\draw[gray, opacity=0.36, line width=0.35pt] (7.83,2.37) -- (6.72,4.00);
+\draw[gray, opacity=0.36, line width=0.35pt] (6.64,2.37) -- (5.92,1.65);
+\draw[gray, opacity=0.36, line width=0.35pt] (4.76,1.22) -- (5.78,2.76);
+\draw[gray, opacity=0.36, line width=0.35pt] (3.75,3.43) -- (5.78,2.76);
+\draw[gray, opacity=0.36, line width=0.35pt] (4.27,2.70) -- (5.47,3.45);
+\draw[gray, opacity=0.36, line width=0.35pt] (2.62,2.82) -- (0.32,2.77);
+\draw[gray, opacity=0.36, line width=0.35pt] (8.76,2.64) -- (9.00,0.72);
+\draw[gray, opacity=0.36, line width=0.35pt] (8.19,1.27) -- (5.78,2.76);
+\draw[gray, opacity=0.35, line width=0.35pt] (9.00,0.72) -- (8.19,1.27);
+\draw[gray, opacity=0.35, line width=0.35pt] (6.64,2.37) -- (6.69,1.20);
+\draw[gray, opacity=0.35, line width=0.35pt] (5.47,3.45) -- (5.78,2.76);
+\draw[gray, opacity=0.35, line width=0.35pt] (6.42,0.62) -- (5.51,2.23);
+\draw[gray, opacity=0.35, line width=0.35pt] (5.92,1.65) -- (8.19,1.27);
+\draw[gray, opacity=0.35, line width=0.35pt] (7.94,3.01) -- (8.76,2.64);
+\draw[gray, opacity=0.35, line width=0.35pt] (8.82,1.67) -- (7.94,3.01);
+\draw[gray, opacity=0.35, line width=0.35pt] (6.64,2.37) -- (7.60,0.84);
+\draw[gray, opacity=0.35, line width=0.35pt] (4.50,1.87) -- (6.69,1.20);
+\draw[gray, opacity=0.35, line width=0.35pt] (4.76,1.22) -- (7.26,1.73);
+\draw[gray, opacity=0.35, line width=0.35pt] (4.27,2.70) -- (2.10,1.08);
+\draw[gray, opacity=0.35, line width=0.35pt] (8.99,2.12) -- (5.47,3.45);
+\draw[gray, opacity=0.35, line width=0.35pt] (4.27,2.70) -- (6.72,4.00);
+\draw[gray, opacity=0.35, line width=0.35pt] (9.00,0.72) -- (5.78,2.76);
+\draw[gray, opacity=0.35, line width=0.35pt] (6.64,2.37) -- (7.94,3.01);
+\draw[gray, opacity=0.35, line width=0.35pt] (8.00,3.59) -- (5.47,3.45);
+\draw[gray, opacity=0.35, line width=0.35pt] (7.94,3.01) -- (5.51,2.23);
+\draw[gray, opacity=0.35, line width=0.35pt] (2.10,1.08) -- (2.76,1.58);
+\draw[gray, opacity=0.35, line width=0.35pt] (5.92,1.65) -- (5.78,2.76);
+\draw[gray, opacity=0.35, line width=0.35pt] (4.27,2.70) -- (2.76,1.58);
+\draw[gray, opacity=0.34, line width=0.35pt] (6.65,3.18) -- (8.00,3.59);
+\draw[gray, opacity=0.34, line width=0.35pt] (2.62,2.82) -- (1.28,1.83);
+\draw[gray, opacity=0.34, line width=0.35pt] (6.64,2.37) -- (4.50,1.87);
+\draw[gray, opacity=0.34, line width=0.35pt] (6.42,0.62) -- (4.50,1.87);
+\draw[gray, opacity=0.34, line width=0.35pt] (2.10,1.08) -- (4.76,1.22);
+\draw[gray, opacity=0.34, line width=0.35pt] (6.64,2.37) -- (4.27,2.70);
+\draw[gray, opacity=0.34, line width=0.35pt] (3.75,3.43) -- (2.62,2.82);
+\draw[gray, opacity=0.34, line width=0.35pt] (7.26,1.73) -- (4.50,1.87);
+\draw[gray, opacity=0.34, line width=0.35pt] (8.82,1.67) -- (6.65,3.18);
+\draw[gray, opacity=0.34, line width=0.35pt] (7.60,0.84) -- (5.78,2.76);
+\draw[gray, opacity=0.34, line width=0.35pt] (4.50,1.87) -- (7.60,0.84);
+\draw[gray, opacity=0.34, line width=0.35pt] (3.05,2.22) -- (2.76,1.58);
+\draw[gray, opacity=0.34, line width=0.35pt] (6.64,2.37) -- (4.76,1.22);
+\fill[c1, opacity=0.85] (6.64,2.37) circle (2.59mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.81mm, inner sep=0.5pt] at (6.64,2.37) {Davoodalhosseini (2021)};
+\fill[c2, opacity=0.85] (0.00,3.09) circle (2.15mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.51mm, inner sep=0.5pt] at (0.00,3.09) {Yankovskiy (2020)};
+\fill[c3, opacity=0.85] (4.27,2.70) circle (1.99mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.39mm, inner sep=0.5pt] at (4.27,2.70) {Bindseil (2019)};
+\fill[c1, opacity=0.85] (7.83,2.37) circle (2.01mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.41mm, inner sep=0.5pt] at (7.83,2.37) {Williamson (2021)};
+\fill[c2, opacity=0.85] (2.10,1.08) circle (1.97mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.38mm, inner sep=0.5pt] at (2.10,1.08) {Barontini (2019)};
+\fill[c2, opacity=0.85] (4.76,1.22) circle (2.27mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.59mm, inner sep=0.5pt] at (4.76,1.22) {Meaning (2018)};
+\fill[c2, opacity=0.85] (3.67,0.85) circle (2.52mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.76mm, inner sep=0.5pt] at (3.67,0.85) {Bindseil (2020)};
+\fill[c1, opacity=0.85] (8.82,1.67) circle (2.29mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.60mm, inner sep=0.5pt] at (8.82,1.67) {Williamson (2022)};
+\fill[c1, opacity=0.85] (6.42,0.62) circle (2.91mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=2.04mm, inner sep=0.5pt] at (6.42,0.62) {Brunnermeier (2019)};
+\fill[c1, opacity=0.85] (8.99,2.12) circle (2.02mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.41mm, inner sep=0.5pt] at (8.99,2.12) {Keister (2022b)};
+\fill[c3, opacity=0.85] (7.94,3.01) circle (2.46mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.72mm, inner sep=0.5pt] at (7.94,3.01) {KIM (2022)};
+\fill[c3, opacity=0.85] (3.75,3.43) circle (2.27mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.59mm, inner sep=0.5pt] at (3.75,3.43) {Lee (2021)};
+\fill[c1, opacity=0.85] (5.51,2.23) circle (2.43mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.70mm, inner sep=0.5pt] at (5.51,2.23) {Minesso (2022)};
+\fill[c1, opacity=0.85] (8.76,2.64) circle (2.46mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.72mm, inner sep=0.5pt] at (8.76,2.64) {Barrdear (2021)};
+\fill[c1, opacity=0.85] (9.00,0.72) circle (2.05mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.43mm, inner sep=0.5pt] at (9.00,0.72) {Diamond (1983)};
+\fill[c3, opacity=0.85] (6.65,3.18) circle (1.92mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (6.65,3.18) {Chen (2022)};
+\fill[c2, opacity=0.85] (0.12,1.14) circle (2.35mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.65mm, inner sep=0.5pt] at (0.12,1.14) {Nakamoto (2008)};
+\fill[c2, opacity=0.85] (1.54,2.42) circle (2.86mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=2.00mm, inner sep=0.5pt] at (1.54,2.42) {Auer (2020a)};
+\fill[c1, opacity=0.85] (7.26,1.73) circle (2.13mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.49mm, inner sep=0.5pt] at (7.26,1.73) {Schilling (2020)};
+\fill[c2, opacity=0.85] (2.72,0.39) circle (2.49mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.74mm, inner sep=0.5pt] at (2.72,0.39) {Kumhof (2018)};
+\fill[c2, opacity=0.85] (2.62,2.82) circle (2.42mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.69mm, inner sep=0.5pt] at (2.62,2.82) {Kiff (2020)};
+\fill[c3, opacity=0.85] (3.58,3.97) circle (1.89mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.33mm, inner sep=0.5pt] at (3.58,3.97) {Söilen (2021)};
+\fill[c1, opacity=0.85] (4.50,1.87) circle (3.15mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=2.20mm, inner sep=0.5pt] at (4.50,1.87) {Agur (2019)};
+\fill[c1, opacity=0.85] (7.60,0.84) circle (2.73mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.91mm, inner sep=0.5pt] at (7.60,0.84) {Chiu (2022)};
+\fill[c2, opacity=0.85] (1.28,1.83) circle (2.22mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.55mm, inner sep=0.5pt] at (1.28,1.83) {Auer (2020b)};
+\fill[c3, opacity=0.85] (8.00,3.59) circle (2.58mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.81mm, inner sep=0.5pt] at (8.00,3.59) {Auer (2022)};
+\fill[c1, opacity=0.85] (5.92,1.65) circle (2.91mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=2.04mm, inner sep=0.5pt] at (5.92,1.65) {Fernández-Villaverde (2\dots{}};
+\fill[c3, opacity=0.85] (6.72,4.00) circle (2.26mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.58mm, inner sep=0.5pt] at (6.72,4.00) {Allen (2022)};
+\fill[c3, opacity=0.85] (4.89,4.10) circle (2.35mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.64mm, inner sep=0.5pt] at (4.89,4.10) {Ozili (2022)};
+\fill[c2, opacity=0.85] (1.53,3.25) circle (2.16mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.52mm, inner sep=0.5pt] at (1.53,3.25) {Allen (2020)};
+\fill[c3, opacity=0.85] (5.47,3.45) circle (1.89mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.33mm, inner sep=0.5pt] at (5.47,3.45) {Wang (2022)};
+\fill[c2, opacity=0.85] (3.05,2.22) circle (2.19mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.54mm, inner sep=0.5pt] at (3.05,2.22) {Adrian (2019)};
+\fill[c2, opacity=0.85] (0.32,2.77) circle (2.01mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.40mm, inner sep=0.5pt] at (0.32,2.77) {Bossu (2020)};
+\fill[c2, opacity=0.85] (0.93,1.05) circle (2.07mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.45mm, inner sep=0.5pt] at (0.93,1.05) {Sun (2019)};
+\fill[c2, opacity=0.85] (4.86,0.56) circle (3.03mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=2.12mm, inner sep=0.5pt] at (4.86,0.56) {Bordo (2017)};
+\fill[c1, opacity=0.85] (8.19,1.27) circle (3.20mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=2.24mm, inner sep=0.5pt] at (8.19,1.27) {Andolfatto (2020)};
+\fill[c3, opacity=0.85] (5.78,2.76) circle (2.01mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.40mm, inner sep=0.5pt] at (5.78,2.76) {Kumhof (2021)};
+\fill[c1, opacity=0.85] (6.69,1.20) circle (2.88mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=2.02mm, inner sep=0.5pt] at (6.69,1.20) {Keister (2022a)};
+\fill[c2, opacity=0.85] (2.76,1.58) circle (2.48mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.74mm, inner sep=0.5pt] at (2.76,1.58) {Agur (n.d.)};
+\fill[c2, opacity=0.85] (4.95,0.00) circle (2.45mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.72mm, inner sep=0.5pt] at (4.95,0.00) {Barrdear (2016)};
 \end{tikzpicture}
 \end{column}
 \begin{column}{0.28\textwidth}\scriptsize
@@ -674,132 +777,131 @@ Chiu (2022) & 241 \\\end{tabular}
 2,749 papers with reference lists, 28,897 distinct references; 40 most co-cited shown, 3 clusters, $Q=0.12$.
 \note{\textbf{Co-citation (0:50).}
 \begin{itemize}
-\item Method in one line: two items are linked when they appear in the same paper, weighted by association strength, grouped by the Louvain algorithm (details in backup).
+\item Same method as the keyword maps: here the items are references.
 \item Two references are linked when the same paper cites both: this shows what the field builds on.
 \item Core: Andolfatto (2020), Agur (2019), Bordo (2017).
 \item Clusters read as schools: CBDC design and bank intermediation models; central bank policy reports; adoption studies.
 \end{itemize}}
 \end{frame}
-
 \begin{frame}{Co-authorship: research communities}
 \begin{columns}[T]
 \begin{column}{0.62\textwidth}
 \begin{tikzpicture}
+\draw[gray, opacity=0.67, line width=0.35pt] (5.60,2.13) -- (6.70,0.00);
 \draw[gray, opacity=0.67, line width=0.35pt] (5.60,2.13) -- (6.74,4.20);
 \draw[gray, opacity=0.67, line width=0.35pt] (5.60,2.13) -- (7.84,2.07);
-\draw[gray, opacity=0.67, line width=0.35pt] (5.60,2.13) -- (6.70,0.00);
-\draw[gray, opacity=0.67, line width=0.35pt] (6.74,4.20) -- (7.84,2.07);
 \draw[gray, opacity=0.67, line width=0.35pt] (6.74,4.20) -- (6.70,0.00);
+\draw[gray, opacity=0.67, line width=0.35pt] (6.74,4.20) -- (7.84,2.07);
 \draw[gray, opacity=0.67, line width=0.35pt] (6.70,0.00) -- (7.84,2.07);
-\draw[gray, opacity=0.64, line width=0.35pt] (2.80,3.18) -- (3.00,3.16);
-\draw[gray, opacity=0.56, line width=0.35pt] (4.92,2.96) -- (4.75,3.04);
-\draw[gray, opacity=0.54, line width=0.35pt] (2.24,3.37) -- (1.95,3.25);
-\draw[gray, opacity=0.49, line width=0.35pt] (5.04,3.12) -- (4.92,2.96);
-\draw[gray, opacity=0.47, line width=0.35pt] (0.70,3.17) -- (0.93,3.31);
-\draw[gray, opacity=0.47, line width=0.35pt] (4.94,3.49) -- (5.04,3.12);
-\draw[gray, opacity=0.47, line width=0.35pt] (4.94,3.49) -- (4.92,2.96);
-\draw[gray, opacity=0.43, line width=0.35pt] (2.80,3.18) -- (2.83,3.73);
-\draw[gray, opacity=0.43, line width=0.35pt] (0.89,2.76) -- (0.93,3.31);
-\draw[gray, opacity=0.43, line width=0.35pt] (0.80,3.49) -- (0.93,3.31);
-\draw[gray, opacity=0.37, line width=0.35pt] (4.94,3.49) -- (4.75,3.04);
-\draw[gray, opacity=0.36, line width=0.35pt] (5.04,3.12) -- (4.75,3.04);
-\draw[gray, opacity=0.36, line width=0.35pt] (0.89,2.76) -- (0.80,3.49);
-\draw[gray, opacity=0.36, line width=0.35pt] (3.00,3.16) -- (2.83,3.73);
-\draw[gray, opacity=0.36, line width=0.35pt] (0.69,2.69) -- (0.70,3.17);
-\draw[gray, opacity=0.33, line width=0.35pt] (0.89,2.76) -- (0.69,2.69);
-\draw[gray, opacity=0.33, line width=0.35pt] (0.89,2.76) -- (0.85,1.74);
-\draw[gray, opacity=0.32, line width=0.35pt] (0.69,2.69) -- (0.85,1.74);
-\draw[gray, opacity=0.30, line width=0.35pt] (0.89,2.76) -- (0.70,3.17);
-\draw[gray, opacity=0.30, line width=0.35pt] (3.00,3.16) -- (3.42,2.91);
-\draw[gray, opacity=0.30, line width=0.35pt] (0.80,3.49) -- (0.70,3.17);
-\draw[gray, opacity=0.30, line width=0.35pt] (4.06,2.89) -- (4.09,2.17);
-\draw[gray, opacity=0.27, line width=0.35pt] (3.42,2.91) -- (3.32,1.96);
-\draw[gray, opacity=0.25, line width=0.35pt] (0.94,4.20) -- (0.93,3.31);
-\draw[gray, opacity=0.25, line width=0.35pt] (1.01,0.94) -- (0.85,1.74);
-\draw[gray, opacity=0.25, line width=0.35pt] (0.69,2.69) -- (0.93,3.31);
-\draw[gray, opacity=0.24, line width=0.35pt] (1.01,0.94) -- (0.73,0.82);
-\draw[gray, opacity=0.24, line width=0.35pt] (0.73,0.82) -- (0.85,1.74);
-\draw[gray, opacity=0.23, line width=0.35pt] (0.00,2.54) -- (0.07,3.04);
-\draw[gray, opacity=0.22, line width=0.35pt] (0.94,4.20) -- (0.80,3.49);
-\draw[gray, opacity=0.22, line width=0.35pt] (0.80,3.49) -- (0.69,2.69);
-\draw[gray, opacity=0.21, line width=0.35pt] (0.07,3.04) -- (0.69,2.69);
-\draw[gray, opacity=0.20, line width=0.35pt] (3.13,4.20) -- (2.83,3.73);
-\draw[gray, opacity=0.20, line width=0.35pt] (0.00,2.54) -- (0.69,2.69);
-\draw[gray, opacity=0.20, line width=0.35pt] (0.99,0.30) -- (0.85,1.74);
-\draw[gray, opacity=0.20, line width=0.35pt] (0.99,0.30) -- (1.01,0.94);
-\draw[gray, opacity=0.19, line width=0.35pt] (0.99,0.30) -- (0.73,0.82);
-\draw[gray, opacity=0.18, line width=0.35pt] (3.13,4.20) -- (3.42,2.91);
-\draw[gray, opacity=0.18, line width=0.35pt] (0.99,0.30) -- (1.10,0.00);
-\draw[gray, opacity=0.18, line width=0.35pt] (4.06,2.89) -- (3.42,2.91);
-\draw[gray, opacity=0.17, line width=0.35pt] (4.06,2.89) -- (4.75,3.04);
-\draw[gray, opacity=0.16, line width=0.35pt] (3.42,2.91) -- (4.09,2.17);
-\draw[gray, opacity=0.15, line width=0.35pt] (0.69,2.69) -- (1.95,3.25);
-\draw[gray, opacity=0.15, line width=0.35pt] (4.75,3.04) -- (4.09,2.17);
-\draw[gray, opacity=0.15, line width=0.35pt] (4.23,0.00) -- (4.09,2.17);
-\fill[c2, opacity=0.85] (0.00,2.54) circle (2.33mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (0.00,2.54) {Tronnier};
-\fill[c3, opacity=0.85] (4.94,3.49) circle (2.78mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.95mm, inner sep=0.5pt] at (4.94,3.49) {Buckley};
+\draw[gray, opacity=0.64, line width=0.35pt] (4.79,3.73) -- (5.04,3.99);
+\draw[gray, opacity=0.56, line width=0.35pt] (4.59,0.25) -- (4.45,0.53);
+\draw[gray, opacity=0.54, line width=0.35pt] (2.24,4.20) -- (2.05,4.02);
+\draw[gray, opacity=0.49, line width=0.35pt] (4.37,0.06) -- (4.59,0.25);
+\draw[gray, opacity=0.47, line width=0.35pt] (0.65,3.27) -- (0.46,3.43);
+\draw[gray, opacity=0.47, line width=0.35pt] (4.62,0.00) -- (4.37,0.06);
+\draw[gray, opacity=0.47, line width=0.35pt] (4.62,0.00) -- (4.59,0.25);
+\draw[gray, opacity=0.43, line width=0.35pt] (4.81,4.20) -- (5.04,3.99);
+\draw[gray, opacity=0.43, line width=0.35pt] (0.31,3.30) -- (0.46,3.43);
+\draw[gray, opacity=0.43, line width=0.35pt] (0.46,3.43) -- (0.46,2.87);
+\draw[gray, opacity=0.37, line width=0.35pt] (4.62,0.00) -- (4.45,0.53);
+\draw[gray, opacity=0.36, line width=0.35pt] (4.79,3.73) -- (4.81,4.20);
+\draw[gray, opacity=0.36, line width=0.35pt] (4.37,0.06) -- (4.45,0.53);
+\draw[gray, opacity=0.36, line width=0.35pt] (0.31,3.30) -- (0.46,2.87);
+\draw[gray, opacity=0.36, line width=0.35pt] (0.65,3.27) -- (0.84,2.88);
+\draw[gray, opacity=0.33, line width=0.35pt] (0.84,2.88) -- (0.46,2.87);
+\draw[gray, opacity=0.33, line width=0.35pt] (0.44,2.06) -- (0.46,2.87);
+\draw[gray, opacity=0.32, line width=0.35pt] (0.84,2.88) -- (0.44,2.06);
+\draw[gray, opacity=0.30, line width=0.35pt] (0.65,3.27) -- (0.46,2.87);
+\draw[gray, opacity=0.30, line width=0.35pt] (0.65,3.27) -- (0.31,3.30);
+\draw[gray, opacity=0.30, line width=0.35pt] (4.79,3.73) -- (4.35,3.08);
+\draw[gray, opacity=0.30, line width=0.35pt] (3.97,1.79) -- (4.36,1.84);
+\draw[gray, opacity=0.27, line width=0.35pt] (3.84,3.25) -- (4.35,3.08);
+\draw[gray, opacity=0.25, line width=0.35pt] (0.10,3.96) -- (0.46,3.43);
+\draw[gray, opacity=0.25, line width=0.35pt] (0.28,1.36) -- (0.44,2.06);
+\draw[gray, opacity=0.25, line width=0.35pt] (0.84,2.88) -- (0.46,3.43);
+\draw[gray, opacity=0.24, line width=0.35pt] (0.28,1.36) -- (0.00,1.41);
+\draw[gray, opacity=0.24, line width=0.35pt] (0.00,1.41) -- (0.44,2.06);
+\draw[gray, opacity=0.23, line width=0.35pt] (1.54,2.90) -- (1.43,2.46);
+\draw[gray, opacity=0.22, line width=0.35pt] (0.10,3.96) -- (0.31,3.30);
+\draw[gray, opacity=0.22, line width=0.35pt] (0.31,3.30) -- (0.84,2.88);
+\draw[gray, opacity=0.21, line width=0.35pt] (1.43,2.46) -- (0.84,2.88);
+\draw[gray, opacity=0.20, line width=0.35pt] (4.81,4.20) -- (4.25,4.05);
+\draw[gray, opacity=0.20, line width=0.35pt] (1.54,2.90) -- (0.84,2.88);
+\draw[gray, opacity=0.20, line width=0.35pt] (0.28,1.36) -- (0.28,0.82);
+\draw[gray, opacity=0.20, line width=0.35pt] (0.44,2.06) -- (0.28,0.82);
+\draw[gray, opacity=0.19, line width=0.35pt] (0.00,1.41) -- (0.28,0.82);
+\draw[gray, opacity=0.18, line width=0.35pt] (0.38,0.00) -- (0.28,0.82);
+\draw[gray, opacity=0.18, line width=0.35pt] (4.35,3.08) -- (4.25,4.05);
+\draw[gray, opacity=0.18, line width=0.35pt] (4.35,3.08) -- (4.36,1.84);
+\draw[gray, opacity=0.17, line width=0.35pt] (4.36,1.84) -- (4.45,0.53);
+\draw[gray, opacity=0.16, line width=0.35pt] (4.35,3.08) -- (3.97,1.79);
+\draw[gray, opacity=0.15, line width=0.35pt] (0.84,2.88) -- (2.05,4.02);
+\draw[gray, opacity=0.15, line width=0.35pt] (3.97,1.79) -- (4.45,0.53);
+\draw[gray, opacity=0.15, line width=0.35pt] (2.80,1.50) -- (3.97,1.79);
+\fill[c2, opacity=0.85] (0.65,3.27) circle (2.02mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.41mm, inner sep=0.5pt] at (0.65,3.27) {Bechara};
 \fill[c4, opacity=0.85] (5.60,2.13) circle (2.33mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (5.60,2.13) {Ninia};
-\fill[c3, opacity=0.85] (5.04,3.12) circle (2.10mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (5.04,3.12) {Didenko};
-\fill[c1, opacity=0.85] (3.13,4.20) circle (2.10mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (3.13,4.20) {Keister};
-\fill[c3, opacity=0.85] (4.92,2.96) circle (2.02mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.41mm, inner sep=0.5pt] at (4.92,2.96) {Zetzsche};
-\fill[c2, opacity=0.85] (0.94,4.20) circle (1.92mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (0.94,4.20) {Tan};
-\fill[c1, opacity=0.85] (4.06,2.89) circle (2.78mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.95mm, inner sep=0.5pt] at (4.06,2.89) {Auer};
-\fill[c5, opacity=0.85] (0.99,0.30) circle (2.33mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (0.99,0.30) {Niepelt};
-\fill[c5, opacity=0.85] (1.01,0.94) circle (1.92mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (1.01,0.94) {Bordo};
-\fill[c5, opacity=0.85] (0.73,0.82) circle (2.02mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.41mm, inner sep=0.5pt] at (0.73,0.82) {Masciandaro};
-\fill[c1, opacity=0.85] (4.23,0.00) circle (2.10mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (4.23,0.00) {Uhlig};
-\fill[c1, opacity=0.85] (2.80,3.18) circle (1.92mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (2.80,3.18) {Davoodalhosseini};
-\fill[c5, opacity=0.85] (1.10,0.00) circle (2.10mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (1.10,0.00) {Moser};
-\fill[c2, opacity=0.85] (0.89,2.76) circle (2.10mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (0.89,2.76) {Tourpe};
-\fill[c6, opacity=0.85] (2.24,3.37) circle (2.18mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.53mm, inner sep=0.5pt] at (2.24,3.37) {Sandner};
-\fill[c3, opacity=0.85] (4.75,3.04) circle (2.54mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.78mm, inner sep=0.5pt] at (4.75,3.04) {Arner};
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (5.60,2.13) {Mobius};
+\fill[c1, opacity=0.85] (4.79,3.73) circle (2.10mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (4.79,3.73) {Chiu};
+\fill[c3, opacity=0.85] (4.62,0.00) circle (2.78mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.95mm, inner sep=0.5pt] at (4.62,0.00) {Buckley};
+\fill[c2, opacity=0.85] (1.54,2.90) circle (2.33mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (1.54,2.90) {Tronnier};
+\fill[c5, opacity=0.85] (0.38,0.00) circle (2.10mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (0.38,0.00) {Moser};
+\fill[c1, opacity=0.85] (4.81,4.20) circle (2.10mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (4.81,4.20) {Zhu};
+\fill[c3, opacity=0.85] (4.37,0.06) circle (2.10mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (4.37,0.06) {Didenko};
+\fill[c1, opacity=0.85] (3.84,3.25) circle (2.26mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.58mm, inner sep=0.5pt] at (3.84,3.25) {Assenmacher};
+\fill[c2, opacity=0.85] (0.10,3.96) circle (1.92mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (0.10,3.96) {Tan};
+\fill[c5, opacity=0.85] (0.28,1.36) circle (1.92mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (0.28,1.36) {Bordo};
 \fill[c4, opacity=0.85] (6.74,4.20) circle (2.33mm);
 \node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (6.74,4.20) {Casanova};
 \fill[c4, opacity=0.85] (6.70,0.00) circle (2.33mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (6.70,0.00) {Pandit};
-\fill[c1, opacity=0.85] (3.00,3.16) circle (2.10mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (3.00,3.16) {Chiu};
-\fill[c1, opacity=0.85] (3.42,2.91) circle (2.33mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (3.42,2.91) {Monnet};
-\fill[c2, opacity=0.85] (0.80,3.49) circle (2.10mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (0.80,3.49) {Soderberg};
-\fill[c2, opacity=0.85] (0.07,3.04) circle (2.18mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.53mm, inner sep=0.5pt] at (0.07,3.04) {Atangana};
-\fill[c2, opacity=0.85] (0.69,2.69) circle (2.47mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.73mm, inner sep=0.5pt] at (0.69,2.69) {Kiff};
-\fill[c6, opacity=0.85] (1.95,3.25) circle (2.47mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.73mm, inner sep=0.5pt] at (1.95,3.25) {Groß};
-\fill[c1, opacity=0.85] (4.09,2.17) circle (3.20mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=2.24mm, inner sep=0.5pt] at (4.09,2.17) {Frost};
-\fill[c2, opacity=0.85] (0.70,3.17) circle (2.02mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.41mm, inner sep=0.5pt] at (0.70,3.17) {Bechara};
-\fill[c2, opacity=0.85] (0.93,3.31) circle (1.92mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (0.93,3.31) {Lannquist};
-\fill[c1, opacity=0.85] (3.32,1.96) circle (2.26mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.58mm, inner sep=0.5pt] at (3.32,1.96) {Assenmacher};
-\fill[c1, opacity=0.85] (2.83,3.73) circle (2.10mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (2.83,3.73) {Zhu};
-\fill[c5, opacity=0.85] (0.85,1.74) circle (1.92mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (0.85,1.74) {Agur};
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (6.70,0.00) {Ninia};
+\fill[c2, opacity=0.85] (0.31,3.30) circle (2.10mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (0.31,3.30) {Soderberg};
+\fill[c6, opacity=0.85] (2.24,4.20) circle (2.18mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.53mm, inner sep=0.5pt] at (2.24,4.20) {Sandner};
 \fill[c4, opacity=0.85] (7.84,2.07) circle (2.33mm);
-\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (7.84,2.07) {Mobius};
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (7.84,2.07) {Pandit};
+\fill[c2, opacity=0.85] (1.43,2.46) circle (2.18mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.53mm, inner sep=0.5pt] at (1.43,2.46) {Atangana};
+\fill[c1, opacity=0.85] (4.35,3.08) circle (2.33mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (4.35,3.08) {Monnet};
+\fill[c3, opacity=0.85] (4.59,0.25) circle (2.02mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.41mm, inner sep=0.5pt] at (4.59,0.25) {Zetzsche};
+\fill[c5, opacity=0.85] (0.00,1.41) circle (2.02mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.41mm, inner sep=0.5pt] at (0.00,1.41) {Masciandaro};
+\fill[c2, opacity=0.85] (0.84,2.88) circle (2.47mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.73mm, inner sep=0.5pt] at (0.84,2.88) {Kiff};
+\fill[c1, opacity=0.85] (2.80,1.50) circle (2.10mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (2.80,1.50) {Uhlig};
+\fill[c2, opacity=0.85] (0.46,3.43) circle (1.92mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (0.46,3.43) {Lannquist};
+\fill[c1, opacity=0.85] (4.25,4.05) circle (2.10mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (4.25,4.05) {Keister};
+\fill[c1, opacity=0.85] (5.04,3.99) circle (1.92mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (5.04,3.99) {Davoodalhosseini};
+\fill[c1, opacity=0.85] (3.97,1.79) circle (3.20mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=2.24mm, inner sep=0.5pt] at (3.97,1.79) {Frost};
+\fill[c1, opacity=0.85] (4.36,1.84) circle (2.78mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.95mm, inner sep=0.5pt] at (4.36,1.84) {Auer};
+\fill[c3, opacity=0.85] (4.45,0.53) circle (2.54mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.78mm, inner sep=0.5pt] at (4.45,0.53) {Arner};
+\fill[c5, opacity=0.85] (0.44,2.06) circle (1.92mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (0.44,2.06) {Agur};
+\fill[c6, opacity=0.85] (2.05,4.02) circle (2.47mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.73mm, inner sep=0.5pt] at (2.05,4.02) {Groß};
+\fill[c5, opacity=0.85] (0.28,0.82) circle (2.33mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (0.28,0.82) {Niepelt};
+\fill[c2, opacity=0.85] (0.46,2.87) circle (2.10mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (0.46,2.87) {Tourpe};
 \end{tikzpicture}
 \end{column}
 \begin{column}{0.36\textwidth}\scriptsize
@@ -823,131 +925,6 @@ Papers with a central bank, BIS, IMF or World Bank author: \alert{5\%} (13\% in 
 \item Who sets the agenda: central bank and international-institution economists write few of the papers but collect a third of the citations, though their share of papers is shrinking as the field opens up.
 \end{itemize}}
 \end{frame}
-
-\begin{frame}{Thematic map: which themes drive the field?}
-\begin{columns}[c]
-\begin{column}{0.47\textwidth}
-\begin{tikzpicture}[font=\scriptsize]
-\draw[gray!60, dashed] (5.20,0) -- (5.20,4.6);
-\draw[gray!60, dashed] (0,3.02) -- (6.4,3.02);
-\draw[-{Stealth}, gray] (0,0) -- (6.6000000000000005,0) node[below, text=gray, pos=0.5, yshift=-1mm] {centrality $\to$};
-\draw[-{Stealth}, gray] (0,0) -- (0,4.8) node[above, text=gray] {density};
-\node[gray, anchor=south east, font=\scriptsize\bfseries] at (6.4,4.6) {Motor};
-\node[gray, anchor=south west, font=\scriptsize\bfseries] at (0.1,4.6) {Niche};
-\node[gray, anchor=north west, font=\scriptsize\bfseries] at (0.1,-0.35) {Emerging / declining};
-\node[gray, anchor=north east, font=\scriptsize\bfseries] at (6.4,-0.35) {Basic};
-\fill[c1, opacity=0.8] (5.20,3.82) circle (6.5mm);
-\node[font=\scriptsize, text=white] at (5.20,3.82) {\textbf{1}};
-\fill[c2, opacity=0.8] (5.41,2.81) circle (6.5mm);
-\node[font=\scriptsize, text=white] at (5.41,2.81) {\textbf{2}};
-\fill[c3, opacity=0.8] (4.68,3.02) circle (5.9mm);
-\node[font=\scriptsize, text=white] at (4.68,3.02) {\textbf{3}};
-\fill[c4, opacity=0.8] (0.30,0.35) circle (3.7mm);
-\node[font=\scriptsize, text=white] at (0.30,0.35) {\textbf{4}};
-\end{tikzpicture}
-\end{column}
-\begin{column}{0.51\textwidth}\scriptsize
-Keyword clusters (Callon), with $e_{ij} = c_{ij}^2 / (c_i c_j)$:
-\[ \text{centrality} = 10\!\!\sum_{i\in C,\,j\notin C}\!\! e_{ij}, \qquad \text{density} = \frac{100}{|C|}\!\sum_{i,j\in C}\! e_{ij} \]
-\begin{tabular}{@{}lp{0.62\linewidth}l@{}}\toprule
- & \textbf{Theme} (top keywords) & \textbf{Quadrant}\\\midrule
-\textcolor{c1}{\textbf{1}} & digital transformation in financial services, monetary policy, moneta\dots{} & motor \\
-\textcolor{c2}{\textbf{2}} & blockchain technology applications and security, cryptocurrency, digi\dots{} & basic \\
-\textcolor{c3}{\textbf{3}} & fintech, crowdfunding, digital finance, financial inclusion, digital\dots{} & niche \\
-\textcolor{c4}{\textbf{4}} & digital ruble, bank of russia, digital economy & emerging or declining \\
-\bottomrule\end{tabular}
-\end{column}
-\end{columns}
-\note{\textbf{Thematic map (0:50).}
-\begin{itemize}
-\item Centrality: how connected a theme is to the others. Density: how developed it is internally.
-\item Motor themes (central and developed): digital transformation in financial services.
-\item Niche themes are developed but isolated; basic themes are transversal but less structured.
-\end{itemize}}
-\end{frame}
-
-\begin{frame}{How the themes evolve}
-\scriptsize
-\begin{tabular}{@{}p{0.42\textwidth}rrrr@{}}\toprule
-\textbf{Keyword} (\% of the period's papers) & \textbf{2014--2019} & \textbf{2020--2022} & \textbf{2023--2026} & \textbf{Change}\\
-\textit{papers in period} & \textit{232} & \textit{1,360} & \textit{5,368} &\\\midrule
-financial inclusion & \cellcolor{c1!5}5.6 & \cellcolor{c1!9}9.2 & \cellcolor{c1!15}15.9 & \textcolor{c4}{$+6.7$} \\
-digital euro & \cellcolor{c1!3}3.0 & \cellcolor{c1!6}6.8 & \cellcolor{c1!9}9.7 & \textcolor{c4}{$+2.9$} \\
-financial stability & \cellcolor{c1!15}15.9 & \cellcolor{c1!10}10.7 & \cellcolor{c1!12}12.6 & \textcolor{c4}{$+1.9$} \\
-blockchain & \cellcolor{c1!12}12.1 & \cellcolor{c1!11}11.7 & \cellcolor{c1!13}13.3 & \textcolor{c4}{$+1.6$} \\
-digital ruble & \cellcolor{c1!0}0.0 & \cellcolor{c1!8}8.8 & \cellcolor{c1!9}9.6 & \textcolor{c4}{$+0.8$} \\
-stablecoin & \cellcolor{c1!1}1.7 & \cellcolor{c1!10}10.7 & \cellcolor{c1!10}11.0 & \textcolor{c4}{$+0.3$} \\
-digital transformation in law & \cellcolor{c1!11}11.2 & \cellcolor{c1!15}15.7 & \cellcolor{c1!14}15.0 & \textcolor{c2}{$-0.7$} \\
-banking stability, regulation, efficien\dots{} & \cellcolor{c1!14}14.2 & \cellcolor{c1!10}10.5 & \cellcolor{c1!9}9.6 & \textcolor{c2}{$-0.9$} \\
-fintech, crowdfunding, digital finance & \cellcolor{c1!50}50.4 & \cellcolor{c1!57}57.1 & \cellcolor{c1!55}55.4 & \textcolor{c2}{$-1.7$} \\
-digital payments & \cellcolor{c1!8}8.6 & \cellcolor{c1!11}11.1 & \cellcolor{c1!8}8.7 & \textcolor{c2}{$-2.4$} \\
-monetary policy and economic impact & \cellcolor{c1!35}35.8 & \cellcolor{c1!15}15.1 & \cellcolor{c1!12}12.4 & \textcolor{c2}{$-2.7$} \\
-payment systems & \cellcolor{c1!11}11.6 & \cellcolor{c1!12}12.6 & \cellcolor{c1!8}8.1 & \textcolor{c2}{$-4.5$} \\
-\bottomrule\end{tabular}\\[4pt]
-Sorted by change between the last two periods. Darker = more frequent.\\[3pt]
-\textbf{New in each period} (c-TF-IDF, periods as classes): \textbf{2014--2019}: \emph{cash, cryptocurrencies, e-krona, riksbank, bitcoin, legal}; \textbf{2020--2022}: \emph{china, euro, cash, blockchain, world, cryptocurrencies}; \textbf{2023--2026}: \emph{euro, legal, blockchain, finance, framework, inclusion}.
-\note{\textbf{Evolution (0:35).}
-\begin{itemize}
-\item Rising fastest: financial inclusion; falling most: payment systems (shares, while the field itself grows).
-\item The literature moves from ``how would it work'' to ``who adopts it and for whom''.
-\item Bottom line, TF-IDF answers ``when'': each period's vocabulary compared to the others.
-\end{itemize}}
-\end{frame}
-
-% =====================================================================
-\section{Text as data: what, why, how, when}
-
-\begin{frame}{Toolbox: the method chosen for each question}
-\scriptsize
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{@{}lp{0.43\textwidth}p{0.36\textwidth}@{}}\toprule
-\textbf{Question} & \textbf{Used} & \textbf{Also tested, and why not}\\\midrule
-What? & topics: \alert{BERTopic} (SBERT, UMAP, HDBSCAN), labels by \alert{c-TF-IDF}; co-word and Callon map; \alert{covariate logit} on topic shares & LDA / STM: bag of words, one language at a time; their covariate model is applied to BERTopic instead\\
-Who? & co-citation, co-authorship, Lotka, Bradford, \alert{affiliations}; \alert{log-odds} with Dirichlet prior & plain TF-IDF: no shrinkage of rare words\\
-Why? & motivations: \alert{validated codebook}, $\kappa = 0.53$; covariate logit & SBERT, NLI, local LLMs: $\kappa \le 0.33$\\
-How? & tone: \alert{FinBERT} on CBDC sentences, $\kappa = 0.52$; stance: levels by reading, changes by a \alert{local LLM} on a stratified sample, $\kappa = 0.41$ & stance: LLM Qwen2.5 7B 0.41, NLI zero-shot 0.28, FinBERT tone 0.17, SBERT classifier 0.16\\
-When? & vocabulary: \alert{c-TF-IDF} by period; \alert{Kleinberg bursts}; \alert{event study} with placebo dates & Poisson $z$-test: 24\% false positives\\\midrule
-All & six robustness specifications; every coder checked on hand-coded texts & \\
-\bottomrule\end{tabular}
-\note{\textbf{Toolbox (0:45).}
-\begin{itemize}
-\item One row per question; the middle column is what the results use.
-\item The right column matters for the paper: each alternative was run against the same hand-coded texts, and lost.
-\item Remaining improvements are tuning (more labels, bigger language models), not new methods.
-\end{itemize}}
-\end{frame}
-
-\begin{frame}{What: topics found by meaning (SBERT + BERTopic)}
-\scriptsize
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{@{}rp{0.4\textwidth}rrrrrr@{}}\toprule
- & \textbf{Topic} (top c-TF-IDF terms) & \textbf{Texts} & \multicolumn{3}{c}{\textbf{\% of the period's texts}} & \multicolumn{2}{c}{\textbf{Adjusted, points}}\\
- & & & \textbf{2014--2019} & \textbf{2020--2022} & \textbf{2023--2026} & \textbf{change} & \textbf{CB}\\\midrule
-1 & retail, implementation, interest, inclusion & 1,495 & \cellcolor{c1!38}13.0 & \cellcolor{c1!54}18.0 & \cellcolor{c1!55}18.4 & {+3.4} & \textbf{-17.4} \\
-2 & euro, european, ecb, europe & 1,050 & \cellcolor{c1!58}19.6 & \cellcolor{c1!41}13.8 & \cellcolor{c1!36}12.3 & {+2.3} & \textbf{+71.0} \\
-3 & cryptocurrencies, traditional, cash, legal & 771 & \cellcolor{c1!43}14.5 & \cellcolor{c1!32}10.9 & \cellcolor{c1!26}8.8 & \textbf{-7.8} & \textbf{-8.7} \\
-4 & pound, japan, retail, pilot & 636 & \cellcolor{c1!48}16.3 & \cellcolor{c1!32}10.8 & \cellcolor{c1!17}5.9 & \textbf{-11.6} & \textbf{-4.5} \\
-5 & ruble, russian, russia, legal & 627 & \cellcolor{c1!2}0.9 & \cellcolor{c1!19}6.3 & \cellcolor{c1!23}8.0 & \textbf{+6.7} & \textbf{-6.9} \\
-6 & blockchain, privacy, offline, security & 584 & \cellcolor{c1!18}6.3 & \cellcolor{c1!22}7.5 & \cellcolor{c1!21}7.3 & {-0.1} & \textbf{-7.4} \\
-7 & china, e-cny, rmb, yuan & 432 & \cellcolor{c1!2}0.9 & \cellcolor{c1!19}6.3 & \cellcolor{c1!15}5.3 & \textbf{+4.2} & \textbf{-5.8} \\
-8 & cryptocurrencies, cryptocurrency, bitcoin, cr\dots{} & 362 & \cellcolor{c1!19}6.6 & \cellcolor{c1!11}3.9 & \cellcolor{c1!13}4.5 & \textbf{-2.8} & \textbf{-3.3} \\
-9 & debt, dollar, reserve, crisis & 342 & \cellcolor{c1!9}3.3 & \cellcolor{c1!11}3.8 & \cellcolor{c1!13}4.4 & {+0.8} & \textbf{-2.2} \\
-10 & india, rupee, intention, indian & 324 & \cellcolor{c1!0}0.0 & \cellcolor{c1!5}1.7 & \cellcolor{c1!14}4.9 & {+4.8} & \textbf{-4.2} \\
-11 & fintech, services, finance, innovation & 260 & \cellcolor{c1!12}4.2 & \cellcolor{c1!5}1.9 & \cellcolor{c1!10}3.5 & {-0.9} & {-1.0} \\
-12 & indonesia, rupiah, islamic, legal & 205 & \cellcolor{c1!1}0.6 & \cellcolor{c1!5}1.7 & \cellcolor{c1!8}2.9 & \textbf{+2.2} & \textbf{-1.6} \\
-\bottomrule\end{tabular}\\[3pt]
-8,213 texts (research, speeches, official), multilingual SBERT; 20 topics (24\% outliers reassigned). Labels: $W_{t,c} = \frac{\text{tf}_{t,c}}{|c|}\log\!\big(1+\frac{A}{f_t}\big)$. Adjusted: logit of topic membership on period, actor, English (the covariate model of an STM); change = 2023--26 vs 2014--19; CB = central banks vs academics; \textbf{bold}: 95\% CI excludes 0.\\[2pt]
-\small Topics tied to \alert{one jurisdiction}: 41--43\% of texts in every period, but the mix shifts: \emph{pound}, \emph{euro} fall; \emph{ruble}, \emph{india}, \emph{china} rise.
-\note{\textbf{Topics (1:00).}
-\begin{itemize}
-\item Unlike keywords, embeddings group texts by meaning and across languages: a Russian and an English paper on the digital ruble land together.
-\item Two kinds of topics: issues (privacy, cross-border, stablecoins, adoption) and jurisdictions (digital euro, ruble, e-CNY, rupee).
-\item Jurisdiction topics keep a stable share, but move away from the digital euro towards the ruble, the e-CNY and the rupee: the literature follows national projects.
-\item Central banks dominate one topic, the digital euro; researchers the rest.
-\end{itemize}}
-\end{frame}
-
-
 \begin{frame}{Who says what: academics, central bankers, press}
 \scriptsize
 Distinctive words, \alert{log-odds ratio with informative Dirichlet prior} (Monroe, Colaresi \& Quinn, 2008), group $i$ vs.\ others $j$:
@@ -974,6 +951,8 @@ design \hfill 19 & cash \hfill 20 & launch \hfill 31 \\
 \item academics: \emph{research, analysis, legal}; central bankers: \emph{payments, area, europe}; press: \emph{euro, rupee, yuan}.
 \end{itemize}}
 \end{frame}
+% =====================================================================
+\section{Why study CBDCs?}
 
 \begin{frame}[fragile]{Why study CBDCs? Coding stated motivations}
 \begin{columns}[T]
@@ -1011,7 +990,6 @@ MOTIVES = {
 \item Validation: codebook tuned on 100 texts, then tested on 50 others never used for tuning. High precision, modest recall: what is found is right, but about half is missed (non-English texts, paraphrases). Details in the backup slide.
 \end{itemize}}
 \end{frame}
-
 \begin{frame}{Why study CBDCs? Results}
 \scriptsize
 \setlength{\tabcolsep}{4pt}
@@ -1042,7 +1020,6 @@ Logit of each motivation on period, actor and English; average marginal effects,
 \item Central bankers and academics do not give the same reasons.
 \end{itemize}}
 \end{frame}
-
 \begin{frame}{Why: is the codebook the best coder?}
 \begin{columns}[T]
 \begin{column}{0.58\textwidth}\scriptsize
@@ -1073,6 +1050,8 @@ SBERT, definitions (zero-shot) & 0.23 & 0.74 & 0.35 & 0.15 \\
 \item A larger LLM behind an API could do better; it would be checked the same way. That is tuning, not a new method.
 \end{itemize}}
 \end{frame}
+% =====================================================================
+\section{How CBDCs are discussed}
 
 \begin{frame}{How: the tone of what is said about CBDCs}
 \begin{columns}[T]
@@ -1110,7 +1089,6 @@ FinBERT on the 25,090 English sentences that name a CBDC (central banks: speeche
 \item Validation: FinBERT rarely confuses positive with negative, but sees tone in neutral sentences: compare groups and years, do not read levels.
 \end{itemize}}
 \end{frame}
-
 \begin{frame}{How: stance towards CBDCs}
 \begin{columns}[T]
 \begin{column}{0.44\textwidth}\scriptsize
@@ -1143,6 +1121,8 @@ The LLM (Qwen2.5 7B, $\kappa = 0.41$, best of five coders) calls 52\% of the han
 \item Changes come from the language model, run on a random sample: central banks have become much more favourable since 2020, as their own projects advanced.
 \end{itemize}}
 \end{frame}
+% =====================================================================
+\section{When attention rises}
 
 \begin{frame}{When: which themes burst, and when}
 \hspace*{3.3cm}\begin{tikzpicture}[font=\scriptsize, y=-0.42cm]
@@ -1190,7 +1170,6 @@ The LLM (Qwen2.5 7B, $\kappa = 0.41$, best of five coders) calls 52\% of the han
 \item Read with the topics: the field moves from monetary policy to sovereignty, tokenisation and national projects.
 \end{itemize}}
 \end{frame}
-
 \begin{frame}{When? Attention around policy events}
 \begin{columns}[c]
 \begin{column}{0.5\textwidth}
@@ -1278,6 +1257,8 @@ Baseline $\lambda$ = daily rate over $[-90,-15]$ days; $E = 15\lambda$; ratio $=
 \item Attention follows institutional milestones (central bank reports, legislation) more than market news. Sand Dollar comes 18 days after the ECB report: the two windows overlap.
 \end{itemize}}
 \end{frame}
+% =====================================================================
+\section{Robustness}
 
 \begin{frame}{Robustness}
 \scriptsize
@@ -1300,7 +1281,6 @@ Changes: 2023--26 vs 2014--19, adjusted (logit, 95\% CI). Tone: mean net tone ga
 \item The direction of every result is unchanged; magnitudes move a little. This is the table that answers a referee's ``what if''.
 \end{itemize}}
 \end{frame}
-
 % =====================================================================
 \section{Conclusion}
 
@@ -1334,7 +1314,6 @@ Changes: 2023--26 vs 2014--19, adjusted (logit, 95\% CI). Tone: mean net tone ga
 \item Limits are known and measured: each one has a fix in the paper plan.
 \end{itemize}}
 \end{frame}
-
 \begin{frame}{From this talk to the paper}
 \begin{columns}[T]
 \begin{column}{0.5\textwidth}\scriptsize
@@ -1343,12 +1322,11 @@ Changes: 2023--26 vs 2014--19, adjusted (logit, 95\% CI). Tone: mean net tone ga
 \begin{tabular}{@{}lll@{}}\toprule
  & \textbf{Section} & \textbf{Status}\\\midrule
 1 & Introduction, research question & to write\\
-2 & Related work (77 reviews) & material\\
+2 & Related literature & reading list\\
 3 & Data: corpus, relevance filter & validated\\
-4 & Methods: maps, topics, coders, tone, stance, events & done\\
-5 & Results: what, who, why, how, when & done\\
-6 & Robustness (6 specifications) & done\\
-7 & Discussion, limits & to write\\
+4--8 & What, who, why, how, when (method, then results) & done\\
+9 & Robustness (6 specifications) & done\\
+10 & Discussion, limits & to write\\
 \bottomrule\end{tabular}\\[6pt]
 \textbf{Working title.} \emph{Why central bank digital currencies? Researchers, central bankers and the press, 2014--2026.}
 \end{column}
@@ -1370,7 +1348,6 @@ Changes: 2023--26 vs 2014--19, adjusted (logit, 95\% CI). Tone: mean net tone ga
 \item Thank you; questions.
 \end{itemize}}
 \end{frame}
-
 \appendix
 \begin{frame}{Backup: validation of the motivation coding}
 \footnotesize
@@ -1393,20 +1370,6 @@ Payment efficiency & 13 & 5 & 0.40 & 0.15 & 0.09 \\
 \bottomrule\end{tabular}\\[3pt]
 \scriptsize Read = texts where the reading found the motivation; Coded = texts flagged by the codebook. Files: \texttt{presentation/validation\_motivations\_dev.csv}, \texttt{\_test.csv}.
 \note{\textbf{Backup (only if asked).} The reference coding was done by reading each text against the codebook definitions (AI-assisted, spot-checked). Payment efficiency is the weakest category: it is expressed in too many ways for keywords.}
-\end{frame}
-\begin{frame}{Backup: how the science maps are built}
-\begin{itemize}
-\item \textbf{Networks.} Nodes = references, authors or keywords; $c_{ij}$ = documents where $i$ and $j$ appear together, $c_i$ = occurrences of $i$. Edges weighted by \alert{association strength}:
-\[ s_{ij} = \frac{c_{ij}}{c_i\,c_j} \]
-\item \textbf{Clusters.} Louvain algorithm, maximising modularity
-\[ Q = \frac{1}{2m}\sum_{i,j}\Big[s_{ij} - \frac{k_i k_j}{2m}\Big]\,\delta(g_i,g_j) \]
-\item \textbf{Layout.} Force-directed: linked nodes end up close. Size $\propto \sqrt{c_i}$, colour = cluster.
-\end{itemize}
-\note{\textbf{Backup (only if asked).}
-\begin{itemize}
-\item Association strength corrects for popularity: two very frequent items co-occur often by chance.
-\item Louvain groups nodes so that links are dense inside groups and sparse between them; $Q$ measures how clear the grouping is.
-\end{itemize}}
 \end{frame}
 
 \begin{frame}{Backup: how the score behaves}
@@ -1507,6 +1470,31 @@ positive & 1 & 12 & 17 & 0.57 \\
 \note{\textbf{Backup (only if asked).} Errors are almost all ``toned vs.\ neutral'': FinBERT was trained on financial news, where descriptive sentences about a new product read as positive.}
 \end{frame}
 
+\begin{frame}{Backup: 77 earlier reviews of CBDC research}
+\footnotesize Five recent bibliometric reviews:\\[2pt]
+\begin{tabular}{@{}llrl@{}}\toprule
+\textbf{Study} & \textbf{Data} & \textbf{Documents} & \textbf{Tools}\\\midrule
+Kvedaravi\v{c}i\={u}t\.{e} \& \v{S}apkauskien\.{e} (2024) & WoS + Scopus & 228 & VOSviewer\\
+Fahad \& Bulut (2024) & Scopus & 169 of 323 & Biblioshiny\\
+Bapat \& Sharma (2025) & Scopus & 371 & bibliometrics + TCCM\\
+Prodan et al.\ (2024) & Scopus + WoS & 747 of 1{,}024 & PRISMA, VOSviewer\\
+Paulovici (2026) & Scopus & 892 & VOSviewer\\\midrule
+\textbf{This study} & \textbf{5 databases, speeches, press\dots} & \textbf{17,709} & \textbf{+ text as data}\\
+\bottomrule\end{tabular}\\[6pt]
+\small
+\begin{itemize}\setlength\itemsep{1pt}
+\item \alert{Gap}: one or two databases (Scopus, WoS), mostly English journal articles: central bankers and the press are absent.
+\item Maps say \emph{what} is studied, not \emph{why}; no measure is validated.
+\end{itemize}
+\scriptsize Found in our own corpus: 77 titles announce a literature, systematic or bibliometric review of CBDCs (2019--2026).
+\note{\textbf{Backup (only if asked).}
+\begin{itemize}
+\item The topic is not new for bibliometrics: about 77 reviews, most of them since 2023.
+\item The bibliometric ones rely on Scopus or Web of Science: a few hundred journal articles, often English only (Prodan et al.\ drop non-English texts).
+\item The closest to us is Hoang et al.\ (2023, RIBAF): text mining, but still academic only.
+\item Our angle: every type of text, every language, and measures that are validated.
+\end{itemize}}
+\end{frame}
 \begin{frame}{References}
 \scriptsize
 \begin{itemize}\setlength\itemsep{1pt}
