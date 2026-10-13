@@ -1,0 +1,137 @@
+record_id,source_type,sentence,label,positive,negative,neutral,manual
+oa-3fbeb7c302c8,academic,"The results also offer implications for CBDCs, suggesting that economies with stronger digital payment ecosystems may be better positioned to support CBDC implementation and diffusion.",positive,0.9374765753746032,0.0097025902941823,0.0528208874166011,neutral
+ecb-17f47ee5a591,speech,"This would protect European merchants from excessive charges, strengthening their bargaining power with those providers and offering an attractive alternative.[12] At the same time, European banks would be able to retain their customer relationship and be remunerated for their role in distributing the digital euro.",positive,0.9307162761688232,0.0093889571726322,0.0598948374390602,positive
+oa-427e89be5b62,academic,"A well-functioning CBDC will require an extremely resilient, secure, and performant new infrastructure, with the ability to onboard, authenticate, and support users on massive scale.",positive,0.7634016275405884,0.0071300552226603,0.2294683903455734,neutral
+oa-5a6a4f376fd6,academic,The provision of the private digital euro would thus act as an enabler for these innovative solutions by making programmable payments possible.,positive,0.7709580063819885,0.0065586091950535,0.2224833518266677,positive
+oa-bccef5fe4e6e,academic,"The authors consider in detail such aspects of the topic under study, namely: the place of the digital ruble among the traction objects of civil law, analyzing the digital ruble through the prism of ""digital currencies"" legalized by Federal Law No.",neutral,0.0825812146067619,0.0110669312998652,0.9063518643379213,neutral
+oa-943a040234c9,academic,The design of CBDCs depends on central bank's objectives.,neutral,0.0291633978486061,0.0212035998702049,0.949633002281189,neutral
+oa-ab30d6579573,academic,"Upon their introduction and depending on their exact design, CBDCs may have considerable consequences for policy makers and the general public.",negative,0.021248709410429,0.5865412950515747,0.3922099769115448,neutral
+oa-1ebfcca0d7ac,academic,We show that an interest-bearing CBDC reinforces inefficiencies in transactions with cash since opportunity costs for cash holders and money supply increase.,negative,0.0403026230633258,0.9447304010391236,0.0149669628590345,negative
+gn-19c7278d1bbc,press,Feedzai Raises $75 Million; Partners with ECB to Safeguard Digital Euro,positive,0.8882176280021667,0.0093990303575992,0.1023833528161048,positive
+oa-2f8aa969a27f,academic,"With the digitalisation of the economy in mind, it examines how the involvement of payment services providers in distributing the digital euro could impact individual and economic rights.",neutral,0.0516323447227478,0.0234748870134353,0.9248927235603333,neutral
+auth-a209909f7fa6,official,This means that CBDC would be issued indirectly through intermediaries.,neutral,0.0511427670717239,0.0103760054334998,0.9384812116622924,neutral
+bis-9f0a41960697,speech,"REMARKS BY JAVIER GUZMÁN CALAFELL, DEPUTY GOVERNOR AT THE BANCO DE MÉXICO, ON 'SOME CONSIDERATIONS ON CENTRAL BANK DIGITAL CURRENCIES'.",neutral,0.0337722077965736,0.0278567839413881,0.9383710026741028,neutral
+gn-c238027cff1d,press,Binance Casts Shadow Over ECB’s Digital Euro Ambitions,negative,0.0143705867230892,0.915252149105072,0.0703772827982902,negative
+gn-24f15ff24db6,press,Could the digital euro get a green light in 2026?,neutral,0.2238526791334152,0.0108191957697272,0.765328049659729,neutral
+oa-cef0ab70481b,academic,"Specifically, we emphasise the potential for Central Bank Digital Currency (CBDC) to either positively or negatively reform values through its design.",positive,0.6381998062133789,0.0104782348498702,0.3513219654560089,neutral
+oa-e476a493e4a7,academic,Also the magnitude of the new dynamics introduced by CBDC are also profoundly dependant on its structural parameters.,neutral,0.0378926768898963,0.0658900365233421,0.8962172865867615,neutral
+gn-ec0639cd7be6,press,eNaira: Firm Drags CBN to Court over ‘Trademark Infringement’,negative,0.0136781632900238,0.942258596420288,0.0440632030367851,negative
+oa-04aa44999710,academic,"Even though CBDCs would have the potential to counteract some of the problems that could arise for the payment system in the future when the use of cash is rapidly declining, they also present significant risks for financial stability.",negative,0.2228594273328781,0.4784300029277801,0.2987105250358581,negative
+bis-3424dd5b77f8,speech,"## Closing Remarks
+
+As I bring my remarks to a close, let me briefly touch upon CBDC.",neutral,0.0469918102025985,0.0203802306205034,0.9326279759407043,neutral
+oa-ba6326f0f1cd,academic,"The findings reveal that China has achieved significant progress with its digital RMB, implementing extensive pilot projects across various scenarios such as retail payments, government subsidies, and cross-border transactions.",positive,0.9374209642410278,0.0128470947965979,0.0497318692505359,positive
+auth-3f2e3f96bcfe,official,"All you need to know
+Stay up to date with the latest news on a digital euro.",neutral,0.0590917132794857,0.0137988207861781,0.9271094799041748,neutral
+gn-29fa0d93dfe4,press,"CBN’s eNaira Inaccessible, Quietly Pulled Offline",negative,0.0248524751514196,0.7297281622886658,0.2454194277524948,negative
+gn-34ab5c18c6a5,press,European Central Bank Launches Preparation Phase for Digital Euro CBDC,neutral,0.0496508069336414,0.0250577572733163,0.9252914190292358,neutral
+oa-9058f2b378df,academic,"However, the Chinese government has offered an alternative in the form of the digital yuan.",neutral,0.1327172070741653,0.0135999005287885,0.8536828756332397,neutral
+oa-6a092b6dc9d0,academic,"Findings The results indicate that compatibility, observability and effort expectancy significantly influence trialability, which in turn significantly impacts the attitudes of e-CNY users.",negative,0.1508100479841232,0.5966147780418396,0.2525751888751983,neutral
+gn-5a829fe282ef,press,"China's digital yuan notches $8.3 billion in transactions in 6 months, taking a tiny share of payments",negative,0.2498117834329605,0.5556920170783997,0.1944961696863174,neutral
+oa-fff1c434eb26,academic,the Nigerian government's ban on cryptocurrency trading negatively impacted the uptake of the eNaira due to mistrust.,negative,0.0116003965958952,0.9637863039970398,0.0246132034808397,negative
+oa-a41edcf910ca,academic,Abstract The ECB has embarked on an uncertain path with the digital euro project.,negative,0.0151224937289953,0.9340893626213074,0.0507880970835685,negative
+oa-45a7ba14732b,academic,"The background to this research is that until now, there has been no precise legal regulation for using this digital currency in implementing CBDC use in Indonesia, even though the digital currency has been implemented in several countries, as mentioned above.",neutral,0.0584150776267051,0.0145352995023131,0.9270496368408204,negative
+oa-9bb00b05b6b9,academic,"The implementation of the CBDC in Ukraine is associated with numerous technical and legal risks, including: privacy and data security risks;",negative,0.0252073593437671,0.7914185523986816,0.1833740770816803,negative
+oa-9e865524debf,academic,"While most central banks have yet to take a firm decision on issuing a CBDC, the survey responses show a tentative inclination towards allowing use of a future CBDC by tourists and other non-residents domestically.",positive,0.7861235737800598,0.0139773804694414,0.1998989880084991,neutral
+bis-f6b9aa7b1d1d,speech,Some believe that a digital euro may not be successful enough ; many ask what specific benefits it could offer that existing payment methods do not already provide.,negative,0.0410606116056442,0.6677035689353943,0.2912357747554779,negative
+s2-f4a750d03ba0,academic,We have for the first time proposed that the full application of central bank digital currencies (CBDC) is a key signal for investors to reduce their holdings of cryptocurrencies or even exit the market.,negative,0.1169648393988609,0.7065395712852478,0.1764955967664718,neutral
+auth-6ee49f1169ce,official,"The Eurosystem would design the digital euro in such a way as to avoid possible 
+undesirable implications for the fulfilment of its mandate, for the financial industry and 
+for the broader economy.",neutral,0.1158276423811912,0.027645606547594,0.8565267324447632,neutral
+oa-60171e5765c3,academic,"Positions regarding central bank digital currencies are diametrically opposed, which creates strategic risks for the international monetary system;",negative,0.0509627424180507,0.7820484042167664,0.1669887602329254,negative
+oa-7300aa4281bd,academic,"Practical implications The authors provide insights on the current state of CBDC cross-border interoperability, which is valuable to policy- and decision-makers currently assessing the situation and deciding on avenues to pursue.",neutral,0.2260928899049759,0.007314330432564,0.7665927410125732,neutral
+auth-7a15c46dbf0a,official,"Latest news on the digital euro project
+We are inviting e-commerce and mobile commerce merchants to express their interest in participating in the upcoming digital euro pilot.",positive,0.5532747507095337,0.0106595801189541,0.4360656142234802,neutral
+auth-2e8903e39c77,official,"17 
+3 
+Making digital euro available: distribution via PSPs 
+18 
+3.1 
+Role of individual PSPs 
+18 
+3.2 
+Supporting services provided by the Eurosystem 
+27 
+3.3 
+Digital euro compensation model 
+30 
+3.4 
+How a digital euro would fit in the ecosystem 
+32 
+4 
+Limitations as a means of investment 
+33 
+5 
+Supporting financial and digital inclusion 
+34 
+6 
+Privacy and data protection 
+37 
+6.1 
+Privacy model for a digital euro 
+37 
+6.2 
+Users in control of their personal data 
+39 
+6.3 
+What personal data can the Eurosystem see?",neutral,0.0399762988090515,0.0189027246087789,0.9411209225654602,neutral
+gn-209f502b345b,press,Central bank digital currencies could mean the end of democracy,negative,0.0408772118389606,0.6991581320762634,0.2599647343158722,negative
+oa-6f595378a28e,academic,Method: This chapter uses the discourse analysis method to assess the opportunities and risks of CBDC.,neutral,0.0407164879143238,0.0172468218952417,0.9420366883277892,neutral
+oa-4218774f3859,academic,"Keywords: offline payments, relay attacks, algorithmic logic fingerprints, virtual identities, CBDC, trusted execution environments, privacy-preserving fraud prevention",neutral,0.0273307636380195,0.0380739532411098,0.9345953464508056,neutral
+gn-45cda9000a6a,press,How stablecoins and central bank digital currencies will affect tax,neutral,0.023041233420372,0.0490928255021572,0.927865982055664,neutral
+oa-e10eacd90007,academic,"The findings show that CBDC can address key issues in financial infrastructure, such as reducing transaction costs, enhancing security, and promoting financial inclusion.",positive,0.8460112810134888,0.0079388096928596,0.1460499614477157,positive
+oa-5c94ecf1432d,academic,"However, the impact of private CCs and introduction of retail CBDCs will eliminate credit creation, thus rendering the commercial banking model obsolete.",negative,0.0326514728367328,0.7720232009887695,0.1953252702951431,negative
+gn-9c11d046732f,press,Trump Calls Central Bank Digital Currency ‘Very Dangerous’—After Vowing To Prohibit Fed’s ‘Digital Dollar’,negative,0.0594498179852962,0.6526720523834229,0.2878780961036682,negative
+oa-93cf1bc2031a,academic,"CBDCs provide various benefits including social control mechanisms, innovation stimulation and reduced dependence on banks as intermediaries.",positive,0.8695924878120422,0.0072663472965359,0.1231411322951316,positive
+oa-85bca62c7c72,academic,"Nine research gaps are identified, most critically the scarcity of empirical evidence from live deployments, the neglect of wholesale CBDC, and insufficient analysis of cross-border interoperability.",negative,0.0103649795055389,0.9327850937843324,0.0568499751389026,neutral
+oa-d3471c164da9,academic,"Moreover, empirical data reveals that, eventhough CBDCs can actually undermine bank funding by drawing away deposits, measures to mitigate risks such as zero interest rates, wallet caps, and two-tier distribution could be implemented.",negative,0.0477497652173042,0.8215449452400208,0.1307052820920944,neutral
+oa-a0309e621f82,academic,"The digital Chinese yuan (E-CNY), based on the AI technique, has shown its nature and valid low-carbon characteristics in pilot cities of China, it will assume important responsibilities and become the key link.",positive,0.6892095804214478,0.0078800022602081,0.3029105067253113,positive
+auth-6cf13a7036a4,official,"Figure 1: CBDC ledger design alternatives 
+
+2 Refer to Appendix 1 for characteristics of a token-based CBDC ledger system.",neutral,0.0353425182402133,0.017971808090806,0.9466856718063354,neutral
+gn-96c4a8e9ad3f,press,E-krona? Increasingly cashless Sweden eyes digital currency,negative,0.0532410219311714,0.5311346650123596,0.4156243503093719,neutral
+ecb-b74a427ef3de,speech,"They emphasised that in a more fragmented and digital world, accelerating progress on a digital euro is key to supporting a competitive and resilient European payment system and contributing to Europe's economic security.",positive,0.8924835324287415,0.0096459435299038,0.0978705212473869,positive
+bis-b30376d67957,speech,"There should be a legal definition of what constitutes electronic legal tender and the e-krona, issued by the state via the Riksbank, should be such legal tender.",neutral,0.0342012271285057,0.0192567855119705,0.946541965007782,positive
+oa-dbb0655ee05d,academic,"Existing studies suggest that better financial inclusion can support economic development, while CBDC may improve the efficiency, accessibility and transparency of digital payments.",positive,0.9013051986694336,0.008326961658895,0.0903677642345428,positive
+oa-6e1c09adcdc1,academic,"In particular, it investigates the potential of the digital euro not only as a tool for enhancing the efficiency and security of cross-border payments but also as a means to foster financial inclusion and mitigate fraud-related risks through increased transparency and traceability.",positive,0.6197763085365295,0.008436556905508,0.3717870712280273,positive
+auth-c4d680048204,official,"Try these useful resources to discover how we engage with market stakeholders, what is informing the design of the digital euro, and much more.",neutral,0.1227605193853378,0.0089490292593836,0.8682904839515686,neutral
+oa-9570377f76f9,academic,This directly conflicts with EU data protection principles and the digital euro's stated privacy objectives.,negative,0.015890983864665,0.7953619956970215,0.1887469589710235,negative
+oa-63b9762be8a0,academic,"Taking the e-CNY pilot policy as an entry point, this paper reveals the potential value and realization path of the CBDC in the field of green innovation.",positive,0.6381963491439819,0.0076916702091693,0.3541119992733001,positive
+oa-8ade50dd9501,academic,"However, there's been a recent change in trend with the introduction of the Digital Rupee, a RBI backed digital currency [2].",positive,0.5644777417182922,0.0531318522989749,0.382390409708023,neutral
+gn-391d5935cb04,press,Tokenized GBP vs. Digital Pound: A Guide to Digital Sterling,neutral,0.1177980601787567,0.013426287099719,0.8687756061553955,neutral
+oa-4f1f956e06fd,academic,"Digital renminbi gained popularity, which actively promote financial industry development of science and technology, encourage technological innovation, but also will bring unprecedented challenges to the traditional financial institutions.",positive,0.8855999112129211,0.0109421564266085,0.103457860648632,neutral
+oa-ee1bf7216818,academic,"Anchoring Europe's Monetary Future: Why a Wholesale Digital Euro Is the Immediate PriorityDollar-denominated stablecoins are expanding rapidly.For Europe, this is not merely a technological development.The deeper question is strategic: who controls the infrastructure through which money circulates?Even where prices, contracts and accounting remain denominated in euro, a growing share of transactions may be executed on dollar-based digital rails, thereby reducing the effectiveness of ECB monetary policy and weakening one of the institutional foundations on which Europe's longer-term growth increasingly depends.This article argues that dollar stablecoins are best understood as ""Eurodollars on steroids"": a programmable and scalable extension of the offshore dollar system.It identifies three risks for the Economic and Monetary Union: leakage of liquidity and activity from euro monetary circuits, indirect support for US fiscal power, and new forms of fragility arising from reserve opacity and redemption risk.The article further contends that a wholesale CBDC could mitigate some of the EMU's structural constraints and provide catalytic infrastructure for scalable euro-denominated stablecoins, with the potential to become the most trustworthy in the world.By contrast, retail CBDC addresses the wrong battlefield: Europe's central vulnerability lies not in payments at the till, but in the deeper monetary architecture that will shape its future monetary sovereignty.",negative,0.0273439474403858,0.7680065035820007,0.2046495825052261,positive
+auth-a209909f7fa6,official,"Supporting Private Payment Services 
+Even without the decline in cash circulation, if CBDC is needed from the viewpoint of 
+enhancing the stability and efficiency of the overall payment and settlement systems, it 
+might become appropriate to issue CBDC in order to support private payment services.",positive,0.5978886485099792,0.0119387656450271,0.3901726007461548,neutral
+ecb-03e105eb16dd,speech,"We actively engage with market participants including banks, and I would like to thank the Italian banking community for its active involvement in the digital euro project, including its innovation platform.",positive,0.8735758066177368,0.0088843759149312,0.1175398677587509,positive
+bis-8138b532eab5,speech,"By way of example, I would highlight the need to minimise the adverse impact that potential banking disintermediation would have on financial stability, or the possible effects of the digital euro on situations of financial instability.",neutral,0.0621148608624935,0.0421911813318729,0.8956938982009888,negative
+oa-55ac0909320e,academic,"However, despite the rollout of DCEP in several pilot cities, its adoption among the bank user community still faces some resistance.",positive,0.6656448841094971,0.0959813073277473,0.238373801112175,negative
+gn-9478411ab5ea,press,Watch Crypto Markets: Europe Debates a Digital Euro But ECB's Lagarde Says Progress Is Too Slow,negative,0.0935494527220726,0.7300958037376404,0.1763548105955124,negative
+oa-db1faae520c8,academic,"On the one hand, the National Bank of Ukraine’s digital currency – the e-hryvnia – remains at the pilot stage, restricting its practical application.",negative,0.0153509592637419,0.8113183379173279,0.1733306497335434,negative
+oa-fc10e548ba62,academic,Policymakers should focus on adaptive legal and policy design outlooks to address uncertainties associated with CBDC.,neutral,0.2489227652549743,0.0105128362774848,0.7405643463134766,neutral
+oa-75967eb34a53,academic,"Retail central bank digital currency (CBDC) is frequently justified as a tool for financial inclusion, yet the three retail CBDCs in live operation have struggled to attract sustained use, and the people they were meant to reach remain largely absent from the adoption literature.",negative,0.0269490797072649,0.5206896662712097,0.4523612856864929,negative
+oa-ae67a8e96fda,academic,The results offer insights for designing programmable CBDCs to boost consumption-led economic growth without fiscal monetization risks.,positive,0.8616883754730225,0.0079678101465106,0.130343809723854,positive
+gn-73703b1d5a44,press,Saudi Arabia ends participation in mBridge CBDC project,negative,0.032935231924057,0.5178372859954834,0.4492274820804596,negative
+ecb-1f4dd9499aee,speech,The impact of a digital euro on the financial system A digital euro to meet the expectations of Europeans,positive,0.6980035901069641,0.0085544511675834,0.2934419810771942,neutral
+oa-7004999a6e75,academic,"Cash use may continue to fall, and card use (the main cash substitute) may fall by more, if CBDC is issued.",negative,0.0157829150557518,0.958350956439972,0.0258660316467285,neutral
+oa-3ade11391a32,academic,"Additional tests further show that the e-CNY pilot reduces both supplier-side trade credit and financing obtained through customer advances, suggesting that the baseline effect is primarily driven by a reduced reliance on trade credit as a substitute for formal bank lending.",negative,0.2067705392837524,0.7179358601570129,0.0752935782074928,neutral
+gn-5d01a27a9a7b,press,Bank of Baroda unveils pilot to boost CBDC adoption,positive,0.8865066170692444,0.010648401454091,0.1028449982404708,positive
+oa-724f45f5bde0,academic,"COVID-19 experiences are driving forward a range of efforts to build better infrastructure to address future crises, in particular interoperable electronic payments systems (including central bank digital currencies and other forms of sovereign digital currency), sovereign digital identification (particularly in the context of market integrity and non face-to-face transactions), and use of technology for regulatory, supervisory and compliance purposes, At the same time, we argue that digitization generally and of finance in particular driven by the COVID-19 crisis – while providing effective tools to support the response – have also raised new challenges, particularly around forms of TechRisk arising from control and use of data from both state and non-state actors.",positive,0.6900925040245056,0.0133392727002501,0.296568214893341,neutral
+auth-310ab4adcc91,official,"Also, the full reach achieved through mandatory acceptance of the digital euro 
+could increase the rate of return on investments in innovative products and 
+services, as outlined in the parallel work on the innovation potential embedded in 
+the digital euro.",positive,0.8906673789024353,0.0072896480560302,0.1020429879426956,positive
+oa-417d48b09f09,academic,"This research advocates for a democratic approach to CBDC implementation, emphasizing the need for attractiveness, user anonymity, and enhanced monetary policy possibilities.",positive,0.8356553316116333,0.0091362567618489,0.1552084684371948,neutral
+bis-525dd6b3a760,speech,Another step we can take to strengthen Europe is to introduce a digital euro.,positive,0.5374321341514587,0.0104057053104043,0.4521621763706207,positive
+gn-8d08df9784c2,press,Digital Euro Could Push Apple Pay to the Margins in EU,negative,0.0301298052072525,0.9203402996063232,0.0495298467576503,neutral
+oa-e88bb8d64e7f,academic,"Both the rise of digital payments and the increased popularity of cryptocurrencies can be seen as the main drivers behind the prospective issuance of the digital euro, significantly affecting financial markets and business models alike.",neutral,0.0603113956749439,0.4419238269329071,0.4977648556232452,neutral
+gn-c4249609aaf4,press,Mastercard and Island Pay unveils Central Bank Digital Currency linked card,neutral,0.053992073982954,0.0133838476613163,0.932624101638794,neutral
+gn-d181a7265ed8,press,"CBDC | Global CBDC Platform, mBridge, Plans to Launch a Minimum Viable Project in 2024",neutral,0.3958204984664917,0.0071062464267015,0.5970732569694519,neutral
+oa-8e083fe09768,academic,The paper analyzes main approaches to the legal regulation of the digital ruble.,neutral,0.0441549234092235,0.0166746396571397,0.9391704201698304,neutral
+ecb-3da58f58130a,speech,A digital euro would also provide new business opportunities and act as a catalyst for technological progress and innovation: European intermediaries would be in a position to improve the services they offer to their customers and stay competitive as new actors enter the payments landscape.,positive,0.8933590054512024,0.0069451159797608,0.0996959283947944,positive
+oa-916c85670884,academic,"A dissertação explora os vários designs de CBDCs como retalhista versus grossista, direto/híbrido/intermediado que afetam os sistemas económicos, identifica benefícios observados, como maior eficiência nos pagamentos e inclusão financeira, ao lado de riscos como desintermediação, preocupações com privacidade e vulnerabilidades cibernéticas e compara previsões teóricas com resultados empíricos, revelando divergências influenciadas por contextos institucionais, lacunas infraestruturais e confiança pública.",positive,0.684665858745575,0.0306949689984321,0.2846392095088959,neutral
+oa-d1d23ebad891,academic,Although CBDC is common in lower trunk and genitalia it can also present as generalized bullous lesions.,negative,0.0358281470835208,0.526015043258667,0.43815678358078,neutral
+gn-92c31c2a9a4c,press,Digital Euro: the money revolution,neutral,0.0503921210765838,0.0347473993897438,0.9148604273796082,positive
+oa-3f7e4592de0e,academic,The mechanism of digital ruble smart contracts is investigated as a tool for labeling and automatic control of targeted budget expenditures.,neutral,0.0931017026305198,0.0127530563622713,0.8941452503204346,neutral

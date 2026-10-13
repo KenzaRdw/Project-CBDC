@@ -1,0 +1,140 @@
+% Paper: structure only. Compile with pdflatex + biber (latexmk -pdf cbdc_paper.tex).
+\documentclass[11pt,a4paper]{article}
+
+% ---------------------------------------------------------------- language and encoding
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{csquotes}
+
+% ---------------------------------------------------------------- fonts: Libertinus (serif, sans, mono) with matching maths
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{libertinus}
+\usepackage[libertine]{newtxmath}
+\usepackage[final]{microtype}
+
+% ---------------------------------------------------------------- page and paragraphs
+\usepackage[margin=2.5cm,headheight=14pt]{geometry}
+\usepackage{setspace}
+\setstretch{1.15}
+\setlength{\parindent}{1.5em}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\sffamily\shorttitle}
+\fancyhead[R]{\small\sffamily\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\small\sffamily\thepage}\renewcommand{\headrulewidth}{0pt}}
+
+% ---------------------------------------------------------------- colours, headings, captions, lists
+\usepackage{xcolor}
+\definecolor{accent}{HTML}{23395B}
+\usepackage[explicit]{titlesec}
+\titleformat{\section}{\normalfont\sffamily\Large\bfseries\color{accent}}{\thesection}{0.8em}{#1}
+\titleformat{\subsection}{\normalfont\sffamily\large\bfseries}{\thesubsection}{0.8em}{#1}
+\titleformat{\subsubsection}{\normalfont\sffamily\normalsize\bfseries}{\thesubsubsection}{0.8em}{#1}
+\titlespacing*{\section}{0pt}{2.2ex plus 1ex minus .2ex}{1.1ex}
+\titlespacing*{\subsection}{0pt}{1.8ex plus 1ex minus .2ex}{0.8ex}
+\usepackage[font=small,labelfont={sf,bf},labelsep=period,skip=6pt]{caption}
+\usepackage{enumitem}
+\setlist{itemsep=2pt,topsep=4pt}
+
+% ---------------------------------------------------------------- tables, figures, numbers
+\usepackage{booktabs,tabularx,multirow}
+\usepackage{graphicx}
+\usepackage{siunitx}
+\sisetup{group-separator={,},group-minimum-digits=4,detect-all}
+\usepackage[section]{placeins}
+
+% ---------------------------------------------------------------- bibliography (your reading list: references.bib)
+\usepackage[backend=biber,style=authoryear-comp,maxcitenames=2,maxbibnames=10,uniquelist=false,
+            giveninits=true,dashed=false,doi=true,url=false,isbn=false]{biblatex}
+\addbibresource{references.bib}
+\DeclareFieldFormat[article]{title}{#1}
+\renewbibmacro{in:}{\ifentrytype{article}{}{\printtext{\bibstring{in}\intitlepunct}}}
+
+% ---------------------------------------------------------------- links and cross-references (load last)
+\usepackage{xurl}
+\usepackage[colorlinks=true,linkcolor=accent,citecolor=accent,urlcolor=accent,pdfusetitle]{hyperref}
+\usepackage[capitalise,noabbrev]{cleveref}
+
+% ---------------------------------------------------------------- title block
+\newcommand{\shorttitle}{Why central bank digital currencies?}
+\title{\sffamily\bfseries\color{accent} Why Central Bank Digital Currencies?\\[4pt]
+       \large\mdseries Researchers, Central Bankers and the Press, 2014--2026}
+\author{Adriel Mazere\thanks{M2 -- Private crypto.}}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{plain}
+
+\begin{abstract}
+\noindent
+\end{abstract}
+
+\noindent\textbf{Keywords:} \\
+\noindent\textbf{JEL codes:}
+
+\bigskip
+
+% =====================================================================
+\section{Introduction}\label{sec:intro}
+
+% =====================================================================
+\section{Related literature}\label{sec:literature}
+\subsection{Central bank digital currencies}
+\subsection{Bibliometric reviews of CBDC research}
+\subsection{Text as data in economics and central banking}
+
+% =====================================================================
+\section{Data}\label{sec:data}
+\subsection{Sources and collection}
+\subsection{De-duplication and enrichment}
+\subsection{Relevance: is CBDC the theme?}
+\subsection{Validation of the relevance filter}
+\subsection{Descriptive statistics}
+
+% =====================================================================
+\section{Methods}\label{sec:methods}
+\subsection{Science maps: co-citation, co-authorship, co-word}
+\subsection{Topics: sentence embeddings and BERTopic}
+\subsection{Motivations: codebook and alternative coders}
+\subsection{Tone and stance}
+\subsection{Timing: bursts and event study}
+\subsection{Covariate-adjusted estimates}
+
+% =====================================================================
+\section{Results}\label{sec:results}
+\subsection{What is written}
+\subsection{Who writes}
+\subsection{Why CBDCs are studied}
+\subsection{How CBDCs are discussed}
+\subsection{When attention rises}
+
+% =====================================================================
+\section{Robustness}\label{sec:robustness}
+
+% =====================================================================
+\section{Discussion}\label{sec:discussion}
+\subsection{Limitations}
+
+% =====================================================================
+\section{Conclusion}\label{sec:conclusion}
+
+% =====================================================================
+\section*{Data and code availability}
+\addcontentsline{toc}{section}{Data and code availability}
+
+\printbibliography[heading=bibintoc,title={References}]
+
+% =====================================================================
+\appendix
+\renewcommand{\thesection}{\Alph{section}}
+\section{Search vocabulary}\label{app:vocabulary}
+\section{Harvesting algorithms}\label{app:harvest}
+\section{Validation samples and coding guide}\label{app:validation}
+\section{Additional tables and figures}\label{app:additional}
+
+\end{document}

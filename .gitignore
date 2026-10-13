@@ -1,0 +1,30 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Data: too large for GitHub (the corpus CSV alone is 336 MB); rebuilt with run.py
+data/
+logs/
+
+# LaTeX build files
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.nav
+*.out
+*.run.xml
+*.snm
+*.synctex.gz
+*.toc
+*.vrb
+.build/
+
+# macOS / iCloud duplicates / editors
+.DS_Store
+* 2.*
+.vscode/

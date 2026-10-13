@@ -1,0 +1,1528 @@
+% Final version, generated from data/cbdc_corpus.csv by scripts/make_slides.py.
+\PassOptionsToPackage{table}{xcolor}
+\documentclass[aspectratio=169,10pt]{beamer}
+\usetheme[progressbar=frametitle,sectionpage=progressbar]{metropolis}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,booktabs,pgfplots,listings,textcomp,nicefrac}
+\usetikzlibrary{positioning,arrows.meta}
+\pgfplotsset{compat=1.18}
+\definecolor{c1}{HTML}{23395B}\definecolor{c2}{HTML}{D1495B}\definecolor{c3}{HTML}{EDAE49}
+\definecolor{c4}{HTML}{00798C}\definecolor{c5}{HTML}{8F6593}\definecolor{c6}{HTML}{6A994E}
+\definecolor{c7}{HTML}{E07A5F}\definecolor{c8}{HTML}{3D5A80}\definecolor{codebg}{HTML}{F3F3F0}
+\pgfplotscreateplotcyclelist{corpus}{{fill=c1,draw=c1},{fill=c2,draw=c2},{fill=c3,draw=c3},{fill=c4,draw=c4}}
+\lstset{language=Python, basicstyle=\ttfamily\fontsize{6.6}{7.6}\selectfont, keywordstyle=\color{c1}\bfseries,
+  stringstyle=\color{c4}, backgroundcolor=\color{codebg}, frame=none, showstringspaces=false,
+  columns=fullflexible, keepspaces=true, xleftmargin=4pt, framexleftmargin=4pt,
+  upquote=true, literate={é}{{\'e}}1 {è}{{\`e}}1 {’}{{\textquotesingle}}1}
+\tikzset{box/.style={draw=c1, rounded corners=2pt, fill=white, align=center, font=\scriptsize, minimum height=7mm,
+  text width=19mm}, arr/.style={-{Stealth[length=2mm]}, c1, thick}}
+\setbeamertemplate{note page}{\pagecolor{white}\vspace{6mm}\hspace{6mm}\begin{minipage}{0.9\paperwidth}\large\insertnote\end{minipage}}
+\newcommand{\ymaxev}{491}
+
+\title{A Bibliometric Corpus on Central Bank Digital Currencies}
+\subtitle{Data, methods and first results of a paper in progress}
+\author{Group Louis, Kenza, Ad}
+\institute{M2 -- Private crypto}
+\date{October 2026}
+\begin{document}
+\begin{frame}
+\titlepage
+\note{\textbf{Title (0:15). Total: about 23 minutes.} This talk presents the groundwork of a paper: a bibliometric and text-as-data study of everything written on central bank digital currencies.}
+\end{frame}
+
+\begin{frame}{The paper in one slide}
+\textbf{Research question.} Why do researchers, central bankers and journalists write about CBDCs, and how has the agenda shifted since 2014?
+\\[3pt]
+\alert{What} is written? \quad \alert{Who} writes? \quad \alert{Why} (stated motivations)? \quad \alert{How} (tone)? \quad \alert{When} (around which events)?\\[6pt]
+\textbf{Contribution.}
+\begin{enumerate}\setlength\itemsep{2pt}
+\item \alert{Data}: research, speeches, official documents and press, in 45 languages: 17 times the largest earlier review.
+\item \alert{Measurement}: relevance filter, motivations and tone, each checked against hand coding.
+\item \alert{Dynamics}: attention tested against policy events with placebo inference.
+\end{enumerate}
+\vfill
+\begin{center}\large 48,188 collected \quad$\to$\quad \alert{17,709} with CBDC as a theme \quad$\cdot$\quad 2014--2026\end{center}
+\note{\textbf{The paper in one slide (1:00).}
+\begin{itemize}
+\item One question: why do people write about CBDCs, and how has that changed?
+\item Five sub-questions structure the talk: what, who, why, how, when.
+\item Three contributions: the data, validated measures, and the timing of attention.
+\item Headline: 48,188 texts collected, 17,709 keep CBDC as a theme.
+\end{itemize}}
+\end{frame}
+
+\begin{frame}{Related work: 77 reviews already exist}
+\footnotesize Five recent bibliometric reviews:\\[2pt]
+\begin{tabular}{@{}llrl@{}}\toprule
+\textbf{Study} & \textbf{Data} & \textbf{Documents} & \textbf{Tools}\\\midrule
+Kvedaravi\v{c}i\={u}t\.{e} \& \v{S}apkauskien\.{e} (2024) & WoS + Scopus & 228 & VOSviewer\\
+Fahad \& Bulut (2024) & Scopus & 169 of 323 & Biblioshiny\\
+Bapat \& Sharma (2025) & Scopus & 371 & bibliometrics + TCCM\\
+Prodan et al.\ (2024) & Scopus + WoS & 747 of 1{,}024 & PRISMA, VOSviewer\\
+Paulovici (2026) & Scopus & 892 & VOSviewer\\\midrule
+\textbf{This study} & \textbf{5 databases, speeches, press\dots} & \textbf{17,709} & \textbf{+ text as data}\\
+\bottomrule\end{tabular}\\[6pt]
+\small
+\begin{itemize}\setlength\itemsep{1pt}
+\item \alert{Gap}: one or two databases (Scopus, WoS), mostly English journal articles: central bankers and the press are absent.
+\item Maps say \emph{what} is studied, not \emph{why}; no measure is validated.
+\end{itemize}
+\scriptsize Found in our own corpus: 77 titles announce a literature, systematic or bibliometric review of CBDCs (2019--2026).
+\note{\textbf{Related work (0:50).}
+\begin{itemize}
+\item The topic is not new for bibliometrics: about 77 reviews, most of them since 2023.
+\item The bibliometric ones rely on Scopus or Web of Science: a few hundred journal articles, often English only (Prodan et al.\ drop non-English texts).
+\item The closest to us is Hoang et al.\ (2023, RIBAF): text mining, but still academic only.
+\item Our angle: every type of text, every language, and measures that are validated.
+\end{itemize}}
+\end{frame}
+
+\begin{frame}{Outline}
+\tableofcontents
+\note{\textbf{Outline (0:15).} Method first (collection, scoring), then results (corpus, maps, why and when).}
+\end{frame}
+
+% =====================================================================
+\section{Collecting the texts}
+
+\begin{frame}{Pipeline}
+\begin{center}
+\begin{tikzpicture}[node distance=4mm and 7mm]
+\node[box] (s1) {Academic APIs\\\tiny OpenAlex, Semantic Scholar,\\\tiny arXiv, HAL, DOAJ};
+\node[box, below=of s1] (s2) {Speeches\\\tiny BIS (1996--), ECB};
+\node[box, below=of s2] (s3) {Authorities\\\tiny central banks, EU, IMF\dots};
+\node[box, below=of s3] (s4) {Press\\\tiny Google News, GDELT};
+\node[box, right=of s2, yshift=-5.5mm, text width=16mm] (raw) {\textbf{harvest}\\\tiny one JSONL\\\tiny per source};
+\node[box, right=of raw, text width=16mm] (ft) {\textbf{full text}\\\tiny PDF / HTML\\\tiny extraction};
+\node[box, right=of ft, text width=21mm] (bd) {\textbf{build}\\\tiny de-duplicate, language,\\\tiny sections, keywords,\\\tiny relevance score};
+\node[box, right=of bd, text width=15mm, fill=c1!10] (csv) {\textbf{one CSV}\\\tiny 49 columns};
+\foreach \s in {s1,s2,s3,s4} \draw[arr] (\s.east) -- (raw.west);
+\draw[arr] (raw) -- (ft); \draw[arr] (ft) -- (bd); \draw[arr] (bd) -- (csv);
+\end{tikzpicture}
+\end{center}
+\small
+\begin{itemize}
+\item 115 search phrases, 12 languages: \emph{CBDC, digital euro, e-CNY, eNaira, Drex, digital fiat currency, Fedcoin, euro numérique, digitaler Euro, digital ruble\dots}
+\item \alert{Recall first}: nothing is filtered at harvest time; every step is resumable.
+\end{itemize}
+\note{\textbf{Pipeline (0:45).}
+\begin{itemize}
+\item Four families of sources, each harvested into its own raw file.
+\item Then full text is downloaded and parsed, then everything is merged into one CSV.
+\item Search vocabulary includes older names (digital fiat currency, Fedcoin) to reach the pre-2017 literature.
+\item Design choice: collect broadly, decide relevance later.
+\end{itemize}}
+\end{frame}
+
+\begin{frame}[fragile]{Press: recursive bisection of time windows}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\begin{lstlisting}
+stack = monthly_windows("2000-01-01", today)
+while stack:
+    a, b = stack.pop()
+    items = fetch(query, after=a, before=b)
+    if len(items) >= CAP and (b - a).days > 1:
+        m = a + (b - a) / 2
+        stack += [(m, b), (a, m)]
+        continue
+    save(items)
+    checkpoint(query, a, b, len(items))
+\end{lstlisting}
+\end{column}
+\begin{column}{0.43\textwidth}\small
+A search returns at most $C=100$ items. For a window $W=[a,b)$ with $N(W)$ articles:
+\begin{itemize}
+\item $N(W) < 95$ or $|W| \leq 1$ day: \alert{keep} $W$;
+\item otherwise \alert{split} at $m = a + \frac{b-a}{2}$.
+\item Depth $\leq \lceil \log_2 31 \rceil = 5$ per month; $2L-1$ requests for $L$ windows kept.
+\item 55 searches (country editions $\times$ languages).
+\end{itemize}
+\end{column}
+\end{columns}
+\note{\textbf{Press harvesting (0:45).}
+\begin{itemize}
+\item Problem: a news search returns at most 100 results, but a busy month has thousands.
+\item Solution: if a month is full, cut it in two, and repeat until each window holds fewer than the cap, down to one day.
+\item A month needs at most 5 levels of splitting; the cost is $2L-1$ requests.
+\end{itemize}}
+\end{frame}
+
+% =====================================================================
+\section{Scoring relevance}
+
+\begin{frame}[fragile]{Step 1: is it really \emph{Central Bank Digital Currency}?}
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\begin{lstlisting}
+TERMS = {
+  "CBDC": r"\bCBDCs?\b|\bwCBDCs?\b|\brCBDCs?\b",
+  "central bank digital currency":
+      r"central[\s-]+banks?(?:['’]s?)?[\s-]+"
+      r"digital[\s-]+currenc(?:y|ies)",
+  "digital euro": r"digital(?:e[rn]?)?\s+euro\b"
+      r"|euro\s+numérique|euro\s+digitale?\b",
+  "DCEP (e-CNY)": r"\bDC/?EP\b",
+  ...
+}
+\end{lstlisting}
+\end{column}
+\begin{column}{0.47\textwidth}\small
+\begin{itemize}
+\item ``CBDC'' is also a \emph{skin disease}; ``DCEP'' a chemical.
+\item Ambiguous terms $t\in\mathcal{A}$ count only with \alert{monetary context}:
+\end{itemize}
+\[
+\text{count}(t) = n_t \cdot \mathbf{1}\big[t \notin \mathcal{A} \,\lor\, \text{context}\big]
+\]
+\begin{itemize}
+\item context = \emph{currency, payment, central bank, monnaie, Geld\dots}
+\item \emph{digital dollar}, \emph{Sand Dollar}: reported, never scored.
+\end{itemize}
+\end{column}
+\end{columns}
+\note{\textbf{Homonyms (0:45).}
+\begin{itemize}
+\item Each concept is a regular expression; the same list drives searching and scoring.
+\item ``CBDC'' also means \emph{chronic bullous dermatosis of childhood}: an ambiguous term only counts if the text also talks about money or payments.
+\end{itemize}}
+\end{frame}
+
+\begin{frame}{Step 2: how central is CBDC to the text?}
+Each available field $f$ gets a centrality $c_f \in [0,1]$:
+\begin{align*}
+c_{\text{title}} &= \mathbf{1}[\text{CBDC term in title}] &
+c_{\text{kw}} &= 0.4\cdot\mathbf{1}[\text{CBDC in keywords}]\\
+c_{\text{abs}} &= \frac{\#\{\text{sentences mentioning CBDC}\}}{\#\{\text{sentences}\}} &
+c_{\text{body}} &= \tfrac12\min\!\Big(1,\frac{\rho}{3}\Big) + \tfrac12\,\sigma
+\end{align*}
+$\rho$ = mentions per 1{,}000 words; $\sigma$ = share of the ten slices of the text that mention CBDC.
+\[
+\boxed{\text{score} = 100\Big(0.6\,\max_{f\in F} c_f + 0.4\,\frac{1}{|F|}\sum_{f\in F} c_f\Big)}
+\qquad F = \text{fields available}
+\]
+\small One field clearly about CBDC suffices; a passing mention stays low; missing fields are not penalised.
+\note{\textbf{Theme score (0:45).}
+\begin{itemize}
+\item Not ``does the word appear'' but ``is it the subject''.
+\item Title: strongest signal. Abstract: share of sentences. Full text: density and spread across the document.
+\item The max rewards one clear signal; the mean rewards consistency. Keywords weigh less: partly machine-assigned.
+\end{itemize}}
+\end{frame}
+
+\begin{frame}{Step 3: labels, and how good is the filter?}
+\begin{columns}[T]
+\begin{column}{0.58\textwidth}\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrrr@{}}\toprule
+\textbf{Label (all texts kept)} & \textbf{Texts} & \textbf{Theme} & \textbf{95\% CI}\\\midrule
+Main theme ($\geq 50$) & 15,464 & 29/30 & 0.83--0.99 \\
+Secondary theme (25--49) & 2,245 & 11/29 & 0.23--0.56 \\
+Mentioned only ($<25$) & 489 & 1/30 & 0.01--0.17 \\
+Press, text not available & 13,446 & 2/19 & 0.03--0.31 \\
+Ambiguous terms only & 1,709 & 3/10 & 0.11--0.60 \\
+Off-topic (homonyms, no match) & 14,803 & 0/20 & 0.00--0.16 \\
+Dated before 2014 (checked: false) & 32 & -- & -- \\
+\bottomrule\end{tabular}\\[3pt]
+Theme = share read as having CBDC as a theme, in a stratified sample of 138 texts read blind to the label; Wilson intervals.
+\end{column}
+\begin{column}{0.4\textwidth}\small
+Strata $h$ weighted by size $N_h$; $T$ = theme labels:
+\[ \widehat{P} = \frac{\sum_{h\in T} N_h \hat p_h}{\sum_{h\in T} N_h}, \qquad \widehat{R} = \frac{\sum_{h\in T} N_h \hat p_h}{\sum_{h} N_h \hat p_h} \]
+\begin{itemize}\setlength\itemsep{1pt}
+\item Precision \alert{0.89}, recall \alert{0.89}.
+\item Main theme is reliable; \alert{secondary theme is noisy} $\Rightarrow$ robustness on main theme only.
+\item Most missed texts: press without text ($\approx$ 1,415).
+\end{itemize}
+\end{column}
+\end{columns}
+\vspace{2pt}
+\small From here on: \alert{main + secondary theme} (17,709 texts).
+\note{\textbf{Validating the filter (0:50).}
+\begin{itemize}
+\item A paper needs to show the filter works: I read a stratified sample without seeing the label.
+\item Main theme: almost always right. Secondary theme: only a minority really is about CBDCs, so every result is re-run on main theme only.
+\item Recall loss comes mainly from press items whose text could not be fetched.
+\end{itemize}}
+\end{frame}
+
+% =====================================================================
+\section{The corpus}
+
+\begin{frame}{Sources and completeness}
+\begin{columns}[T]
+\begin{column}{0.46\textwidth}\footnotesize
+\begin{tabular}{@{}lr@{}}\toprule
+\textbf{Database} & \textbf{Documents}\\\midrule
+Google News & 9,496 \\
+OpenAlex & 7,266 \\
+Semantic Scholar & 4,000 \\
+DOAJ & 485 \\
+BIS central bankers' speeches & 465 \\
+Central banks \& authorities (crawl) & 239 \\
+ECB speeches & 108 \\
+arXiv & 90 \\
+HAL & 83 \\
+\bottomrule\end{tabular}\\[2pt]
+\scriptsize Merged duplicates count in each database.
+\end{column}
+\begin{column}{0.5\textwidth}\footnotesize
+\begin{tabular}{@{}lr@{}}\toprule
+\textbf{Type of text} & \textbf{Documents}\\\midrule
+Academic & 7,463 \\
+Speeches & 511 \\
+Official docs & 239 \\
+Press & 9,496 \\
+\midrule Total & 17,709\\\bottomrule\end{tabular}\\[6pt]
+\begin{tabular}{@{}lr@{}}\toprule
+\textbf{Field available} & \textbf{Share}\\\midrule
+Exact day of publication & 86\% \\
+Issuer / outlet identified & 97\% \\
+Abstract & 32\% \\
+Full text & 26\% \\
+Keywords & 42\% \\
+Reference list & 16\% \\
+\bottomrule\end{tabular}
+\end{column}
+\end{columns}
+\note{\textbf{Sources (0:35).}
+\begin{itemize}
+\item Press articles form the largest group; speeches and official documents are few but long and fully available.
+\item Completeness: most texts are dated to the day; full text and references are the scarcest fields.
+\end{itemize}}
+\end{frame}
+
+\begin{frame}{A literature that took off after 2020}
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[ybar stacked, width=0.95\textwidth, height=0.68\textheight, bar width=14pt,
+  cycle list name=corpus, xtick=data, xticklabel style={/pgf/number format/1000 sep=},
+  ymin=0, legend style={at={(0.02,0.98)},anchor=north west,font=\scriptsize,draw=none},
+  ylabel={Documents}, tick label style={font=\scriptsize}, axis lines*=left, ymajorgrids]
+\addplot coordinates {(2016,10) (2017,42) (2018,72) (2019,131) (2020,298) (2021,530) (2022,625) (2023,1005) (2024,1141) (2025,1614) (2026,1678)};
+\addlegendentry{Academic}
+\addplot coordinates {(2016,3) (2017,8) (2018,30) (2019,24) (2020,41) (2021,66) (2022,77) (2023,67) (2024,67) (2025,72) (2026,56)};
+\addlegendentry{Speeches}
+\addplot coordinates {(2016,1) (2017,5) (2018,2) (2019,2) (2020,9) (2021,9) (2022,17) (2023,59) (2024,33) (2025,54) (2026,47)};
+\addlegendentry{Official docs}
+\addplot coordinates {(2016,5) (2017,6) (2018,9) (2019,32) (2020,187) (2021,514) (2022,642) (2023,1124) (2024,678) (2025,1427) (2026,4870)};
+\addlegendentry{Press}
+\end{axis}
+\end{tikzpicture}
+\end{center}
+\scriptsize 4 documents date from before 2016; 2026 runs to October. Press counts follow the search engine's coverage, which favours recent articles: read trends on academic texts.
+\note{\textbf{Growth (0:40).}
+\begin{itemize}
+\item From 189 in 2019 to 3,167 in 2025.
+\item Turning point 2020: COVID and the decline of cash, Libra (2019), the ECB report on a digital euro (Oct.\ 2020).\item Caution: the press bar for 2026 is mostly a harvesting effect (news search returns recent articles first); in the paper, press is normalised by its coverage.
+\end{itemize}}
+\end{frame}
+
+\begin{frame}{Languages}
+\begin{columns}[c]
+\begin{column}{0.58\textwidth}
+\begin{tikzpicture}
+\begin{axis}[xbar, width=\textwidth, height=0.72\textheight, bar width=7pt, xmin=0,
+  symbolic y coords={{Chinese},{Ukrainian},{Japanese},{Dutch},{Portuguese},{French},{German},{Italian},{Spanish},{Russian}}, ytick=data, tick label style={font=\scriptsize},
+  axis lines*=left, nodes near coords, nodes near coords style={font=\tiny},
+  xlabel={Documents}, xlabel style={font=\scriptsize}, enlarge x limits={upper,value=0.12}]
+\addplot[fill=c1, draw=c1] coordinates {(46,{Chinese}) (114,{Ukrainian}) (115,{Japanese}) (257,{Dutch}) (331,{Portuguese}) (565,{French}) (587,{German}) (709,{Italian}) (743,{Spanish}) (3230,{Russian})};
+\end{axis}
+\end{tikzpicture}
+\end{column}
+\begin{column}{0.4\textwidth}\small
+\begin{itemize}
+\item English dominates: 10,733 texts (61\%); chart shows the others.
+\item Second language: \alert{Russian} (3,230 texts, of which 2,712 press).
+\item Speeches kept in their original language.
+\end{itemize}
+\end{column}
+\end{columns}
+\note{\textbf{Languages (0:25).} English dominates, but Russian is a large second block: a reminder that English-only databases miss part of the debate.}
+\end{frame}
+
+\begin{frame}{Academic literature}
+\begin{columns}[T]
+\begin{column}{0.4\textwidth}\scriptsize\textbf{Main outlets}\\[2pt]
+\begin{tabular}{@{}p{0.8\linewidth}r@{}}SSRN Electronic Journal & 876 \\
+Zenodo (CERN repository) & 284 \\
+RePEc: Research Papers in Economics & 236 \\
+Springer eBooks & 139 \\
+Routledge eBooks & 108 \\
+CyberLeninka (Russian repository) & 81 \\
+Ekonomika i Upravlenie & 50 \\\end{tabular}\\[4pt]
+Working papers (SSRN, RePEc) outweigh journals.\\[4pt]
+\textbf{Bibliometric laws.} Growth 58\%/year (2017--2025). Lotka: $f(n) \propto n^{-3.0}$, 81\% of authors publish once. Bradford: 24 core sources hold \nicefrac{1}{3} of the papers (zones 24 : 469 : 2,005).
+\end{column}
+\begin{column}{0.58\textwidth}\scriptsize\textbf{Most cited papers} (global citations)\\[2pt]
+\begin{tabular}{@{}p{0.2\linewidth}p{0.66\linewidth}r@{}}
+Bordo (2017) & Central Bank Digital Currency and the Future of Monetary\dots{} & 517 \\
+Auer (2020) & Rise of the Central Bank Digital Currencies: Drivers, App\dots{} & 454 \\
+Agur (2019) & Designing Central Bank Digital Currencies & 433 \\
+Andolfatto (2020) & Assessing the Impact of Central Bank Digital Currency on\dots{} & 404 \\
+Barrdear (2016) & The Macroeconomics of Central Bank Issued Digital Currenc\dots{} & 341 \\
+\end{tabular}
+\end{column}
+\end{columns}
+\note{\textbf{Academic literature (0:45).}
+\begin{itemize}
+\item Much of the debate happens in working papers, often by central bank economists.
+\item The most cited papers are macro-modelling papers from 2016--2020.
+\item Laws: output grows 58\% a year; most authors write once (a Lotka exponent above 2): a young, open field around a small core of sources.
+\end{itemize}}
+\end{frame}
+
+\begin{frame}{Who speaks: central banks, authorities, press}
+\begin{columns}[T]\begin{column}{0.32\textwidth}\scriptsize\textbf{Speeches}\\[2pt]\begin{tabular}{@{}p{0.8\linewidth}r@{}}European Central Bank & 118 \\
+Deutsche Bundesbank & 63 \\
+Bank of France & 49 \\
+Hong Kong Monetary Authority & 23 \\
+Federal Reserve Board & 21 \\
+Bank of England & 21 \\
+Bank of Italy & 19 \\
+Bank of Japan & 14 \\\end{tabular}\end{column}\begin{column}{0.32\textwidth}\scriptsize\textbf{Official documents}\\[2pt]\begin{tabular}{@{}p{0.8\linewidth}r@{}}European Central Bank & 98 \\
+Bank of Japan & 27 \\
+Sveriges Riksbank & 22 \\
+Deutsche Bundesbank & 21 \\
+European Commission & 15 \\
+Swiss National Bank & 9 \\
+European Parliament & 8 \\
+The White House & 7 \\\end{tabular}\end{column}\begin{column}{0.32\textwidth}\scriptsize\textbf{Press outlets}\\[2pt]\begin{tabular}{@{}p{0.8\linewidth}r@{}}Ledger Insights & 343 \\
+CoinGeek & 89 \\
+Euronews.com & 83 \\
+Reuters & 82 \\
+TradingView & 78 \\
+South China Morning Post & 69 \\
+European Central Bank & 65 \\
+Global Government Finance & 59 \\\end{tabular}\end{column}\end{columns}
+\note{\textbf{Voices (0:35).}
+\begin{itemize}
+\item European Central Bank leads the speeches: the digital euro project makes it the most vocal institution.
+\item The press is led by specialised fintech outlets before generalist media.
+\end{itemize}}
+\end{frame}
+
+% =====================================================================
+\section{Mapping the field}
+
+\begin{frame}{Co-citation: the intellectual base}
+\begin{columns}[T]
+\begin{column}{0.7\textwidth}
+\begin{tikzpicture}
+\draw[gray, opacity=0.67, line width=0.35pt] (1.25,2.35) -- (0.00,2.10);
+\draw[gray, opacity=0.59, line width=0.35pt] (0.00,2.10) -- (1.96,1.65);
+\draw[gray, opacity=0.58, line width=0.35pt] (1.25,2.35) -- (1.96,1.65);
+\draw[gray, opacity=0.57, line width=0.35pt] (1.70,2.98) -- (3.65,3.43);
+\draw[gray, opacity=0.57, line width=0.35pt] (0.63,1.72) -- (1.25,2.35);
+\draw[gray, opacity=0.56, line width=0.35pt] (0.63,1.72) -- (1.96,1.65);
+\draw[gray, opacity=0.54, line width=0.35pt] (0.63,1.72) -- (0.00,2.10);
+\draw[gray, opacity=0.54, line width=0.35pt] (0.38,2.65) -- (1.25,2.35);
+\draw[gray, opacity=0.54, line width=0.35pt] (1.25,2.35) -- (3.31,2.75);
+\draw[gray, opacity=0.54, line width=0.35pt] (0.51,0.56) -- (1.96,1.65);
+\draw[gray, opacity=0.54, line width=0.35pt] (3.31,2.75) -- (0.00,2.10);
+\draw[gray, opacity=0.53, line width=0.35pt] (1.25,2.35) -- (3.64,2.23);
+\draw[gray, opacity=0.53, line width=0.35pt] (3.65,3.43) -- (2.28,3.99);
+\draw[gray, opacity=0.51, line width=0.35pt] (1.70,2.98) -- (2.28,3.99);
+\draw[gray, opacity=0.50, line width=0.35pt] (1.70,2.98) -- (3.31,2.75);
+\draw[gray, opacity=0.50, line width=0.35pt] (0.38,2.65) -- (3.64,2.23);
+\draw[gray, opacity=0.50, line width=0.35pt] (0.63,1.72) -- (0.25,1.27);
+\draw[gray, opacity=0.49, line width=0.35pt] (1.25,2.35) -- (0.51,0.56);
+\draw[gray, opacity=0.49, line width=0.35pt] (0.25,1.27) -- (1.96,1.65);
+\draw[gray, opacity=0.48, line width=0.35pt] (0.38,2.65) -- (2.52,2.30);
+\draw[gray, opacity=0.48, line width=0.35pt] (1.25,2.35) -- (3.65,3.43);
+\draw[gray, opacity=0.48, line width=0.35pt] (0.38,2.65) -- (0.00,2.10);
+\draw[gray, opacity=0.48, line width=0.35pt] (5.57,3.99) -- (5.40,3.45);
+\draw[gray, opacity=0.47, line width=0.35pt] (1.70,2.98) -- (2.52,2.30);
+\draw[gray, opacity=0.47, line width=0.35pt] (0.38,2.65) -- (3.31,2.75);
+\draw[gray, opacity=0.47, line width=0.35pt] (1.70,2.98) -- (0.38,2.65);
+\draw[gray, opacity=0.46, line width=0.35pt] (0.63,1.72) -- (0.51,0.56);
+\draw[gray, opacity=0.46, line width=0.35pt] (0.63,1.72) -- (1.48,1.13);
+\draw[gray, opacity=0.46, line width=0.35pt] (3.20,1.62) -- (1.96,1.65);
+\draw[gray, opacity=0.46, line width=0.35pt] (1.48,1.13) -- (0.25,1.27);
+\draw[gray, opacity=0.46, line width=0.35pt] (3.20,1.62) -- (0.00,2.10);
+\draw[gray, opacity=0.46, line width=0.35pt] (3.20,1.62) -- (1.25,2.35);
+\draw[gray, opacity=0.45, line width=0.35pt] (0.00,2.10) -- (0.25,1.27);
+\draw[gray, opacity=0.45, line width=0.35pt] (1.70,2.98) -- (1.25,2.35);
+\draw[gray, opacity=0.45, line width=0.35pt] (1.70,2.98) -- (0.00,2.10);
+\draw[gray, opacity=0.45, line width=0.35pt] (4.85,2.73) -- (5.40,3.45);
+\draw[gray, opacity=0.45, line width=0.35pt] (0.63,1.72) -- (2.52,2.30);
+\draw[gray, opacity=0.45, line width=0.35pt] (2.83,1.00) -- (0.25,1.27);
+\draw[gray, opacity=0.45, line width=0.35pt] (3.64,2.23) -- (0.00,2.10);
+\draw[gray, opacity=0.45, line width=0.35pt] (0.63,1.72) -- (0.38,2.65);
+\draw[gray, opacity=0.44, line width=0.35pt] (1.25,2.35) -- (2.52,2.30);
+\draw[gray, opacity=0.44, line width=0.35pt] (0.38,2.65) -- (1.96,1.65);
+\draw[gray, opacity=0.44, line width=0.35pt] (1.70,2.98) -- (2.39,3.25);
+\draw[gray, opacity=0.44, line width=0.35pt] (2.52,2.30) -- (1.96,1.65);
+\draw[gray, opacity=0.44, line width=0.35pt] (3.64,2.23) -- (2.52,2.30);
+\draw[gray, opacity=0.44, line width=0.35pt] (3.31,2.75) -- (2.52,2.30);
+\draw[gray, opacity=0.43, line width=0.35pt] (5.57,3.99) -- (4.22,4.10);
+\draw[gray, opacity=0.43, line width=0.35pt] (4.44,1.21) -- (4.05,0.00);
+\draw[gray, opacity=0.43, line width=0.35pt] (0.63,1.72) -- (2.83,1.00);
+\draw[gray, opacity=0.43, line width=0.35pt] (1.48,1.13) -- (1.96,1.65);
+\draw[gray, opacity=0.43, line width=0.35pt] (3.65,3.43) -- (3.64,2.23);
+\draw[gray, opacity=0.43, line width=0.35pt] (8.53,2.57) -- (6.67,2.92);
+\draw[gray, opacity=0.43, line width=0.35pt] (2.37,0.57) -- (1.96,1.65);
+\draw[gray, opacity=0.43, line width=0.35pt] (1.25,2.35) -- (0.25,1.27);
+\draw[gray, opacity=0.43, line width=0.35pt] (3.31,2.75) -- (2.28,3.99);
+\draw[gray, opacity=0.42, line width=0.35pt] (0.51,0.56) -- (2.37,0.57);
+\draw[gray, opacity=0.42, line width=0.35pt] (4.85,2.73) -- (3.31,2.75);
+\draw[gray, opacity=0.42, line width=0.35pt] (0.51,0.56) -- (0.00,2.10);
+\draw[gray, opacity=0.42, line width=0.35pt] (2.39,3.25) -- (3.31,2.75);
+\draw[gray, opacity=0.42, line width=0.35pt] (0.63,1.72) -- (3.64,2.23);
+\draw[gray, opacity=0.42, line width=0.35pt] (3.64,2.23) -- (3.31,2.75);
+\draw[gray, opacity=0.42, line width=0.35pt] (0.63,1.72) -- (2.37,0.57);
+\draw[gray, opacity=0.42, line width=0.35pt] (1.70,2.98) -- (3.64,2.23);
+\draw[gray, opacity=0.41, line width=0.35pt] (1.48,1.13) -- (0.38,2.65);
+\draw[gray, opacity=0.41, line width=0.35pt] (2.83,1.00) -- (1.96,1.65);
+\draw[gray, opacity=0.41, line width=0.35pt] (1.48,1.13) -- (1.25,2.35);
+\draw[gray, opacity=0.41, line width=0.35pt] (5.40,3.45) -- (4.22,4.10);
+\draw[gray, opacity=0.41, line width=0.35pt] (0.51,0.56) -- (0.25,1.27);
+\draw[gray, opacity=0.41, line width=0.35pt] (7.04,0.72) -- (4.44,1.21);
+\draw[gray, opacity=0.40, line width=0.35pt] (1.25,2.35) -- (2.37,0.57);
+\draw[gray, opacity=0.40, line width=0.35pt] (2.52,2.30) -- (0.00,2.10);
+\draw[gray, opacity=0.40, line width=0.35pt] (2.39,3.25) -- (0.00,2.10);
+\draw[gray, opacity=0.40, line width=0.35pt] (3.20,1.62) -- (2.37,0.57);
+\draw[gray, opacity=0.40, line width=0.35pt] (4.43,0.56) -- (4.05,0.00);
+\draw[gray, opacity=0.40, line width=0.35pt] (0.38,2.65) -- (0.25,1.27);
+\draw[gray, opacity=0.40, line width=0.35pt] (3.65,3.43) -- (2.52,2.30);
+\draw[gray, opacity=0.40, line width=0.35pt] (2.28,3.99) -- (4.22,4.10);
+\draw[gray, opacity=0.40, line width=0.35pt] (1.70,2.98) -- (4.85,2.73);
+\draw[gray, opacity=0.39, line width=0.35pt] (1.48,1.13) -- (0.00,2.10);
+\draw[gray, opacity=0.39, line width=0.35pt] (1.48,1.13) -- (2.37,0.57);
+\draw[gray, opacity=0.39, line width=0.35pt] (3.65,3.43) -- (5.40,3.45);
+\draw[gray, opacity=0.39, line width=0.35pt] (1.70,2.98) -- (5.40,3.45);
+\draw[gray, opacity=0.39, line width=0.35pt] (2.52,2.30) -- (0.25,1.27);
+\draw[gray, opacity=0.39, line width=0.35pt] (1.25,2.35) -- (2.83,1.00);
+\draw[gray, opacity=0.39, line width=0.35pt] (5.60,0.90) -- (7.04,0.72);
+\draw[gray, opacity=0.39, line width=0.35pt] (1.48,1.13) -- (2.83,1.00);
+\draw[gray, opacity=0.39, line width=0.35pt] (3.20,1.62) -- (0.38,2.65);
+\draw[gray, opacity=0.39, line width=0.35pt] (4.66,1.86) -- (2.52,2.30);
+\draw[gray, opacity=0.38, line width=0.35pt] (1.70,2.98) -- (5.57,3.99);
+\draw[gray, opacity=0.38, line width=0.35pt] (3.20,1.62) -- (0.51,0.56);
+\draw[gray, opacity=0.38, line width=0.35pt] (0.00,2.10) -- (2.37,0.57);
+\draw[gray, opacity=0.38, line width=0.35pt] (7.04,0.72) -- (4.05,0.00);
+\draw[gray, opacity=0.38, line width=0.35pt] (0.38,2.65) -- (2.37,0.57);
+\draw[gray, opacity=0.38, line width=0.35pt] (2.83,1.00) -- (0.00,2.10);
+\draw[gray, opacity=0.38, line width=0.35pt] (5.40,3.45) -- (2.28,3.99);
+\draw[gray, opacity=0.38, line width=0.35pt] (1.25,2.35) -- (2.39,3.25);
+\draw[gray, opacity=0.38, line width=0.35pt] (7.04,0.72) -- (7.79,1.29);
+\draw[gray, opacity=0.38, line width=0.35pt] (0.25,1.27) -- (2.37,0.57);
+\draw[gray, opacity=0.38, line width=0.35pt] (5.57,3.99) -- (3.65,3.43);
+\draw[gray, opacity=0.38, line width=0.35pt] (3.20,1.62) -- (2.52,2.30);
+\draw[gray, opacity=0.37, line width=0.35pt] (2.83,1.00) -- (2.37,0.57);
+\draw[gray, opacity=0.37, line width=0.35pt] (3.64,2.23) -- (2.28,3.99);
+\draw[gray, opacity=0.37, line width=0.35pt] (3.20,1.62) -- (0.25,1.27);
+\draw[gray, opacity=0.37, line width=0.35pt] (0.38,2.65) -- (4.66,1.86);
+\draw[gray, opacity=0.37, line width=0.35pt] (1.48,1.13) -- (2.52,2.30);
+\draw[gray, opacity=0.37, line width=0.35pt] (5.57,3.99) -- (2.28,3.99);
+\draw[gray, opacity=0.37, line width=0.35pt] (3.20,1.62) -- (0.63,1.72);
+\draw[gray, opacity=0.37, line width=0.35pt] (3.20,1.62) -- (1.48,1.13);
+\draw[gray, opacity=0.37, line width=0.35pt] (1.48,1.13) -- (0.51,0.56);
+\draw[gray, opacity=0.37, line width=0.35pt] (0.38,2.65) -- (3.65,3.43);
+\draw[gray, opacity=0.37, line width=0.35pt] (2.39,3.25) -- (1.96,1.65);
+\draw[gray, opacity=0.37, line width=0.35pt] (3.64,2.23) -- (1.96,1.65);
+\draw[gray, opacity=0.37, line width=0.35pt] (4.85,2.73) -- (4.44,1.21);
+\draw[gray, opacity=0.36, line width=0.35pt] (4.43,0.56) -- (4.44,1.21);
+\draw[gray, opacity=0.36, line width=0.35pt] (0.38,2.65) -- (2.83,1.00);
+\draw[gray, opacity=0.36, line width=0.35pt] (1.25,2.35) -- (4.66,1.86);
+\draw[gray, opacity=0.36, line width=0.35pt] (2.83,1.00) -- (2.52,2.30);
+\draw[gray, opacity=0.36, line width=0.35pt] (1.25,2.35) -- (4.85,2.73);
+\draw[gray, opacity=0.36, line width=0.35pt] (0.63,1.72) -- (4.66,1.86);
+\draw[gray, opacity=0.36, line width=0.35pt] (1.25,2.35) -- (2.28,3.99);
+\draw[gray, opacity=0.36, line width=0.35pt] (3.20,1.62) -- (3.64,2.23);
+\draw[gray, opacity=0.36, line width=0.35pt] (5.40,3.45) -- (3.31,2.75);
+\draw[gray, opacity=0.36, line width=0.35pt] (4.44,1.21) -- (3.31,2.75);
+\draw[gray, opacity=0.36, line width=0.35pt] (3.65,3.43) -- (4.85,2.73);
+\draw[gray, opacity=0.36, line width=0.35pt] (8.09,3.31) -- (6.67,2.92);
+\draw[gray, opacity=0.36, line width=0.35pt] (0.38,2.65) -- (0.51,0.56);
+\draw[gray, opacity=0.36, line width=0.35pt] (2.83,1.00) -- (3.31,2.75);
+\draw[gray, opacity=0.35, line width=0.35pt] (2.83,1.00) -- (0.51,0.56);
+\draw[gray, opacity=0.35, line width=0.35pt] (1.48,1.13) -- (3.64,2.23);
+\draw[gray, opacity=0.35, line width=0.35pt] (3.65,3.43) -- (3.31,2.75);
+\draw[gray, opacity=0.35, line width=0.35pt] (2.52,2.30) -- (2.37,0.57);
+\draw[gray, opacity=0.35, line width=0.35pt] (3.20,1.62) -- (2.83,1.00);
+\draw[gray, opacity=0.35, line width=0.35pt] (0.38,2.65) -- (2.39,3.25);
+\draw[gray, opacity=0.35, line width=0.35pt] (0.63,1.72) -- (2.39,3.25);
+\draw[gray, opacity=0.35, line width=0.35pt] (3.64,2.23) -- (0.25,1.27);
+\draw[gray, opacity=0.35, line width=0.35pt] (1.48,1.13) -- (4.66,1.86);
+\draw[gray, opacity=0.35, line width=0.35pt] (4.44,1.21) -- (1.96,1.65);
+\draw[gray, opacity=0.35, line width=0.35pt] (4.85,2.73) -- (7.79,1.29);
+\draw[gray, opacity=0.35, line width=0.35pt] (3.65,3.43) -- (0.00,2.10);
+\draw[gray, opacity=0.35, line width=0.35pt] (4.85,2.73) -- (2.28,3.99);
+\draw[gray, opacity=0.35, line width=0.35pt] (0.51,0.56) -- (3.31,2.75);
+\draw[gray, opacity=0.35, line width=0.35pt] (3.64,2.23) -- (2.39,3.25);
+\draw[gray, opacity=0.35, line width=0.35pt] (0.71,3.46) -- (3.65,3.43);
+\draw[gray, opacity=0.35, line width=0.35pt] (2.39,3.25) -- (2.52,2.30);
+\draw[gray, opacity=0.35, line width=0.35pt] (6.43,1.60) -- (7.79,1.29);
+\draw[gray, opacity=0.35, line width=0.35pt] (3.20,1.62) -- (3.31,2.75);
+\draw[gray, opacity=0.35, line width=0.35pt] (6.43,1.60) -- (4.85,2.73);
+\draw[gray, opacity=0.34, line width=0.35pt] (0.71,3.46) -- (1.70,2.98);
+\draw[gray, opacity=0.34, line width=0.35pt] (7.97,1.81) -- (6.67,2.92);
+\draw[gray, opacity=0.34, line width=0.35pt] (3.64,2.23) -- (4.66,1.86);
+\draw[gray, opacity=0.34, line width=0.35pt] (4.66,1.86) -- (2.37,0.57);
+\draw[gray, opacity=0.34, line width=0.35pt] (4.44,1.21) -- (7.79,1.29);
+\draw[gray, opacity=0.34, line width=0.35pt] (4.85,2.73) -- (3.64,2.23);
+\draw[gray, opacity=0.34, line width=0.35pt] (5.40,3.45) -- (6.67,2.92);
+\draw[gray, opacity=0.34, line width=0.35pt] (4.66,1.86) -- (1.96,1.65);
+\draw[gray, opacity=0.34, line width=0.35pt] (0.63,1.72) -- (1.70,2.98);
+\draw[gray, opacity=0.34, line width=0.35pt] (3.31,2.75) -- (0.25,1.27);
+\draw[gray, opacity=0.34, line width=0.35pt] (4.66,1.86) -- (0.25,1.27);
+\draw[gray, opacity=0.34, line width=0.35pt] (6.43,1.60) -- (6.00,2.31);
+\draw[gray, opacity=0.34, line width=0.35pt] (3.64,2.23) -- (4.44,1.21);
+\fill[c2, opacity=0.85] (9.00,3.11) circle (2.15mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.51mm, inner sep=0.5pt] at (9.00,3.11) {Yankovskiy (2020)};
+\fill[c3, opacity=0.85] (0.71,3.46) circle (2.58mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.81mm, inner sep=0.5pt] at (0.71,3.46) {Auer (2022)};
+\fill[c1, opacity=0.85] (3.20,1.62) circle (2.91mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=2.04mm, inner sep=0.5pt] at (3.20,1.62) {Fernández-Villaverde (2\dots{}};
+\fill[c2, opacity=0.85] (5.60,0.90) circle (2.52mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.76mm, inner sep=0.5pt] at (5.60,0.90) {Bindseil (2020)};
+\fill[c1, opacity=0.85] (0.63,1.72) circle (2.29mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.60mm, inner sep=0.5pt] at (0.63,1.72) {Williamson (2022)};
+\fill[c3, opacity=0.85] (1.70,2.98) circle (1.92mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (1.70,2.98) {Chen (2022)};
+\fill[c1, opacity=0.85] (1.48,1.13) circle (2.88mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=2.02mm, inner sep=0.5pt] at (1.48,1.13) {Keister (2022a)};
+\fill[c3, opacity=0.85] (5.57,3.99) circle (1.89mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.33mm, inner sep=0.5pt] at (5.57,3.99) {Söilen (2021)};
+\fill[c1, opacity=0.85] (0.38,2.65) circle (2.46mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.72mm, inner sep=0.5pt] at (0.38,2.65) {Barrdear (2021)};
+\fill[c1, opacity=0.85] (1.25,2.35) circle (2.01mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.41mm, inner sep=0.5pt] at (1.25,2.35) {Williamson (2021)};
+\fill[c2, opacity=0.85] (4.43,0.56) circle (3.03mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=2.12mm, inner sep=0.5pt] at (4.43,0.56) {Bordo (2017)};
+\fill[c3, opacity=0.85] (3.65,3.43) circle (1.89mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.33mm, inner sep=0.5pt] at (3.65,3.43) {Wang (2022)};
+\fill[c2, opacity=0.85] (8.53,2.57) circle (2.16mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.52mm, inner sep=0.5pt] at (8.53,2.57) {Allen (2020)};
+\fill[c2, opacity=0.85] (7.97,1.81) circle (2.22mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.55mm, inner sep=0.5pt] at (7.97,1.81) {Auer (2020b)};
+\fill[c2, opacity=0.85] (6.43,1.60) circle (2.48mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.74mm, inner sep=0.5pt] at (6.43,1.60) {Agur (n.d.)};
+\fill[c3, opacity=0.85] (4.85,2.73) circle (1.99mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.39mm, inner sep=0.5pt] at (4.85,2.73) {Bindseil (2019)};
+\fill[c1, opacity=0.85] (2.83,1.00) circle (3.20mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=2.24mm, inner sep=0.5pt] at (2.83,1.00) {Andolfatto (2020)};
+\fill[c1, opacity=0.85] (3.64,2.23) circle (2.59mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.81mm, inner sep=0.5pt] at (3.64,2.23) {Davoodalhosseini (2021)};
+\fill[c2, opacity=0.85] (7.04,0.72) circle (2.49mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.74mm, inner sep=0.5pt] at (7.04,0.72) {Kumhof (2018)};
+\fill[c2, opacity=0.85] (8.72,0.99) circle (2.35mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.65mm, inner sep=0.5pt] at (8.72,0.99) {Nakamoto (2008)};
+\fill[c3, opacity=0.85] (5.40,3.45) circle (2.27mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.59mm, inner sep=0.5pt] at (5.40,3.45) {Lee (2021)};
+\fill[c2, opacity=0.85] (7.40,2.36) circle (2.86mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=2.00mm, inner sep=0.5pt] at (7.40,2.36) {Auer (2020a)};
+\fill[c3, opacity=0.85] (2.39,3.25) circle (2.46mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.72mm, inner sep=0.5pt] at (2.39,3.25) {KIM (2022)};
+\fill[c2, opacity=0.85] (4.44,1.21) circle (2.27mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.59mm, inner sep=0.5pt] at (4.44,1.21) {Meaning (2018)};
+\fill[c1, opacity=0.85] (0.51,0.56) circle (2.05mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.43mm, inner sep=0.5pt] at (0.51,0.56) {Diamond (1983)};
+\fill[c2, opacity=0.85] (4.05,0.00) circle (2.45mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.72mm, inner sep=0.5pt] at (4.05,0.00) {Barrdear (2016)};
+\fill[c2, opacity=0.85] (7.79,1.29) circle (1.97mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.38mm, inner sep=0.5pt] at (7.79,1.29) {Barontini (2019)};
+\fill[c2, opacity=0.85] (6.33,0.13) circle (2.07mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.45mm, inner sep=0.5pt] at (6.33,0.13) {Sun (2019)};
+\fill[c3, opacity=0.85] (3.31,2.75) circle (2.01mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.40mm, inner sep=0.5pt] at (3.31,2.75) {Kumhof (2021)};
+\fill[c2, opacity=0.85] (8.09,3.31) circle (2.01mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.40mm, inner sep=0.5pt] at (8.09,3.31) {Bossu (2020)};
+\fill[c3, opacity=0.85] (2.28,3.99) circle (2.26mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.58mm, inner sep=0.5pt] at (2.28,3.99) {Allen (2022)};
+\fill[c1, opacity=0.85] (4.66,1.86) circle (3.15mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=2.20mm, inner sep=0.5pt] at (4.66,1.86) {Agur (2019)};
+\fill[c1, opacity=0.85] (2.52,2.30) circle (2.43mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.70mm, inner sep=0.5pt] at (2.52,2.30) {Minesso (2022)};
+\fill[c3, opacity=0.85] (4.22,4.10) circle (2.35mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.64mm, inner sep=0.5pt] at (4.22,4.10) {Ozili (2022)};
+\fill[c1, opacity=0.85] (0.00,2.10) circle (2.02mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.41mm, inner sep=0.5pt] at (0.00,2.10) {Keister (2022b)};
+\fill[c1, opacity=0.85] (0.25,1.27) circle (2.73mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.91mm, inner sep=0.5pt] at (0.25,1.27) {Chiu (2022)};
+\fill[c1, opacity=0.85] (2.37,0.57) circle (2.91mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=2.04mm, inner sep=0.5pt] at (2.37,0.57) {Brunnermeier (2019)};
+\fill[c2, opacity=0.85] (6.00,2.31) circle (2.19mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.54mm, inner sep=0.5pt] at (6.00,2.31) {Adrian (2019)};
+\fill[c1, opacity=0.85] (1.96,1.65) circle (2.13mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.49mm, inner sep=0.5pt] at (1.96,1.65) {Schilling (2020)};
+\fill[c2, opacity=0.85] (6.67,2.92) circle (2.42mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.69mm, inner sep=0.5pt] at (6.67,2.92) {Kiff (2020)};
+\end{tikzpicture}
+\end{column}
+\begin{column}{0.28\textwidth}\scriptsize
+\textbf{Most cited within the corpus}\\[2pt]
+\begin{tabular}{@{}lr@{}}Andolfatto (2020) & 359 \\
+Agur (2019) & 345 \\
+Bordo (2017) & 314 \\
+Brunnermeier (2019) & 283 \\
+Fernández-Villaverde (2020) & 283 \\
+Keister (2022) & 276 \\
+Auer (2020) & 272 \\
+Chiu (2022) & 241 \\\end{tabular}
+\end{column}
+\end{columns}
+\vspace{2pt}
+\scriptsize\textbf{Clusters} (largest members):
+\begin{itemize}\setlength\itemsep{0pt}
+\item[\textcolor{c1}{$\bullet$}] Andolfatto (2020), Agur (2019), Fernández-Villaverde (2020), Brunnermeier (2019)
+\item[\textcolor{c2}{$\bullet$}] Bordo (2017), Auer (2020a), Bindseil (2020), Kumhof (2018)
+\item[\textcolor{c3}{$\bullet$}] Auer (2022), KIM (2022), Ozili (2022), Lee (2021)
+\end{itemize}
+2,749 papers with reference lists, 28,897 distinct references; 40 most co-cited shown, 3 clusters, $Q=0.12$.
+\note{\textbf{Co-citation (0:50).}
+\begin{itemize}
+\item Method in one line: two items are linked when they appear in the same paper, weighted by association strength, grouped by the Louvain algorithm (details in backup).
+\item Two references are linked when the same paper cites both: this shows what the field builds on.
+\item Core: Andolfatto (2020), Agur (2019), Bordo (2017).
+\item Clusters read as schools: CBDC design and bank intermediation models; central bank policy reports; adoption studies.
+\end{itemize}}
+\end{frame}
+
+\begin{frame}{Co-authorship: research communities}
+\begin{columns}[T]
+\begin{column}{0.62\textwidth}
+\begin{tikzpicture}
+\draw[gray, opacity=0.67, line width=0.35pt] (5.60,2.13) -- (6.74,4.20);
+\draw[gray, opacity=0.67, line width=0.35pt] (5.60,2.13) -- (7.84,2.07);
+\draw[gray, opacity=0.67, line width=0.35pt] (5.60,2.13) -- (6.70,0.00);
+\draw[gray, opacity=0.67, line width=0.35pt] (6.74,4.20) -- (7.84,2.07);
+\draw[gray, opacity=0.67, line width=0.35pt] (6.74,4.20) -- (6.70,0.00);
+\draw[gray, opacity=0.67, line width=0.35pt] (6.70,0.00) -- (7.84,2.07);
+\draw[gray, opacity=0.64, line width=0.35pt] (2.80,3.18) -- (3.00,3.16);
+\draw[gray, opacity=0.56, line width=0.35pt] (4.92,2.96) -- (4.75,3.04);
+\draw[gray, opacity=0.54, line width=0.35pt] (2.24,3.37) -- (1.95,3.25);
+\draw[gray, opacity=0.49, line width=0.35pt] (5.04,3.12) -- (4.92,2.96);
+\draw[gray, opacity=0.47, line width=0.35pt] (0.70,3.17) -- (0.93,3.31);
+\draw[gray, opacity=0.47, line width=0.35pt] (4.94,3.49) -- (5.04,3.12);
+\draw[gray, opacity=0.47, line width=0.35pt] (4.94,3.49) -- (4.92,2.96);
+\draw[gray, opacity=0.43, line width=0.35pt] (2.80,3.18) -- (2.83,3.73);
+\draw[gray, opacity=0.43, line width=0.35pt] (0.89,2.76) -- (0.93,3.31);
+\draw[gray, opacity=0.43, line width=0.35pt] (0.80,3.49) -- (0.93,3.31);
+\draw[gray, opacity=0.37, line width=0.35pt] (4.94,3.49) -- (4.75,3.04);
+\draw[gray, opacity=0.36, line width=0.35pt] (5.04,3.12) -- (4.75,3.04);
+\draw[gray, opacity=0.36, line width=0.35pt] (0.89,2.76) -- (0.80,3.49);
+\draw[gray, opacity=0.36, line width=0.35pt] (3.00,3.16) -- (2.83,3.73);
+\draw[gray, opacity=0.36, line width=0.35pt] (0.69,2.69) -- (0.70,3.17);
+\draw[gray, opacity=0.33, line width=0.35pt] (0.89,2.76) -- (0.69,2.69);
+\draw[gray, opacity=0.33, line width=0.35pt] (0.89,2.76) -- (0.85,1.74);
+\draw[gray, opacity=0.32, line width=0.35pt] (0.69,2.69) -- (0.85,1.74);
+\draw[gray, opacity=0.30, line width=0.35pt] (0.89,2.76) -- (0.70,3.17);
+\draw[gray, opacity=0.30, line width=0.35pt] (3.00,3.16) -- (3.42,2.91);
+\draw[gray, opacity=0.30, line width=0.35pt] (0.80,3.49) -- (0.70,3.17);
+\draw[gray, opacity=0.30, line width=0.35pt] (4.06,2.89) -- (4.09,2.17);
+\draw[gray, opacity=0.27, line width=0.35pt] (3.42,2.91) -- (3.32,1.96);
+\draw[gray, opacity=0.25, line width=0.35pt] (0.94,4.20) -- (0.93,3.31);
+\draw[gray, opacity=0.25, line width=0.35pt] (1.01,0.94) -- (0.85,1.74);
+\draw[gray, opacity=0.25, line width=0.35pt] (0.69,2.69) -- (0.93,3.31);
+\draw[gray, opacity=0.24, line width=0.35pt] (1.01,0.94) -- (0.73,0.82);
+\draw[gray, opacity=0.24, line width=0.35pt] (0.73,0.82) -- (0.85,1.74);
+\draw[gray, opacity=0.23, line width=0.35pt] (0.00,2.54) -- (0.07,3.04);
+\draw[gray, opacity=0.22, line width=0.35pt] (0.94,4.20) -- (0.80,3.49);
+\draw[gray, opacity=0.22, line width=0.35pt] (0.80,3.49) -- (0.69,2.69);
+\draw[gray, opacity=0.21, line width=0.35pt] (0.07,3.04) -- (0.69,2.69);
+\draw[gray, opacity=0.20, line width=0.35pt] (3.13,4.20) -- (2.83,3.73);
+\draw[gray, opacity=0.20, line width=0.35pt] (0.00,2.54) -- (0.69,2.69);
+\draw[gray, opacity=0.20, line width=0.35pt] (0.99,0.30) -- (0.85,1.74);
+\draw[gray, opacity=0.20, line width=0.35pt] (0.99,0.30) -- (1.01,0.94);
+\draw[gray, opacity=0.19, line width=0.35pt] (0.99,0.30) -- (0.73,0.82);
+\draw[gray, opacity=0.18, line width=0.35pt] (3.13,4.20) -- (3.42,2.91);
+\draw[gray, opacity=0.18, line width=0.35pt] (0.99,0.30) -- (1.10,0.00);
+\draw[gray, opacity=0.18, line width=0.35pt] (4.06,2.89) -- (3.42,2.91);
+\draw[gray, opacity=0.17, line width=0.35pt] (4.06,2.89) -- (4.75,3.04);
+\draw[gray, opacity=0.16, line width=0.35pt] (3.42,2.91) -- (4.09,2.17);
+\draw[gray, opacity=0.15, line width=0.35pt] (0.69,2.69) -- (1.95,3.25);
+\draw[gray, opacity=0.15, line width=0.35pt] (4.75,3.04) -- (4.09,2.17);
+\draw[gray, opacity=0.15, line width=0.35pt] (4.23,0.00) -- (4.09,2.17);
+\fill[c2, opacity=0.85] (0.00,2.54) circle (2.33mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (0.00,2.54) {Tronnier};
+\fill[c3, opacity=0.85] (4.94,3.49) circle (2.78mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.95mm, inner sep=0.5pt] at (4.94,3.49) {Buckley};
+\fill[c4, opacity=0.85] (5.60,2.13) circle (2.33mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (5.60,2.13) {Ninia};
+\fill[c3, opacity=0.85] (5.04,3.12) circle (2.10mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (5.04,3.12) {Didenko};
+\fill[c1, opacity=0.85] (3.13,4.20) circle (2.10mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (3.13,4.20) {Keister};
+\fill[c3, opacity=0.85] (4.92,2.96) circle (2.02mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.41mm, inner sep=0.5pt] at (4.92,2.96) {Zetzsche};
+\fill[c2, opacity=0.85] (0.94,4.20) circle (1.92mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (0.94,4.20) {Tan};
+\fill[c1, opacity=0.85] (4.06,2.89) circle (2.78mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.95mm, inner sep=0.5pt] at (4.06,2.89) {Auer};
+\fill[c5, opacity=0.85] (0.99,0.30) circle (2.33mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (0.99,0.30) {Niepelt};
+\fill[c5, opacity=0.85] (1.01,0.94) circle (1.92mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (1.01,0.94) {Bordo};
+\fill[c5, opacity=0.85] (0.73,0.82) circle (2.02mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.41mm, inner sep=0.5pt] at (0.73,0.82) {Masciandaro};
+\fill[c1, opacity=0.85] (4.23,0.00) circle (2.10mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (4.23,0.00) {Uhlig};
+\fill[c1, opacity=0.85] (2.80,3.18) circle (1.92mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (2.80,3.18) {Davoodalhosseini};
+\fill[c5, opacity=0.85] (1.10,0.00) circle (2.10mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (1.10,0.00) {Moser};
+\fill[c2, opacity=0.85] (0.89,2.76) circle (2.10mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (0.89,2.76) {Tourpe};
+\fill[c6, opacity=0.85] (2.24,3.37) circle (2.18mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.53mm, inner sep=0.5pt] at (2.24,3.37) {Sandner};
+\fill[c3, opacity=0.85] (4.75,3.04) circle (2.54mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.78mm, inner sep=0.5pt] at (4.75,3.04) {Arner};
+\fill[c4, opacity=0.85] (6.74,4.20) circle (2.33mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (6.74,4.20) {Casanova};
+\fill[c4, opacity=0.85] (6.70,0.00) circle (2.33mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (6.70,0.00) {Pandit};
+\fill[c1, opacity=0.85] (3.00,3.16) circle (2.10mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (3.00,3.16) {Chiu};
+\fill[c1, opacity=0.85] (3.42,2.91) circle (2.33mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (3.42,2.91) {Monnet};
+\fill[c2, opacity=0.85] (0.80,3.49) circle (2.10mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (0.80,3.49) {Soderberg};
+\fill[c2, opacity=0.85] (0.07,3.04) circle (2.18mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.53mm, inner sep=0.5pt] at (0.07,3.04) {Atangana};
+\fill[c2, opacity=0.85] (0.69,2.69) circle (2.47mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.73mm, inner sep=0.5pt] at (0.69,2.69) {Kiff};
+\fill[c6, opacity=0.85] (1.95,3.25) circle (2.47mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.73mm, inner sep=0.5pt] at (1.95,3.25) {Groß};
+\fill[c1, opacity=0.85] (4.09,2.17) circle (3.20mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=2.24mm, inner sep=0.5pt] at (4.09,2.17) {Frost};
+\fill[c2, opacity=0.85] (0.70,3.17) circle (2.02mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.41mm, inner sep=0.5pt] at (0.70,3.17) {Bechara};
+\fill[c2, opacity=0.85] (0.93,3.31) circle (1.92mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (0.93,3.31) {Lannquist};
+\fill[c1, opacity=0.85] (3.32,1.96) circle (2.26mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.58mm, inner sep=0.5pt] at (3.32,1.96) {Assenmacher};
+\fill[c1, opacity=0.85] (2.83,3.73) circle (2.10mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.47mm, inner sep=0.5pt] at (2.83,3.73) {Zhu};
+\fill[c5, opacity=0.85] (0.85,1.74) circle (1.92mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.35mm, inner sep=0.5pt] at (0.85,1.74) {Agur};
+\fill[c4, opacity=0.85] (7.84,2.07) circle (2.33mm);
+\node[font=\fontsize{4.6}{5}\selectfont, above=1.63mm, inner sep=0.5pt] at (7.84,2.07) {Mobius};
+\end{tikzpicture}
+\end{column}
+\begin{column}{0.36\textwidth}\scriptsize
+\textbf{Most productive authors}\\[2pt]
+\begin{tabular}{@{}lr@{}}Peterson K Ozili & 47 \\
+Jon Frost & 27 \\
+Ulrich Bindseil & 23 \\
+Ross P. Buckley & 19 \\
+Raphael Auer & 19 \\
+Sangam Das & 18 \\
+Annelieke Mooij & 17 \\
+Heng Wang & 15 \\\end{tabular}\\[6pt]
+10,733 authors; 49\% of papers co-authored (mean team 2.0); 17\% international. Top countries: RU 602, US 509, CN 410, IN 349, GB 343.\\[4pt]
+Papers with a central bank, BIS, IMF or World Bank author: \alert{5\%} (13\% in 2014--2019, 4\% in 2023--2026), but \alert{31\% of citations}.
+\end{column}
+\end{columns}
+\note{\textbf{Co-authorship (0:45).}
+\begin{itemize}
+\item Small, separate teams: the field is fragmented, around institutions (BIS, IMF, academic groups).
+\item Productivity is concentrated on a few very prolific authors.
+\item Who sets the agenda: central bank and international-institution economists write few of the papers but collect a third of the citations, though their share of papers is shrinking as the field opens up.
+\end{itemize}}
+\end{frame}
+
+\begin{frame}{Thematic map: which themes drive the field?}
+\begin{columns}[c]
+\begin{column}{0.47\textwidth}
+\begin{tikzpicture}[font=\scriptsize]
+\draw[gray!60, dashed] (5.20,0) -- (5.20,4.6);
+\draw[gray!60, dashed] (0,3.02) -- (6.4,3.02);
+\draw[-{Stealth}, gray] (0,0) -- (6.6000000000000005,0) node[below, text=gray, pos=0.5, yshift=-1mm] {centrality $\to$};
+\draw[-{Stealth}, gray] (0,0) -- (0,4.8) node[above, text=gray] {density};
+\node[gray, anchor=south east, font=\scriptsize\bfseries] at (6.4,4.6) {Motor};
+\node[gray, anchor=south west, font=\scriptsize\bfseries] at (0.1,4.6) {Niche};
+\node[gray, anchor=north west, font=\scriptsize\bfseries] at (0.1,-0.35) {Emerging / declining};
+\node[gray, anchor=north east, font=\scriptsize\bfseries] at (6.4,-0.35) {Basic};
+\fill[c1, opacity=0.8] (5.20,3.82) circle (6.5mm);
+\node[font=\scriptsize, text=white] at (5.20,3.82) {\textbf{1}};
+\fill[c2, opacity=0.8] (5.41,2.81) circle (6.5mm);
+\node[font=\scriptsize, text=white] at (5.41,2.81) {\textbf{2}};
+\fill[c3, opacity=0.8] (4.68,3.02) circle (5.9mm);
+\node[font=\scriptsize, text=white] at (4.68,3.02) {\textbf{3}};
+\fill[c4, opacity=0.8] (0.30,0.35) circle (3.7mm);
+\node[font=\scriptsize, text=white] at (0.30,0.35) {\textbf{4}};
+\end{tikzpicture}
+\end{column}
+\begin{column}{0.51\textwidth}\scriptsize
+Keyword clusters (Callon), with $e_{ij} = c_{ij}^2 / (c_i c_j)$:
+\[ \text{centrality} = 10\!\!\sum_{i\in C,\,j\notin C}\!\! e_{ij}, \qquad \text{density} = \frac{100}{|C|}\!\sum_{i,j\in C}\! e_{ij} \]
+\begin{tabular}{@{}lp{0.62\linewidth}l@{}}\toprule
+ & \textbf{Theme} (top keywords) & \textbf{Quadrant}\\\midrule
+\textcolor{c1}{\textbf{1}} & digital transformation in financial services, monetary policy, moneta\dots{} & motor \\
+\textcolor{c2}{\textbf{2}} & blockchain technology applications and security, cryptocurrency, digi\dots{} & basic \\
+\textcolor{c3}{\textbf{3}} & fintech, crowdfunding, digital finance, financial inclusion, digital\dots{} & niche \\
+\textcolor{c4}{\textbf{4}} & digital ruble, bank of russia, digital economy & emerging or declining \\
+\bottomrule\end{tabular}
+\end{column}
+\end{columns}
+\note{\textbf{Thematic map (0:50).}
+\begin{itemize}
+\item Centrality: how connected a theme is to the others. Density: how developed it is internally.
+\item Motor themes (central and developed): digital transformation in financial services.
+\item Niche themes are developed but isolated; basic themes are transversal but less structured.
+\end{itemize}}
+\end{frame}
+
+\begin{frame}{How the themes evolve}
+\scriptsize
+\begin{tabular}{@{}p{0.42\textwidth}rrrr@{}}\toprule
+\textbf{Keyword} (\% of the period's papers) & \textbf{2014--2019} & \textbf{2020--2022} & \textbf{2023--2026} & \textbf{Change}\\
+\textit{papers in period} & \textit{232} & \textit{1,360} & \textit{5,368} &\\\midrule
+financial inclusion & \cellcolor{c1!5}5.6 & \cellcolor{c1!9}9.2 & \cellcolor{c1!15}15.9 & \textcolor{c4}{$+6.7$} \\
+digital euro & \cellcolor{c1!3}3.0 & \cellcolor{c1!6}6.8 & \cellcolor{c1!9}9.7 & \textcolor{c4}{$+2.9$} \\
+financial stability & \cellcolor{c1!15}15.9 & \cellcolor{c1!10}10.7 & \cellcolor{c1!12}12.6 & \textcolor{c4}{$+1.9$} \\
+blockchain & \cellcolor{c1!12}12.1 & \cellcolor{c1!11}11.7 & \cellcolor{c1!13}13.3 & \textcolor{c4}{$+1.6$} \\
+digital ruble & \cellcolor{c1!0}0.0 & \cellcolor{c1!8}8.8 & \cellcolor{c1!9}9.6 & \textcolor{c4}{$+0.8$} \\
+stablecoin & \cellcolor{c1!1}1.7 & \cellcolor{c1!10}10.7 & \cellcolor{c1!10}11.0 & \textcolor{c4}{$+0.3$} \\
+digital transformation in law & \cellcolor{c1!11}11.2 & \cellcolor{c1!15}15.7 & \cellcolor{c1!14}15.0 & \textcolor{c2}{$-0.7$} \\
+banking stability, regulation, efficien\dots{} & \cellcolor{c1!14}14.2 & \cellcolor{c1!10}10.5 & \cellcolor{c1!9}9.6 & \textcolor{c2}{$-0.9$} \\
+fintech, crowdfunding, digital finance & \cellcolor{c1!50}50.4 & \cellcolor{c1!57}57.1 & \cellcolor{c1!55}55.4 & \textcolor{c2}{$-1.7$} \\
+digital payments & \cellcolor{c1!8}8.6 & \cellcolor{c1!11}11.1 & \cellcolor{c1!8}8.7 & \textcolor{c2}{$-2.4$} \\
+monetary policy and economic impact & \cellcolor{c1!35}35.8 & \cellcolor{c1!15}15.1 & \cellcolor{c1!12}12.4 & \textcolor{c2}{$-2.7$} \\
+payment systems & \cellcolor{c1!11}11.6 & \cellcolor{c1!12}12.6 & \cellcolor{c1!8}8.1 & \textcolor{c2}{$-4.5$} \\
+\bottomrule\end{tabular}\\[4pt]
+Sorted by change between the last two periods. Darker = more frequent.\\[3pt]
+\textbf{New in each period} (c-TF-IDF, periods as classes): \textbf{2014--2019}: \emph{cash, cryptocurrencies, e-krona, riksbank, bitcoin, legal}; \textbf{2020--2022}: \emph{china, euro, cash, blockchain, world, cryptocurrencies}; \textbf{2023--2026}: \emph{euro, legal, blockchain, finance, framework, inclusion}.
+\note{\textbf{Evolution (0:35).}
+\begin{itemize}
+\item Rising fastest: financial inclusion; falling most: payment systems (shares, while the field itself grows).
+\item The literature moves from ``how would it work'' to ``who adopts it and for whom''.
+\item Bottom line, TF-IDF answers ``when'': each period's vocabulary compared to the others.
+\end{itemize}}
+\end{frame}
+
+% =====================================================================
+\section{Text as data: what, why, how, when}
+
+\begin{frame}{Toolbox: the method chosen for each question}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lp{0.43\textwidth}p{0.36\textwidth}@{}}\toprule
+\textbf{Question} & \textbf{Used} & \textbf{Also tested, and why not}\\\midrule
+What? & topics: \alert{BERTopic} (SBERT, UMAP, HDBSCAN), labels by \alert{c-TF-IDF}; co-word and Callon map; \alert{covariate logit} on topic shares & LDA / STM: bag of words, one language at a time; their covariate model is applied to BERTopic instead\\
+Who? & co-citation, co-authorship, Lotka, Bradford, \alert{affiliations}; \alert{log-odds} with Dirichlet prior & plain TF-IDF: no shrinkage of rare words\\
+Why? & motivations: \alert{validated codebook}, $\kappa = 0.53$; covariate logit & SBERT, NLI, local LLMs: $\kappa \le 0.33$\\
+How? & tone: \alert{FinBERT} on CBDC sentences, $\kappa = 0.52$; stance: levels by reading, changes by a \alert{local LLM} on a stratified sample, $\kappa = 0.41$ & stance: LLM Qwen2.5 7B 0.41, NLI zero-shot 0.28, FinBERT tone 0.17, SBERT classifier 0.16\\
+When? & vocabulary: \alert{c-TF-IDF} by period; \alert{Kleinberg bursts}; \alert{event study} with placebo dates & Poisson $z$-test: 24\% false positives\\\midrule
+All & six robustness specifications; every coder checked on hand-coded texts & \\
+\bottomrule\end{tabular}
+\note{\textbf{Toolbox (0:45).}
+\begin{itemize}
+\item One row per question; the middle column is what the results use.
+\item The right column matters for the paper: each alternative was run against the same hand-coded texts, and lost.
+\item Remaining improvements are tuning (more labels, bigger language models), not new methods.
+\end{itemize}}
+\end{frame}
+
+\begin{frame}{What: topics found by meaning (SBERT + BERTopic)}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}rp{0.4\textwidth}rrrrrr@{}}\toprule
+ & \textbf{Topic} (top c-TF-IDF terms) & \textbf{Texts} & \multicolumn{3}{c}{\textbf{\% of the period's texts}} & \multicolumn{2}{c}{\textbf{Adjusted, points}}\\
+ & & & \textbf{2014--2019} & \textbf{2020--2022} & \textbf{2023--2026} & \textbf{change} & \textbf{CB}\\\midrule
+1 & retail, implementation, interest, inclusion & 1,495 & \cellcolor{c1!38}13.0 & \cellcolor{c1!54}18.0 & \cellcolor{c1!55}18.4 & {+3.4} & \textbf{-17.4} \\
+2 & euro, european, ecb, europe & 1,050 & \cellcolor{c1!58}19.6 & \cellcolor{c1!41}13.8 & \cellcolor{c1!36}12.3 & {+2.3} & \textbf{+71.0} \\
+3 & cryptocurrencies, traditional, cash, legal & 771 & \cellcolor{c1!43}14.5 & \cellcolor{c1!32}10.9 & \cellcolor{c1!26}8.8 & \textbf{-7.8} & \textbf{-8.7} \\
+4 & pound, japan, retail, pilot & 636 & \cellcolor{c1!48}16.3 & \cellcolor{c1!32}10.8 & \cellcolor{c1!17}5.9 & \textbf{-11.6} & \textbf{-4.5} \\
+5 & ruble, russian, russia, legal & 627 & \cellcolor{c1!2}0.9 & \cellcolor{c1!19}6.3 & \cellcolor{c1!23}8.0 & \textbf{+6.7} & \textbf{-6.9} \\
+6 & blockchain, privacy, offline, security & 584 & \cellcolor{c1!18}6.3 & \cellcolor{c1!22}7.5 & \cellcolor{c1!21}7.3 & {-0.1} & \textbf{-7.4} \\
+7 & china, e-cny, rmb, yuan & 432 & \cellcolor{c1!2}0.9 & \cellcolor{c1!19}6.3 & \cellcolor{c1!15}5.3 & \textbf{+4.2} & \textbf{-5.8} \\
+8 & cryptocurrencies, cryptocurrency, bitcoin, cr\dots{} & 362 & \cellcolor{c1!19}6.6 & \cellcolor{c1!11}3.9 & \cellcolor{c1!13}4.5 & \textbf{-2.8} & \textbf{-3.3} \\
+9 & debt, dollar, reserve, crisis & 342 & \cellcolor{c1!9}3.3 & \cellcolor{c1!11}3.8 & \cellcolor{c1!13}4.4 & {+0.8} & \textbf{-2.2} \\
+10 & india, rupee, intention, indian & 324 & \cellcolor{c1!0}0.0 & \cellcolor{c1!5}1.7 & \cellcolor{c1!14}4.9 & {+4.8} & \textbf{-4.2} \\
+11 & fintech, services, finance, innovation & 260 & \cellcolor{c1!12}4.2 & \cellcolor{c1!5}1.9 & \cellcolor{c1!10}3.5 & {-0.9} & {-1.0} \\
+12 & indonesia, rupiah, islamic, legal & 205 & \cellcolor{c1!1}0.6 & \cellcolor{c1!5}1.7 & \cellcolor{c1!8}2.9 & \textbf{+2.2} & \textbf{-1.6} \\
+\bottomrule\end{tabular}\\[3pt]
+8,213 texts (research, speeches, official), multilingual SBERT; 20 topics (24\% outliers reassigned). Labels: $W_{t,c} = \frac{\text{tf}_{t,c}}{|c|}\log\!\big(1+\frac{A}{f_t}\big)$. Adjusted: logit of topic membership on period, actor, English (the covariate model of an STM); change = 2023--26 vs 2014--19; CB = central banks vs academics; \textbf{bold}: 95\% CI excludes 0.\\[2pt]
+\small Topics tied to \alert{one jurisdiction}: 41--43\% of texts in every period, but the mix shifts: \emph{pound}, \emph{euro} fall; \emph{ruble}, \emph{india}, \emph{china} rise.
+\note{\textbf{Topics (1:00).}
+\begin{itemize}
+\item Unlike keywords, embeddings group texts by meaning and across languages: a Russian and an English paper on the digital ruble land together.
+\item Two kinds of topics: issues (privacy, cross-border, stablecoins, adoption) and jurisdictions (digital euro, ruble, e-CNY, rupee).
+\item Jurisdiction topics keep a stable share, but move away from the digital euro towards the ruble, the e-CNY and the rupee: the literature follows national projects.
+\item Central banks dominate one topic, the digital euro; researchers the rest.
+\end{itemize}}
+\end{frame}
+
+
+\begin{frame}{Who says what: academics, central bankers, press}
+\scriptsize
+Distinctive words, \alert{log-odds ratio with informative Dirichlet prior} (Monroe, Colaresi \& Quinn, 2008), group $i$ vs.\ others $j$:
+\[
+\delta_w = \log\frac{y_{iw}+\alpha_w}{n_i+\alpha_0-y_{iw}-\alpha_w} - \log\frac{y_{jw}+\alpha_w}{n_j+\alpha_0-y_{jw}-\alpha_w},
+\qquad z_w = \delta_w \Big/ \sqrt{\tfrac{1}{y_{iw}+\alpha_w}+\tfrac{1}{y_{jw}+\alpha_w}}
+\]
+\footnotesize
+\begin{tabular}{@{}p{0.3\textwidth}p{0.3\textwidth}p{0.3\textwidth}@{}}\toprule
+\textbf{Academics} \scriptsize(508,067 words) & \textbf{Central bankers} \scriptsize(232,446 words) & \textbf{Press} \scriptsize(23,343 words)\\\midrule
+research \hfill 24 & payments \hfill 39 & euro \hfill 50 \\
+analysis \hfill 22 & area \hfill 24 & rupee \hfill 45 \\
+legal \hfill 21 & europe \hfill 24 & yuan \hfill 43 \\
+adoption \hfill 21 & european \hfill 24 & pilot \hfill 39 \\
+development \hfill 20 & euro \hfill 23 & rbi \hfill 38 \\
+blockchain \hfill 20 & inflation \hfill 21 & china \hfill 34 \\
+cryptocurrencies \hfill 19 & money \hfill 20 & ecb \hfill 33 \\
+design \hfill 19 & cash \hfill 20 & launch \hfill 31 \\
+\bottomrule\end{tabular}\\[3pt]
+\scriptsize English texts; $z$-scores; $\alpha_w = \alpha_0\cdot$ corpus frequency of $w$; topic words removed. Academics: title + abstract; central bankers: speeches; press: headlines.
+\note{\textbf{Framing (0:40).}
+\begin{itemize}
+\item The prior shrinks rare words, so the list is not dominated by noise.
+\item academics: \emph{research, analysis, legal}; central bankers: \emph{payments, area, europe}; press: \emph{euro, rupee, yuan}.
+\end{itemize}}
+\end{frame}
+
+\begin{frame}[fragile]{Why study CBDCs? Coding stated motivations}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\begin{lstlisting}
+MOTIVES = {
+  "Financial inclusion":
+      r"financial\s+inclusion|unbanked|underbanked"
+      r"|access\s+to\s+(?:financial\s+services|finance)",
+  "Monetary sovereignty":
+      r"monetary\s+sovereignty|global\s+stablecoin"
+      r"|\blibra\b|big\s*tech|dollari[sz]ation",
+  "Decline of cash":
+      r"declin\w*\s+(?:in|of)\s+(?:the\s+)?cash"
+      r"|cashless|use\s+of\s+cash",
+  ...
+}
+\end{lstlisting}
+\end{column}
+\begin{column}{0.44\textwidth}\small
+\begin{itemize}
+\item Motivations are stated in the \alert{introduction} (else abstract, else opening of the text).
+\item 10 motivations, codebook built by reading introductions.
+\item For text $t$, motivation $k$, group $G$:
+\begin{align*} m_{k}(t) &= \mathbf{1}[\text{regex}_k \text{ matches } t]\\ \text{share}_k(G) &= \tfrac{1}{|G|}\textstyle\sum_{t\in G} m_k(t) \end{align*}
+\item 6,881 texts coded; 76\% state at least one motivation.
+\item Validated on 50 held-out texts (reading-based coding, AI-assisted): precision 0.78, recall 0.46, $\kappa = 0.53$.
+\end{itemize}
+\end{column}
+\end{columns}
+\note{\textbf{Motivations: method (0:35).}
+\begin{itemize}
+\item The ``why'' requires reading, so the reading is done once to build the codebook, then applied to every text.
+\item A text can have several motivations. Press is excluded: headlines are too short.
+\item Validation: codebook tuned on 100 texts, then tested on 50 others never used for tuning. High precision, modest recall: what is found is right, but about half is missed (non-English texts, paraphrases). Details in the backup slide.
+\end{itemize}}
+\end{frame}
+
+\begin{frame}{Why study CBDCs? Results}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}p{0.29\textwidth}rrrrr@{}}\toprule
+ & \multicolumn{3}{c}{\textbf{\% of texts}} & \multicolumn{2}{c}{\textbf{Adjusted effect, points [95\% CI]}}\\
+\textbf{Motivation} & \textbf{2014--2019} & \textbf{2020--2022} & \textbf{2023--2026} & \textbf{Change} & \textbf{Central banks}\\
+ & & & & \textbf{2023--26 vs 2014--19} & \textbf{vs academics}\\\midrule
+Technology (DLT, programmability) & \cellcolor{c1!47}31.8 & \cellcolor{c1!48}32.0 & \cellcolor{c1!53}35.8 & {+0.6} \tiny[-6, +7] & \textbf{-19.7} \tiny[-22, -17] \\
+Financial stability & \cellcolor{c1!38}26.0 & \cellcolor{c1!32}21.5 & \cellcolor{c1!37}25.3 & {-0.0} \tiny[-6, +5] & {-0.1} \tiny[-3, +3] \\
+Monetary policy & \cellcolor{c1!49}33.3 & \cellcolor{c1!33}22.0 & \cellcolor{c1!29}19.7 & \textbf{-15.0} \tiny[-21, -9] & \textbf{-7.0} \tiny[-10, -4] \\
+Cross-border payments & \cellcolor{c1!18}12.0 & \cellcolor{c1!25}16.7 & \cellcolor{c1!33}22.4 & \textbf{+9.9} \tiny[+5, +14] & \textbf{-6.3} \tiny[-9, -4] \\
+Privacy and surveillance & \cellcolor{c1!14}9.7 & \cellcolor{c1!20}13.4 & \cellcolor{c1!28}18.7 & \textbf{+8.8} \tiny[+4, +12] & \textbf{-4.8} \tiny[-7, -2] \\
+Payment efficiency & \cellcolor{c1!15}10.1 & \cellcolor{c1!17}11.4 & \cellcolor{c1!27}18.3 & \textbf{+8.0} \tiny[+4, +11] & \textbf{-3.3} \tiny[-6, -1] \\
+Financial inclusion & \cellcolor{c1!5}3.9 & \cellcolor{c1!13}8.8 & \cellcolor{c1!26}17.5 & \textbf{+13.2} \tiny[+10, +15] & \textbf{-7.5} \tiny[-10, -5] \\
+Monetary sovereignty & \cellcolor{c1!23}15.9 & \cellcolor{c1!24}16.7 & \cellcolor{c1!19}12.8 & {-3.1} \tiny[-8, +1] & {-1.7} \tiny[-4, +1] \\
+Geopolitics and sanctions & \cellcolor{c1!4}2.7 & \cellcolor{c1!9}6.1 & \cellcolor{c1!17}11.9 & \textbf{+9.5} \tiny[+7, +11] & \textbf{+3.1} \tiny[+0, +6] \\
+Decline of cash & \cellcolor{c1!18}12.0 & \cellcolor{c1!11}7.7 & \cellcolor{c1!9}6.4 & \textbf{-4.7} \tiny[-9, -1] & \textbf{+2.4} \tiny[+0, +5] \\
+\bottomrule\end{tabular}\\[3pt]
+Logit of each motivation on period, actor and English; average marginal effects, robust SEs. \textbf{Bold}: CI excludes 0.
+\begin{itemize}\setlength\itemsep{0pt}
+\item \alert{Rising:} financial inclusion ($+13$\,pts), cross-border payments ($+10$\,pts), geopolitics and sanctions ($+9$\,pts). \quad \alert{Falling:} monetary policy ($-15$\,pts), decline of cash ($-5$\,pts).
+\item Actors differ: central banks stress \emph{Geopolitics and sanctions}, academics \emph{Technology (DLT, programmability)}. \quad Recall $\approx 0.46$: shares are \alert{lower bounds}; compare motivations and periods rather than read levels.
+\end{itemize}
+\note{\textbf{Motivations: results (1:00).}
+\begin{itemize}
+\item The adjusted columns compare like with like: same mix of actors and languages in each period.
+\item Early literature: monetary policy, how a CBDC changes rates and bank funding. Recent literature: inclusion, cross-border payments, geopolitics, privacy.
+\item Central bankers and academics do not give the same reasons.
+\end{itemize}}
+\end{frame}
+
+\begin{frame}{Why: is the codebook the best coder?}
+\begin{columns}[T]
+\begin{column}{0.58\textwidth}\scriptsize
+\begin{tabular}{@{}lrrrr@{}}\toprule
+\textbf{Coder} & \textbf{P} & \textbf{R} & $F_1$ & $\kappa$\\\midrule
+\rowcolor{c4!12}Codebook (regex) & 0.78 & 0.46 & 0.58 & 0.53 \\
+Codebook OR classifier & 0.47 & 0.67 & 0.55 & 0.45 \\
+Local LLM, Qwen2.5 7B & 0.38 & 0.58 & 0.46 & 0.33 \\
+SBERT, classifier (100 labels) & 0.39 & 0.40 & 0.39 & 0.28 \\
+Local LLM, Qwen2.5 3B & 0.35 & 0.28 & 0.31 & 0.20 \\
+NLI zero-shot (mDeBERTa) & 0.27 & 0.45 & 0.33 & 0.17 \\
+SBERT, definitions (zero-shot) & 0.23 & 0.74 & 0.35 & 0.15 \\
+\bottomrule\end{tabular}\\[3pt]
+50 held-out texts $\times$ 10 motivations; thresholds and classifiers set on the 100 development texts. NLI: multilingual mDeBERTa; LLMs: Qwen2.5 Instruct, 4-bit, run locally (\texttt{scripts/validate\_coders.py}).
+\end{column}
+\begin{column}{0.4\textwidth}\small
+\begin{itemize}\setlength\itemsep{2pt}
+\item \alert{The codebook wins}: $\kappa = 0.53$; best alternative 0.33.
+\item Models confuse ``mentions privacy'' with ``studies CBDCs because of privacy''; LLMs over-tag.
+\item Trends hold: same direction of change for 10 of 10 motivations with the high-recall coding, 10 of 10 on main-theme texts only.
+\end{itemize}
+\end{column}
+\end{columns}
+\note{\textbf{Measuring motivations (0:40).}
+\begin{itemize}
+\item Five machine coders against the same hand-coded texts: SBERT in two ways, an NLI model, two local LLMs.
+\item None beats the codebook; the codebook's weakness is recall, so shares are lower bounds.
+\item A larger LLM behind an API could do better; it would be checked the same way. That is tuning, not a new method.
+\end{itemize}}
+\end{frame}
+
+\begin{frame}{How: the tone of what is said about CBDCs}
+\begin{columns}[T]
+\begin{column}{0.46\textwidth}
+\begin{tikzpicture}
+\begin{axis}[width=\textwidth, height=0.62\textheight, xtick={2019,2020,2021,2022,2023,2024,2025,2026}, xticklabel style={/pgf/number format/1000 sep=, font=\tiny, rotate=45, anchor=north east, inner sep=1pt},
+  yticklabel style={font=\scriptsize, /pgf/number format/fixed}, ylabel={net tone}, ylabel style={font=\scriptsize},
+  legend style={at={(0.5,-0.18)}, anchor=north, font=\tiny, draw=none, legend columns=3}, axis lines*=left, ymajorgrids]
+\addplot[c1, thick, mark=*, mark size=1.2pt] coordinates {(2019,0.079) (2020,0.140) (2021,0.142) (2022,0.180) (2023,0.161) (2024,0.204) (2025,0.241) (2026,0.187)};
+\addlegendentry{Academics}
+\addplot[c2, thick, mark=*, mark size=1.2pt] coordinates {(2019,0.075) (2020,0.174) (2021,0.223) (2022,0.237) (2023,0.186) (2024,0.253) (2025,0.269) (2026,0.246)};
+\addlegendentry{Central banks}
+\addplot[c4, thick, mark=*, mark size=1.2pt] coordinates {(2019,0.086) (2020,0.127) (2021,0.127) (2022,0.142) (2023,0.129) (2024,0.098) (2025,0.127) (2026,0.142)};
+\addlegendentry{Press}
+\end{axis}
+\end{tikzpicture}
+\end{column}
+\begin{column}{0.52\textwidth}\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrrrrr@{}}\toprule
+ & \textbf{Texts} & \textbf{Sent.} & \textbf{\%+} & \textbf{\%--} & \textbf{Net tone}\\\midrule
+Academics & 4,351 & 13,147 & 21 & 5 & $0.19 \pm 0.01$ \\
+Central banks & 662 & 8,017 & 19 & 3 & $0.21 \pm 0.01$ \\
+Press & 3,924 & 3,926 & 16 & 8 & $0.13 \pm 0.01$ \\
+\bottomrule\end{tabular}\\[4pt]
+FinBERT on the 25,090 English sentences that name a CBDC (central banks: speeches and official documents). Sentence tone $= P(+) - P(-)$, averaged per text, then per group ($\pm$ 95\% CI).\\[3pt]
+90 sentences read (30 per predicted label): agreement 68\%, $\kappa = 0.52$; positive and negative confused 2 times.
+\end{column}
+\end{columns}
+\note{\textbf{Tone (0:50).}
+\begin{itemize}
+\item Only sentences that name a CBDC are scored, so this is the tone about CBDCs, not about the economy in general.
+\item Central banks are the most positive, the press the least.
+\item Academic tone rises (0.08 in 2019 to 0.24 in 2025), in line with the move from risks (stability) to benefits (inclusion).
+\item Validation: FinBERT rarely confuses positive with negative, but sees tone in neutral sentences: compare groups and years, do not read levels.
+\end{itemize}}
+\end{frame}
+
+\begin{frame}{How: stance towards CBDCs}
+\begin{columns}[T]
+\begin{column}{0.44\textwidth}\scriptsize
+\textbf{Level} (read: 50 texts per actor), \% [95\% CI]\\[2pt]
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrrr@{}}\toprule
+ & $n$ & \textbf{Favourable} & \textbf{Critical}\\\midrule
+Academics & 50 & 16 \tiny[8--29] & 2 \tiny[0--10] \\
+Central banks & 50 & 52 \tiny[39--65] & 8 \tiny[3--19] \\
+Press & 50 & 22 \tiny[13--35] & 14 \tiny[7--26] \\
+\bottomrule\end{tabular}\\[6pt]
+\small By reading: 52\% of central bank texts are favourable, 16\% of research; criticism is rare and mostly in the press (14\%).
+\end{column}
+\begin{column}{0.54\textwidth}\scriptsize
+\textbf{Change} (local LLM, 829 texts sampled per actor $\times$ period), \% favourable\\[2pt]
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrrrr@{}}\toprule
+ & \textbf{2014--2019} & \textbf{2020--2022} & \textbf{2023--2026} & \textbf{Change, pts}\\\midrule
+Academics & 30 & 35 & 38 & {+8} \tiny[-5, +21] \\
+Central banks & 25 & 55 & 60 & \textbf{+35} \tiny[+21, +48] \\
+Press & 35 & 47 & 53 & \textbf{+18} \tiny[+2, +34] \\
+\bottomrule\end{tabular}\\[4pt]
+The LLM (Qwen2.5 7B, $\kappa = 0.41$, best of five coders) calls 52\% of the hand-coded texts favourable against 30\% by reading: its levels are inflated, so only its \emph{changes} are used (assuming a stable bias). \textbf{Bold}: CI excludes 0.
+\end{column}
+\end{columns}
+\note{\textbf{Stance (0:50).}
+\begin{itemize}
+\item Tone says how positive the words are; stance says whether the author is for or against CBDCs.
+\item Levels come from reading: central banks are the advocates, researchers mostly neutral, criticism is rare and mostly in the press.
+\item Changes come from the language model, run on a random sample: central banks have become much more favourable since 2020, as their own projects advanced.
+\end{itemize}}
+\end{frame}
+
+\begin{frame}{When: which themes burst, and when}
+\hspace*{3.3cm}\begin{tikzpicture}[font=\scriptsize, y=-0.42cm]
+\draw[gray!25] (0.00,-0.6) -- (0.00,11.60); \node[gray, above, font=\tiny] at (0.00,-0.6) {2016};
+\draw[gray!25] (0.61,-0.6) -- (0.61,11.60); \node[gray, above, font=\tiny] at (0.61,-0.6) {2017};
+\draw[gray!25] (1.23,-0.6) -- (1.23,11.60); \node[gray, above, font=\tiny] at (1.23,-0.6) {2018};
+\draw[gray!25] (1.84,-0.6) -- (1.84,11.60); \node[gray, above, font=\tiny] at (1.84,-0.6) {2019};
+\draw[gray!25] (2.46,-0.6) -- (2.46,11.60); \node[gray, above, font=\tiny] at (2.46,-0.6) {2020};
+\draw[gray!25] (3.07,-0.6) -- (3.07,11.60); \node[gray, above, font=\tiny] at (3.07,-0.6) {2021};
+\draw[gray!25] (3.68,-0.6) -- (3.68,11.60); \node[gray, above, font=\tiny] at (3.68,-0.6) {2022};
+\draw[gray!25] (4.30,-0.6) -- (4.30,11.60); \node[gray, above, font=\tiny] at (4.30,-0.6) {2023};
+\draw[gray!25] (4.91,-0.6) -- (4.91,11.60); \node[gray, above, font=\tiny] at (4.91,-0.6) {2024};
+\draw[gray!25] (5.53,-0.6) -- (5.53,11.60); \node[gray, above, font=\tiny] at (5.53,-0.6) {2025};
+\draw[gray!25] (6.14,-0.6) -- (6.14,11.60); \node[gray, above, font=\tiny] at (6.14,-0.6) {2026};
+\node[anchor=east] at (-0.1,0) {monetary policy and economic\dots{}};
+\fill[c2, opacity=0.95] (0.15,-0.3) rectangle (2.61,0.3);
+\node[anchor=east] at (-0.1,1) {economic theories and models};
+\fill[c2, opacity=0.62] (0.31,0.7) rectangle (3.38,1.3);
+\node[anchor=east] at (-0.1,2) {monetary policy};
+\fill[c2, opacity=0.93] (0.46,1.7) rectangle (2.30,2.3);
+\node[anchor=east] at (-0.1,3) {covid-19 pandemic};
+\fill[c2, opacity=0.62] (2.46,2.7) rectangle (4.30,3.3);
+\node[anchor=east] at (-0.1,4) {bank of russia};
+\fill[c2, opacity=0.57] (3.07,3.7) rectangle (3.99,4.3);
+\node[anchor=east] at (-0.1,5) {monetary sovereignty};
+\fill[c2, opacity=0.66] (5.83,4.7) rectangle (6.60,5.3);
+\node[anchor=east] at (-0.1,6) {unified payments interface};
+\fill[c2, opacity=0.55] (5.83,5.7) rectangle (6.60,6.3);
+\node[anchor=east] at (-0.1,7) {systemic risk};
+\fill[c2, opacity=0.53] (5.83,6.7) rectangle (6.45,7.3);
+\node[anchor=east] at (-0.1,8) {artificial intelligence};
+\fill[c2, opacity=0.52] (5.99,7.7) rectangle (6.60,8.3);
+\node[anchor=east] at (-0.1,9) {tokenization};
+\fill[c2, opacity=0.74] (6.14,8.7) rectangle (6.60,9.3);
+\node[anchor=east] at (-0.1,10) {digital euro};
+\fill[c2, opacity=0.57] (6.14,9.7) rectangle (6.29,10.3);
+\node[anchor=east] at (-0.1,11) {india};
+\fill[c2, opacity=0.56] (6.29,10.7) rectangle (6.60,11.3);
+\end{tikzpicture}\\[2pt]
+\scriptsize Kleinberg (2002) burst detection on keywords, by quarter: keyword $w$ in $r_t$ of $d_t$ papers; normal rate $p_0 = R/D$, burst rate $p_1 = 2p_0$; cost $\sigma_i(t) = -\ln\big[\binom{d_t}{r_t} p_i^{r_t}(1-p_i)^{d_t-r_t}\big]$, entering a burst costs $\ln T$; the cheapest state path (Viterbi) gives the bursts. Darker = stronger.
+\note{\textbf{Bursts (0:45).}
+\begin{itemize}
+\item Where the event study tests dates I chose, burst detection lets the data say when a theme suddenly takes off.
+\item Early bursts: monetary policy and economic impact, economic theories and models, monetary policy. Latest bursts: monetary sovereignty, unified payments interface, systemic risk, artificial intelligence.
+\item Read with the topics: the field moves from monetary policy to sovereignty, tokenisation and national projects.
+\end{itemize}}
+\end{frame}
+
+\begin{frame}{When? Attention around policy events}
+\begin{columns}[c]
+\begin{column}{0.5\textwidth}
+\begin{tikzpicture}
+\begin{axis}[width=\textwidth, height=0.62\textheight, ymin=0, ymax=\ymaxev, xmin=2019, xmax=2026.85,
+  xticklabel style={/pgf/number format/1000 sep=, font=\scriptsize}, xtick={2019,...,2026},
+  yticklabel style={font=\scriptsize}, ylabel={texts per week}, ylabel style={font=\scriptsize},
+  axis lines*=left, clip=false]
+\addplot[c1, thin, const plot] coordinates {(2018.997,2) (2019.016,2) (2019.055,1) (2019.074,2) (2019.093,2) (2019.112,3) (2019.131,2) (2019.151,4) (2019.170,3) (2019.189,2) (2019.208,2) (2019.227,2)
+  (2019.246,2) (2019.266,1) (2019.285,3) (2019.323,6) (2019.342,1) (2019.361,1) (2019.381,4) (2019.400,3) (2019.419,1) (2019.438,1) (2019.457,1) (2019.476,1)
+  (2019.496,2) (2019.515,2) (2019.534,2) (2019.553,2) (2019.572,1) (2019.591,1) (2019.611,1) (2019.630,2) (2019.649,5) (2019.668,5) (2019.687,1) (2019.706,3)
+  (2019.726,2) (2019.745,6) (2019.764,4) (2019.783,7) (2019.802,6) (2019.821,8) (2019.841,7) (2019.860,3) (2019.879,3) (2019.898,9) (2019.917,7) (2019.936,5)
+  (2019.956,3) (2019.975,1) (2019.994,2) (2020.014,2) (2020.033,3) (2020.052,10) (2020.071,3) (2020.090,5) (2020.110,2) (2020.129,8) (2020.148,13) (2020.167,6)
+  (2020.186,9) (2020.205,1) (2020.225,1) (2020.244,7) (2020.263,2) (2020.282,6) (2020.301,4) (2020.320,5) (2020.339,5) (2020.359,3) (2020.378,3) (2020.397,4)
+  (2020.416,9) (2020.435,11) (2020.454,5) (2020.474,5) (2020.493,10) (2020.512,3) (2020.531,4) (2020.550,7) (2020.569,10) (2020.589,7) (2020.608,5) (2020.627,8)
+  (2020.646,5) (2020.665,13) (2020.684,10) (2020.704,7) (2020.723,6) (2020.742,20) (2020.761,24) (2020.780,16) (2020.799,20) (2020.819,27) (2020.838,15) (2020.857,5)
+  (2020.876,7) (2020.895,11) (2020.914,34) (2020.934,21) (2020.953,7) (2020.972,8) (2020.991,15) (2021.008,6) (2021.027,7) (2021.047,8) (2021.066,15) (2021.085,15)
+  (2021.104,12) (2021.123,10) (2021.142,18) (2021.162,18) (2021.181,7) (2021.200,14) (2021.219,19) (2021.238,20) (2021.257,16) (2021.277,16) (2021.296,31) (2021.315,24)
+  (2021.334,13) (2021.353,20) (2021.372,14) (2021.392,17) (2021.411,23) (2021.430,11) (2021.449,21) (2021.468,20) (2021.487,29) (2021.507,15) (2021.526,32) (2021.545,22)
+  (2021.564,24) (2021.583,10) (2021.602,18) (2021.621,10) (2021.641,13) (2021.660,28) (2021.679,13) (2021.698,15) (2021.717,22) (2021.736,34) (2021.756,13) (2021.775,14)
+  (2021.794,22) (2021.813,43) (2021.832,26) (2021.851,17) (2021.871,22) (2021.890,11) (2021.909,16) (2021.928,22) (2021.947,15) (2021.966,12) (2021.986,25) (2022.005,24)
+  (2022.025,16) (2022.044,28) (2022.063,14) (2022.082,37) (2022.101,19) (2022.120,29) (2022.140,16) (2022.159,22) (2022.178,13) (2022.197,11) (2022.216,16) (2022.235,23)
+  (2022.255,13) (2022.274,11) (2022.293,15) (2022.312,33) (2022.331,8) (2022.350,11) (2022.370,18) (2022.389,14) (2022.408,29) (2022.427,13) (2022.446,17) (2022.465,16)
+  (2022.485,25) (2022.504,14) (2022.523,21) (2022.542,14) (2022.561,8) (2022.580,17) (2022.600,10) (2022.619,21) (2022.638,29) (2022.657,28) (2022.676,16) (2022.695,17)
+  (2022.715,14) (2022.734,39) (2022.753,35) (2022.772,20) (2022.791,15) (2022.810,18) (2022.830,57) (2022.849,26) (2022.868,19) (2022.887,17) (2022.906,95) (2022.925,22)
+  (2022.945,28) (2022.964,16) (2022.983,31) (2023.003,25) (2023.022,22) (2023.041,28) (2023.060,23) (2023.079,36) (2023.099,33) (2023.118,12) (2023.137,34) (2023.156,54)
+  (2023.175,26) (2023.194,14) (2023.214,30) (2023.233,35) (2023.252,17) (2023.271,25) (2023.290,25) (2023.309,37) (2023.329,31) (2023.348,27) (2023.367,44) (2023.386,35)
+  (2023.405,37) (2023.424,27) (2023.444,30) (2023.463,33) (2023.482,115) (2023.501,43) (2023.520,63) (2023.539,37) (2023.559,39) (2023.578,64) (2023.597,34) (2023.616,28)
+  (2023.635,30) (2023.654,50) (2023.674,67) (2023.693,38) (2023.712,21) (2023.731,50) (2023.750,19) (2023.769,33) (2023.789,88) (2023.808,58) (2023.827,45) (2023.846,40)
+  (2023.865,31) (2023.884,23) (2023.903,58) (2023.923,26) (2023.942,25) (2023.961,29) (2023.980,29) (2024.000,27) (2024.019,19) (2024.038,26) (2024.057,34) (2024.077,38)
+  (2024.096,23) (2024.115,39) (2024.134,15) (2024.153,30) (2024.172,42) (2024.192,22) (2024.211,23) (2024.230,33) (2024.249,28) (2024.268,26) (2024.287,25) (2024.307,31)
+  (2024.326,27) (2024.345,19) (2024.364,20) (2024.383,23) (2024.402,48) (2024.422,35) (2024.441,23) (2024.460,31) (2024.479,68) (2024.498,33) (2024.517,20) (2024.537,25)
+  (2024.556,23) (2024.575,28) (2024.594,19) (2024.613,27) (2024.632,14) (2024.652,38) (2024.671,27) (2024.690,33) (2024.709,28) (2024.728,43) (2024.747,30) (2024.767,13)
+  (2024.786,27) (2024.805,28) (2024.824,40) (2024.843,28) (2024.862,27) (2024.882,20) (2024.901,50) (2024.920,36) (2024.939,39) (2024.958,24) (2024.977,26) (2024.997,38)
+  (2025.014,18) (2025.033,30) (2025.052,36) (2025.071,70) (2025.090,35) (2025.110,42) (2025.129,24) (2025.148,55) (2025.167,23) (2025.186,33) (2025.205,57) (2025.225,35)
+  (2025.244,47) (2025.263,43) (2025.282,28) (2025.301,33) (2025.320,44) (2025.339,35) (2025.359,39) (2025.378,33) (2025.397,60) (2025.416,36) (2025.435,36) (2025.454,52)
+  (2025.474,57) (2025.493,61) (2025.512,43) (2025.531,52) (2025.550,33) (2025.569,52) (2025.589,22) (2025.608,33) (2025.627,54) (2025.646,45) (2025.665,49) (2025.684,35)
+  (2025.704,58) (2025.723,85) (2025.742,107) (2025.761,81) (2025.780,53) (2025.799,42) (2025.819,176) (2025.838,65) (2025.857,56) (2025.876,66) (2025.895,59) (2025.914,60)
+  (2025.934,54) (2025.953,82) (2025.972,49) (2025.991,109) (2026.011,45) (2026.030,63) (2026.049,53) (2026.068,65) (2026.088,72) (2026.107,116) (2026.126,107) (2026.145,90)
+  (2026.164,83) (2026.183,78) (2026.203,47) (2026.222,95) (2026.241,91) (2026.260,47) (2026.279,81) (2026.298,91) (2026.318,76) (2026.337,81) (2026.356,68) (2026.375,87)
+  (2026.394,103) (2026.413,138) (2026.433,80) (2026.452,186) (2026.471,393) (2026.490,218) (2026.509,273) (2026.528,353) (2026.548,143) (2026.567,121) (2026.586,75) (2026.605,131)
+  (2026.624,369) (2026.643,439) (2026.663,454) (2026.682,177) (2026.701,143) (2026.720,265) (2026.739,272) (2026.758,314) (2026.816,2)};
+\draw[gray, thin] (axis cs:2019.460,0) -- (axis cs:2019.460,\ymaxev) node[above, font=\scriptsize, inner sep=1pt] {1};
+\draw[c2, thin] (axis cs:2020.753,0) -- (axis cs:2020.753,0.9*\ymaxev) node[above, font=\scriptsize, inner sep=1pt] {2};
+\draw[c2, thin] (axis cs:2020.802,0) -- (axis cs:2020.802,\ymaxev) node[above, font=\scriptsize, inner sep=1pt] {3};
+\draw[gray, thin] (axis cs:2021.531,0) -- (axis cs:2021.531,0.9*\ymaxev) node[above, font=\scriptsize, inner sep=1pt] {4};
+\draw[c2, thin] (axis cs:2021.813,0) -- (axis cs:2021.813,\ymaxev) node[above, font=\scriptsize, inner sep=1pt] {5};
+\draw[gray, thin] (axis cs:2022.052,0) -- (axis cs:2022.052,0.9*\ymaxev) node[above, font=\scriptsize, inner sep=1pt] {6};
+\draw[gray, thin] (axis cs:2022.183,0) -- (axis cs:2022.183,\ymaxev) node[above, font=\scriptsize, inner sep=1pt] {7};
+\draw[gray, thin] (axis cs:2022.832,0) -- (axis cs:2022.832,0.9*\ymaxev) node[above, font=\scriptsize, inner sep=1pt] {8};
+\draw[gray, thin] (axis cs:2023.101,0) -- (axis cs:2023.101,\ymaxev) node[above, font=\scriptsize, inner sep=1pt] {9};
+\draw[c2, thin] (axis cs:2023.487,0) -- (axis cs:2023.487,0.9*\ymaxev) node[above, font=\scriptsize, inner sep=1pt] {10};
+\draw[c2, thin] (axis cs:2023.794,0) -- (axis cs:2023.794,\ymaxev) node[above, font=\scriptsize, inner sep=1pt] {11};
+\draw[c2, thin] (axis cs:2025.060,0) -- (axis cs:2025.060,0.9*\ymaxev) node[above, font=\scriptsize, inner sep=1pt] {12};
+\end{axis}
+\end{tikzpicture}
+\end{column}
+\begin{column}{0.48\textwidth}\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}rlp{0.46\linewidth}rrr@{}}\toprule
+ & \textbf{Date} & \textbf{Event} & \textbf{Ratio} & $z$ & $p$\\\midrule
+1 & Jun 2019 & Facebook announces Libra & 0.4 & -1.3 & 0.77 \\
+2 & Oct 2020 & ECB digital euro report & \textbf{3.2} & +8.8 & 0.00 \\
+3 & Oct 2020 & Bahamas launches Sand Dollar & \textbf{2.8} & +7.7 & 0.02 \\
+4 & Jul 2021 & ECB investigation phase & 1.4 & +2.8 & 0.15 \\
+5 & Oct 2021 & Nigeria launches eNaira & \textbf{1.9} & +5.4 & 0.04 \\
+6 & Jan 2022 & Fed CBDC discussion paper & 1.4 & +2.8 & 0.15 \\
+7 & Mar 2022 & US order on digital assets & 0.6 & -2.6 & 0.94 \\
+8 & Nov 2022 & India e-rupee pilot & 1.7 & +4.6 & 0.07 \\
+9 & Feb 2023 & UK digital pound consultation & 0.8 & -1.3 & 0.77 \\
+10 & Jun 2023 & EU digital euro bill & \textbf{2.6} & +13.1 & 0.00 \\
+11 & Oct 2023 & ECB preparation phase & \textbf{1.9} & +8.7 & 0.01 \\
+12 & Jan 2025 & US order banning a US CBDC & \textbf{1.8} & +6.3 & 0.02 \\
+\bottomrule\end{tabular}\\[3pt]
+Baseline $\lambda$ = daily rate over $[-90,-15]$ days; $E = 15\lambda$; ratio $= N_{[0,14]}/E$; $z = (N-E)/\sqrt{E}$.
+\alert{Placebo}: on 500 random dates, 24\% have $z > 1.96$ (overdispersion, trend), so $p$ = share of placebo dates with a larger $z$ (95th percentile: $z = 5.0$).
+\end{column}
+\end{columns}
+\note{\textbf{Event study (0:50).}
+\begin{itemize}
+\item For each event, compare the texts in the two weeks after it with the rate of the three months before.
+\item The naive Poisson test is far too lenient: a quarter of random dates would look significant. So each event is compared with the placebo dates instead.
+\item Red lines: $p < 0.05$ against the placebo distribution.
+\item 6 of 12 events beat 95\% of placebo dates; strongest: EU digital euro bill, ECB digital euro report.
+\item Attention follows institutional milestones (central bank reports, legislation) more than market news. Sand Dollar comes 18 days after the ECB report: the two windows overlap.
+\end{itemize}}
+\end{frame}
+
+\begin{frame}{Robustness}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lrcccrr@{}}\toprule
+ & & \multicolumn{2}{c}{\textbf{Why: change, points}} & \textbf{How: tone} & \textbf{How: stance} & \textbf{When}\\
+\textbf{Specification} & \textbf{Texts} & \textbf{inclusion} & \textbf{monetary policy} & \textbf{CB -- press} & \textbf{fav.\ CB -- acad.} & \textbf{events}\\\midrule
+Baseline & 17,709 & $+13.2$ \tiny[+10, +15] & $-15.0$ \tiny[-21, -9] & $+0.08$ & $+14$ & 6/12 \\
+Main theme only & 15,464 & $+15.2$ \tiny[+11, +18] & $-11.8$ \tiny[-19, -5] & $+0.06$ & $+13$ & 7/12 \\
+English only & 10,733 & $+14.3$ \tiny[+10, +17] & $-15.9$ \tiny[-22, -9] & $+0.08$ & $+15$ & 7/12 \\
+Journal articles only (research) & 14,270 & $+15.0$ \tiny[+11, +17] & $-14.6$ \tiny[-22, -7] & $+0.08$ & $+9$ & 7/12 \\
+Without 2026 (partial year) & 10,742 & $+12.9$ \tiny[+9, +15] & $-14.9$ \tiny[-21, -9] & $+0.09$ & $+13$ & 6/12 \\
+High-recall motivation coding & 17,709 & $+16.2$ \tiny[+12, +19] & $-9.9$ \tiny[-16, -4] & $+0.08$ & $+14$ & 6/12 \\
+\bottomrule\end{tabular}\\[4pt]
+Changes: 2023--26 vs 2014--19, adjusted (logit, 95\% CI). Tone: mean net tone gap. Stance: raw LLM labels, points. Events: $p < 0.05$ against placebo dates.\\[3pt]
+\small Signs and orders of magnitude hold in every specification.
+\note{\textbf{Robustness (0:50).}
+\begin{itemize}
+\item Each row re-runs the headline results on a different sample: only texts clearly about CBDCs, only English, only journal articles, without the partial year, or with the high-recall coding.
+\item The direction of every result is unchanged; magnitudes move a little. This is the table that answers a referee's ``what if''.
+\end{itemize}}
+\end{frame}
+
+% =====================================================================
+\section{Conclusion}
+
+\begin{frame}{Takeaways and limits}
+\begin{columns}[T]
+\begin{column}{0.54\textwidth}\footnotesize
+\textbf{First results}
+\begin{itemize}\setlength\itemsep{1pt}
+\item \alert{What:} 17,709 texts; output grows 58\% a year; topics follow national projects.
+\item \alert{Who:} a core of co-cited papers (Andolfatto (2020), Agur (2019), Bordo (2017)); central bank economists write 5\% of papers but get 31\% of citations; European Central Bank the most vocal central bank.
+\item \alert{Why:} rising financial inclusion ($+13$\,pts), cross-border payments ($+10$\,pts), geopolitics and sanctions ($+9$\,pts); falling monetary policy ($-15$\,pts), decline of cash ($-5$\,pts).
+\item \alert{How:} central banks most positive in tone and stance, and increasingly so; criticism is rare, mostly in the press.
+\item \alert{When:} bursts move from monetary policy to sovereignty and tokenisation; 6 of 12 milestones move attention.
+\end{itemize}
+\end{column}
+\begin{column}{0.43\textwidth}\footnotesize
+\textbf{Limits}
+\begin{itemize}\setlength\itemsep{1pt}
+\item Press: headlines only; coverage favours recent years; harvest cut short by rate limits.
+\item ``Secondary theme'' is noisy: results re-run on main theme only.
+\item Motivations: recall $\approx$ 0.5 (lower bounds). Tone: English only. Stance: LLM for changes only.
+\item One coder (AI-assisted) for all validation samples.
+\item Keywords partly machine-assigned; authors matched on spelling.
+\end{itemize}
+\end{column}
+\end{columns}
+\note{\textbf{Takeaways (0:50).}
+\begin{itemize}
+\item Recap the five answers: what, who, why, how, when.
+\item Main message: CBDC research moved from a monetary-policy question to one of inclusion, cross-border payments and national projects; the tone has become more positive; attention follows central bank milestones.
+\item Limits are known and measured: each one has a fix in the paper plan.
+\end{itemize}}
+\end{frame}
+
+\begin{frame}{From this talk to the paper}
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}\scriptsize
+\textbf{Structure}\\[2pt]
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lll@{}}\toprule
+ & \textbf{Section} & \textbf{Status}\\\midrule
+1 & Introduction, research question & to write\\
+2 & Related work (77 reviews) & material\\
+3 & Data: corpus, relevance filter & validated\\
+4 & Methods: maps, topics, coders, tone, stance, events & done\\
+5 & Results: what, who, why, how, when & done\\
+6 & Robustness (6 specifications) & done\\
+7 & Discussion, limits & to write\\
+\bottomrule\end{tabular}\\[6pt]
+\textbf{Working title.} \emph{Why central bank digital currencies? Researchers, central bankers and the press, 2014--2026.}
+\end{column}
+\begin{column}{0.47\textwidth}\scriptsize
+\textbf{Before submission}
+\begin{itemize}\setlength\itemsep{1pt}
+\item Finish the press harvest and full-text downloads.
+\item Second human coder: the 200-item sheet is ready (\texttt{second\_coder\_sheet.csv}); report inter-coder $\kappa$.
+\item Release the dataset and code with a DOI.
+\item Methods are complete; what is left is data collection and a second reader, not new tools.
+\end{itemize}
+\textbf{Candidate outlets}: \emph{Scientometrics}; \emph{Technological Forecasting and Social Change}; \emph{Research in International Business and Finance} (published the closest review, Hoang et al.\ 2023).
+\end{column}
+\end{columns}
+\note{\textbf{Paper plan (1:00).}
+\begin{itemize}
+\item Data, methods, results and robustness are done; the method for each question was chosen against the alternatives.
+\item What is left: finishing the press harvest, a second human reader, and writing.
+\item Thank you; questions.
+\end{itemize}}
+\end{frame}
+
+\appendix
+\begin{frame}{Backup: validation of the motivation coding}
+\footnotesize
+Codebook tuned on 100 texts (development set), then evaluated on 50 \alert{held-out} texts; unit = first 1{,}500 characters of the introduction / abstract.
+\[ \text{precision} = \frac{TP}{TP+FP}, \quad \text{recall} = \frac{TP}{TP+FN}, \quad \kappa = \frac{p_o - p_e}{1 - p_e} \]
+\begin{tabular}{@{}lrrrrr@{}}\toprule
+\textbf{Motivation} & \textbf{Read} & \textbf{Coded} & \textbf{Precision} & \textbf{Recall} & $\kappa$\\\midrule
+Privacy and surveillance & 7 & 6 & 1.00 & 0.86 & 0.91 \\
+Technology (DLT, programmability) & 13 & 12 & 0.83 & 0.77 & 0.73 \\
+Monetary policy & 8 & 7 & 0.71 & 0.62 & 0.61 \\
+Financial inclusion & 8 & 3 & 1.00 & 0.38 & 0.50 \\
+Cross-border payments & 5 & 3 & 0.67 & 0.40 & 0.46 \\
+Financial stability & 5 & 3 & 0.67 & 0.40 & 0.46 \\
+Geopolitics and sanctions & 9 & 3 & 1.00 & 0.33 & 0.45 \\
+Monetary sovereignty & 7 & 2 & 1.00 & 0.29 & 0.41 \\
+Decline of cash & 3 & 2 & 0.50 & 0.33 & 0.37 \\
+Payment efficiency & 13 & 5 & 0.40 & 0.15 & 0.09 \\
+\midrule
+\textbf{All} & 78 & 46 & 0.78 & 0.46 & 0.53 \\
+\bottomrule\end{tabular}\\[3pt]
+\scriptsize Read = texts where the reading found the motivation; Coded = texts flagged by the codebook. Files: \texttt{presentation/validation\_motivations\_dev.csv}, \texttt{\_test.csv}.
+\note{\textbf{Backup (only if asked).} The reference coding was done by reading each text against the codebook definitions (AI-assisted, spot-checked). Payment efficiency is the weakest category: it is expressed in too many ways for keywords.}
+\end{frame}
+\begin{frame}{Backup: how the science maps are built}
+\begin{itemize}
+\item \textbf{Networks.} Nodes = references, authors or keywords; $c_{ij}$ = documents where $i$ and $j$ appear together, $c_i$ = occurrences of $i$. Edges weighted by \alert{association strength}:
+\[ s_{ij} = \frac{c_{ij}}{c_i\,c_j} \]
+\item \textbf{Clusters.} Louvain algorithm, maximising modularity
+\[ Q = \frac{1}{2m}\sum_{i,j}\Big[s_{ij} - \frac{k_i k_j}{2m}\Big]\,\delta(g_i,g_j) \]
+\item \textbf{Layout.} Force-directed: linked nodes end up close. Size $\propto \sqrt{c_i}$, colour = cluster.
+\end{itemize}
+\note{\textbf{Backup (only if asked).}
+\begin{itemize}
+\item Association strength corrects for popularity: two very frequent items co-occur often by chance.
+\item Louvain groups nodes so that links are dense inside groups and sparse between them; $Q$ measures how clear the grouping is.
+\end{itemize}}
+\end{frame}
+
+\begin{frame}{Backup: how the score behaves}
+\footnotesize
+\begin{tabular}{@{}lrl@{}}\toprule
+\textbf{Example} & \textbf{Score} & \textbf{Label}\\\midrule
+Paper, CBDC in title & 87 & main theme \\
+Paper, generic title, CBDC abstract & 80 & main theme \\
+Paper, one passing mention & 11 & mentioned only \\
+Speech, one paragraph on it & 18 & mentioned only \\
+Speech devoted to it & 80 & main theme \\
+Medical case report & 0 & off-topic \\
+\bottomrule\end{tabular}
+\note{\textbf{Backup (only if asked).} A speech with one paragraph on the digital euro is ``mentioned only''; a medical case report on CBDC (the skin disease) scores zero.}
+\end{frame}
+
+\begin{frame}[fragile]{Backup: academic sources, cursor pagination under a rate limit}
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\begin{lstlisting}
+def iter_phrase(phrase):
+    cursor = "*"
+    while cursor:
+        d = get(f'{API}?filter=title_and_abstract'
+                f'.search:"{phrase}"&per-page=200'
+                f'&cursor={cursor}')
+        yield from d["results"]
+        cursor = d["meta"].get("next_cursor")
+
+class Throttle:
+    def wait(self):
+        dt = self.interval - (now() - self.last)
+        if dt > 0: sleep(dt)
+        self.last = now()
+\end{lstlisting}
+\end{column}
+\begin{column}{0.41\textwidth}\small
+\begin{itemize}
+\item Each phrase searched in titles and abstracts; results merged on the source id.
+\item Requests spaced by $t_{k+1}-t_k \geq \Delta$\\ ($\Delta = 0.12$\,s OpenAlex, $1.2$\,s Google News, $10$\,s GDELT).
+\item On HTTP 429: back-off $w_j = \min(60j,\,900)$\,s after the $j$-th consecutive failure.
+\item Reference lists resolved into citations (for co-citation).
+\end{itemize}
+\end{column}
+\end{columns}
+\note{\textbf{Backup (only if asked).}
+\begin{itemize}
+\item APIs return results page by page; a cursor points to the next page until none is left.
+\item Free APIs limit the request rate: a throttle guarantees a minimum gap $\Delta$ between calls, and the program waits longer after each refusal.
+\end{itemize}}
+\end{frame}
+
+\begin{frame}[fragile]{Backup: full text and de-duplication}
+\begin{columns}[T]
+\begin{column}{0.46\textwidth}\small
+\textbf{Full text}
+\begin{itemize}
+\item PDFs (PyMuPDF) and web pages (trafilatura).
+\item Split into introduction / conclusion / section headings.
+\item Page metadata (date, author, outlet) fills gaps.
+\end{itemize}
+\end{column}
+\begin{column}{0.51\textwidth}
+\begin{lstlisting}
+def key(r):
+    if r.source_type == "academic":
+        if r.doi: return "doi:" + r.doi.lower()
+        return f"t:{norm(r.title)[:120]}:{r.year}"
+    if r.source_type == "speech":
+        return f"s:{r.date}:{norm(r.title)[:50]}"
+    return "u:" + r.url
+\end{lstlisting}
+\small
+\begin{itemize}
+\item Second pass: same title + year across DOIs.
+\item Merge: most precise date, longest abstract, union of keywords.
+\end{itemize}
+\end{column}
+\end{columns}
+\note{\textbf{Backup (only if asked).}
+\begin{itemize}
+\item The same paper appears in several databases: we match on DOI, else on normalised title and year.
+\item When merging, keep the best of each copy: the most precise date, the longest abstract.
+\end{itemize}}
+\end{frame}
+
+\begin{frame}{Backup: validation of the tone measure}
+\footnotesize
+30 sentences sampled per FinBERT label, read blind to the label.\\[4pt]
+\begin{tabular}{@{}lrrrr@{}}\toprule
+\textbf{FinBERT $\downarrow$ / reading $\rightarrow$} & \textbf{negative} & \textbf{neutral} & \textbf{positive} & \textbf{Precision}\\\midrule
+negative & 18 & 11 & 1 & 0.60 \\
+neutral & 2 & 26 & 2 & 0.87 \\
+positive & 1 & 12 & 17 & 0.57 \\
+\bottomrule\end{tabular}\\[4pt]
+90 sentences read (30 per predicted label): agreement 68\%, $\kappa = 0.52$; positive and negative confused 2 times.\\[3pt]
+\scriptsize File: \texttt{presentation/validation\_tone.csv}.
+\note{\textbf{Backup (only if asked).} Errors are almost all ``toned vs.\ neutral'': FinBERT was trained on financial news, where descriptive sentences about a new product read as positive.}
+\end{frame}
+
+\begin{frame}{References}
+\scriptsize
+\begin{itemize}\setlength\itemsep{1pt}
+\item Araci, D. (2019). FinBERT: Financial sentiment analysis with pre-trained language models. arXiv:1908.10063.
+\item Aria, M., \& Cuccurullo, C. (2017). bibliometrix: An R-tool for comprehensive science mapping analysis. \emph{Journal of Informetrics}, 11(4).
+\item Blondel, V. D., Guillaume, J.-L., Lambiotte, R., \& Lefebvre, E. (2008). Fast unfolding of communities in large networks. \emph{J.\ Stat.\ Mech.}
+\item Callon, M., Courtial, J.-P., \& Laville, F. (1991). Co-word analysis as a tool for describing the network of interactions between basic and technological research. \emph{Scientometrics}, 22(1).
+\item Cobo, M. J., López-Herrera, A. G., Herrera-Viedma, E., \& Herrera, F. (2011). An approach for detecting, quantifying, and visualizing the evolution of a research field. \emph{Journal of Informetrics}, 5(1).
+\item Grootendorst, M. (2022). BERTopic: Neural topic modeling with a class-based TF-IDF procedure. arXiv:2203.05794.
+\item Kleinberg, J. (2002). Bursty and hierarchical structure in streams. \emph{KDD}.
+\item Monroe, B. L., Colaresi, M. P., \& Quinn, K. M. (2008). Fightin' words. \emph{Political Analysis}, 16(4).
+\item Reimers, N., \& Gurevych, I. (2019). Sentence-BERT. \emph{EMNLP}.
+\item Roberts, M. E., Stewart, B. M., Tingley, D., et al.\ (2014). Structural topic models for open-ended survey responses. \emph{AJPS}, 58(4).
+\item van Eck, N. J., \& Waltman, L. (2010). Software survey: VOSviewer. \emph{Scientometrics}, 84(2).
+\item Reviews cited: Bapat \& Sharma (2025); Fahad \& Bulut (2024); Hoang, Ngo \& Vu (2023); Kvedaravi\v{c}i\={u}t\.{e} \& \v{S}apkauskien\.{e} (2024); Paulovici (2026); Prodan et al.\ (2024): full records in the corpus.
+\end{itemize}
+\note{\textbf{References.}}
+\end{frame}
+\end{document}
