@@ -46,6 +46,10 @@ then attach the file to a new release.
 It needs `torch sentence-transformers bertopic scikit-learn transformers statsmodels mlx-lm networkx` in the venv
 (Apple Silicon for `mlx-lm`). Models are downloaded on first use; heavy results are cached in `data/cache/`
 (`embeddings.npz`, `tone.csv`, `stance_sample.csv`, the last one resumable).
+`.venv/bin/python scripts/tag_economists.py` fetches each paper's OpenAlex field and author institutions
+(`data/cache/openalex_fields.csv`): the talk keeps only texts by economists (research in economics or finance, or with a
+central bank / IMF / BIS author; central bank speeches; documents of central banks and international institutions).
+`.venv/bin/python scripts/stance_economists.py` tops up the LLM stance sample for that corpus.
 `.venv/bin/python scripts/validate_coders.py` (about 1.5 h) scores every candidate coder against the hand-coded samples
 and writes `presentation/validation_coders.csv`, which the slides read.
 

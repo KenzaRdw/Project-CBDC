@@ -42,6 +42,26 @@ DISCIPLINES = {"economic", "economics", "business", "computer science", "politic
                "management", "marketing", "economy", "monetary economics", "financial system", "computer security"}
 
 
+# ----------------------------------------------------------------- who counts as an economist
+
+ECON_FIELD = "Economics, Econometrics and Finance"
+ECON_VENUE = re.compile(r"econom|financ|monetar|money|bank|credit|repec|nber|cepr|working\s+paper", re.I)
+
+
+def economists(d, fields):
+    """Texts written by economists: research classified in economics or finance by OpenAlex (or, without an
+    OpenAlex record, published in an economics venue) or with an author at a central bank, the IMF or the BIS;
+    central bank speeches; documents of central banks and international financial organisations. Press is excluded."""
+    f = d[["record_id"]].merge(fields, on="record_id", how="left")
+    f.index = d.index
+    tagged = f.field.notna()
+    research = (f.field.eq(ECON_FIELD) | f.institutions.fillna("").str.contains(CB_AFFIL)
+                | d.author_affiliations.fillna("").str.contains(CB_AFFIL)
+                | (~tagged & d.venue.fillna("").str.contains(ECON_VENUE)))
+    return (((d.source_type == "academic") & research) | (d.source_type == "speech")
+            | ((d.source_type == "official") & d.issuer_type.isin(["central bank", "international organisation"])))
+
+
 def load(path):
     d = pd.read_csv(path, low_memory=False, usecols=lambda c: c != "full_text")
     d["year"] = pd.to_numeric(d["year"], errors="coerce")
@@ -251,7 +271,7 @@ def _tokens(text):
             if w not in STOP and w not in TOPIC and not w.endswith("-")]
 
 
-GROUPS = {"academic": "Academics", "speech": "Central bankers", "press": "Press"}
+GROUPS = {"academic": "Research economists", "speech": "Central bankers"}
 
 
 def distinctive(d, root, k=10, a0=500.0):
@@ -447,6 +467,66 @@ def placebo(d, n=500, start="2019-06-01", end="2025-06-01", pre=(-90, -15), post
             z.append((span(t, *post) - e) / math.sqrt(e))
     z = np.array(z)
     return {"n": len(z), "share_sig": float((z > 1.96).mean()), "z95": float(np.percentile(z, 95)), "z": z}
+
+
+def tone_events(doc, window=180, n=500, start="2019-06-01", end="2025-06-01", seed=7):
+    """Do events move tone? doc: one row per text with `day` and `tone`.
+
+    For event date t0:  Delta = mean tone of texts in [t0, t0 + w)  -  mean tone in [t0 - w, t0);
+    p = share of random dates with |Delta| at least as large (two-sided placebo test)."""
+    doc = doc.dropna(subset=["day", "tone"]).sort_values("day")
+
+    def delta(t0):
+        w = pd.Timedelta(days=window)
+        b = doc[(doc.day >= t0 - w) & (doc.day < t0)].tone
+        a = doc[(doc.day >= t0) & (doc.day < t0 + w)].tone
+        return a.mean() - b.mean(), len(b), len(a)
+    rng = np.random.default_rng(seed)
+    days = pd.date_range(start, end)
+    pl = np.abs(np.array([delta(t)[0] for t in days[rng.choice(len(days), n, replace=False)]]))
+    out = []
+    for date_, label in EVENTS:
+        dl, nb, na = delta(pd.Timestamp(date_))
+        out.append({"date": date_, "event": label, "before": nb, "after": na, "delta": dl,
+                    "p": float((pl >= abs(dl)).mean())})
+    return pd.DataFrame(out), float(np.percentile(pl, 95))
+
+
+# texts about Russia: exposed to the 2022 sanctions shock
+RUSSIA = re.compile(r"russia|ruble|rouble|\bcbr\b|росси|рубл|банк\w*\s+росси", re.I)
+
+
+def did(frame, treated, outcome, ref=2021, years=(2018, 2026)):
+    """Event-study difference-in-differences (linear probability model, robust SEs):
+
+        y_it = a_g + b_t + sum_{k != ref} g_k * 1[treated_i] * 1[t = k] + e_it
+
+    g_k for k < ref test parallel pre-trends; the pooled effect replaces the yearly interactions by
+    1[treated] * 1[t > ref]. Returns {"by_year": [(year, g, lo, hi)], "pooled": (g, lo, hi), "n_treated", "n"}."""
+    import statsmodels.api as sm
+    f = frame[(frame.year >= years[0]) & (frame.year <= years[1])].copy()
+    f["tr"] = treated.reindex(f.index).fillna(False).astype(float)
+    y = f[outcome].astype(float).values
+    yrs = sorted(int(x) for x in f.year.unique())
+    base = {"const": np.ones(len(f)), "treated": f.tr.values}
+    for t in yrs:
+        if t != ref:
+            base[f"y{t}"] = (f.year == t).astype(float).values
+    X = pd.DataFrame(base)
+    for t in yrs:
+        if t != ref:
+            X[f"tr_y{t}"] = f.tr.values * (f.year == t).values
+    m = sm.OLS(y, X).fit(cov_type="HC1")
+    ci = m.conf_int()
+    by_year = [(t, 0.0, 0.0, 0.0) if t == ref else
+               (t, 100 * m.params[f"tr_y{t}"], 100 * ci.loc[f"tr_y{t}", 0], 100 * ci.loc[f"tr_y{t}", 1]) for t in yrs]
+    P = X[["const", "treated"] + [c for c in X if c.startswith("y")]].copy()
+    P["post"] = f.tr.values * (f.year > ref).values
+    mp = sm.OLS(y, P).fit(cov_type="HC1")
+    pre = [r for r in by_year if r[0] < ref]
+    return {"by_year": by_year, "pooled": (100 * mp.params["post"], 100 * mp.conf_int().loc["post", 0],
+                                           100 * mp.conf_int().loc["post", 1]),
+            "pre_ok": all(lo <= 0 <= hi for _, _, lo, hi in pre), "n_treated": int(f.tr.sum()), "n": len(f)}
 
 
 # ----------------------------------------------------------------- 8. bibliometric laws

@@ -60,7 +60,8 @@ def embed(d, root, cache):
 
 # non-English function words in mixed-language abstracts, and repository boilerplate ("Researcher", Zenodo)
 FOREIGN_STOP = {"dan", "yang", "dalam", "untuk", "dengan", "pada", "ini", "atau", "des", "les", "der", "die", "und",
-                "researcher", "creators", "description"}
+                "researcher", "creators", "description",
+                "ugc", "care", "listed", "remarks", "conference", "speech", "ladies", "gentlemen"}
 
 
 def _words(text):
@@ -106,7 +107,7 @@ def ctfidf(class_texts, k=6, min_df=5, max_df=0.15):
 
 # ----------------------------------------------------------------- topics (BERTopic)
 
-def topics(d, root, cache, min_size=60):
+def topics(d, root, cache, min_size=60, selection="eom"):
     """BERTopic on research, speeches and official documents (headlines are too short).
 
     Clusters are found in all languages (the embedding space is multilingual); labels use
@@ -121,7 +122,7 @@ def topics(d, root, cache, min_size=60):
     texts = [doc_text(r, root) for r in t.to_dict("records")]
     model = BERTopic(umap_model=UMAP(n_neighbors=15, n_components=5, min_dist=0.0, metric="cosine", random_state=42),
                      hdbscan_model=HDBSCAN(min_cluster_size=min_size, min_samples=10, metric="euclidean",
-                                           cluster_selection_method="eom", prediction_data=True),
+                                           cluster_selection_method=selection, prediction_data=True),
                      calculate_probabilities=False)
     topic, _ = model.fit_transform(texts, emb)
     n_outliers = int(np.sum(np.array(topic) == -1))
@@ -345,8 +346,12 @@ def stance_sample(d, root, cache, per_cell=100, seed=5):
     for lbl, y0, y1 in PERIODS:
         f.loc[(f.year >= y0) & (f.year <= y1), "period"] = lbl
     f = f.dropna(subset=["period"])
-    sample = pd.concat([g.sample(min(per_cell, len(g)), random_state=seed) for _, g in f.groupby(["actor", "period"])])
     done = pd.read_csv(cache) if cache.exists() else pd.DataFrame(columns=["record_id"])
+    # texts already coded were drawn at random, so they stay a random sample of any subset of the corpus;
+    # each cell is topped up with a random draw from the texts not coded yet
+    f["coded"] = f.record_id.isin(done.record_id)
+    f = f.sample(frac=1, random_state=seed).sort_values("coded", ascending=False, kind="stable")
+    sample = f.groupby(["actor", "period"], group_keys=False).head(per_cell)
     todo = sample[~sample.record_id.isin(done.record_id)]
     if len(todo):
         model, tok = load(LLM)

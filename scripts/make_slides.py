@@ -205,7 +205,7 @@ def robustness(d, mo_table, tone_doc, stance_doc, variants):
         e_inc = A.adjusted(mt, "Financial inclusion").get("period", (np.nan,) * 3)
         e_mp = A.adjusted(mt, "Monetary policy").get("period", (np.nan,) * 3)
         td = tone_doc[tone_doc.record_id.isin(ids)]
-        gap = td[td.actor == "speech"].tone.mean() - td[td.actor == "press"].tone.mean()
+        gap = td[td.actor == "speech"].tone.mean() - td[td.actor == "academic"].tone.mean()
         sd = stance_doc[stance_doc.record_id.isin(ids)]
         fav = lambda a: 100 * (sd[sd.actor == a].stance == "favourable").mean()
         ev, _ = A.event_study(dv)
@@ -219,14 +219,36 @@ def main():
     full = A.load(ROOT / "data/cbdc_corpus.csv")
     rel = full.relevance.value_counts()
     n_all = len(full)
-    d = full[full.relevance.isin(RELEVANT)].copy()
+    d_theme = full[full.relevance.isin(RELEVANT)].copy()
+    fields = pd.read_csv(ROOT / "data/cache/openalex_fields.csv")  # written by scripts/tag_economists.py
+    d = d_theme[A.economists(d_theme, fields)].copy()  # the corpus of the talk: texts written by economists
     n = len(d)
     by_type = d.source_type.value_counts()
     types = [(k, lbl) for k, lbl in TYPES if by_type.get(k, 0)]
     today = date.today()
     periods = [p for p, _, _ in A.PERIODS]
-    v = {"TIMES": f"{n / 1024:.0f}", "DATE": f"{today:%B %Y}", "N_ALL": f"{n_all:,}", "N": f"{n:,}", "N_LANG": str(d.language.nunique()),
+    v = {"N_THEME": f"{len(d_theme):,}", "TIMES": f"{len(d_theme) / 1024:.0f}", "DATE": f"{today:%B %Y}", "N_ALL": f"{n_all:,}", "N": f"{n:,}", "N_LANG": str(d.language.nunique()),
          "Y0": str(int(d.year.min())), "Y1": str(int(d.year.max())), "N_COLS": str(len(full.columns) + 1)}
+
+    # --- who counts as an economist (step 4 of the filter)
+    ff = d_theme[["record_id"]].merge(fields, on="record_id", how="left").set_index(d_theme.index)
+    ac = d_theme.source_type == "academic"
+    by_field = ff.field.eq(A.ECON_FIELD)
+    by_cb = ff.institutions.fillna("").str.contains(A.CB_AFFIL) | d_theme.author_affiliations.fillna("").str.contains(A.CB_AFFIL)
+    by_venue = ff.field.isna() & d_theme.venue.fillna("").str.contains(A.ECON_VENUE)
+    off = d_theme.source_type == "official"
+    v["ECON_ROWS"] = "\n".join(f"{a} & {b:,} & {c} \\\\" for a, b, c in [
+        ("Research, classified in economics or finance (OpenAlex)", int((ac & by_field).sum()), "kept"),
+        ("Research, other field but an author at a central bank, IMF or BIS", int((ac & ~by_field & by_cb).sum()), "kept"),
+        ("Research without OpenAlex record, economics venue", int((ac & ~by_field & ~by_cb & by_venue).sum()), "kept"),
+        ("Research in other fields", int((ac & ~(by_field | by_cb | by_venue)).sum()), "dropped"),
+        ("Central bank speeches", int((d_theme.source_type == "speech").sum()), "kept"),
+        ("Documents of central banks and international institutions",
+         int((off & d_theme.issuer_type.isin(["central bank", "international organisation"])).sum()), "kept"),
+        ("Documents of governments and parliaments", int((off & ~d_theme.issuer_type.isin(["central bank", "international organisation"])).sum()), "dropped"),
+        ("Press articles (no author)", int((d_theme.source_type == "press").sum()), "dropped")])
+    drop_f = ff[ac & ~(by_field | by_cb | by_venue)].field.fillna("no OpenAlex record").value_counts()
+    v["ECON_DROPPED"] = ", ".join(f"{tex(k)} {c:,}" for k, c in drop_f.head(4).items())
 
     # --- corpus description
     yrs = list(range(2016, today.year + 1))
@@ -242,7 +264,6 @@ def main():
     v["LANG_SYM"] = ",".join(f"{{{LANG.get(k, k)}}}" for k in lang.index)
     second = lang.index[-1] if len(lang) else ""
     v["LANG2"], v["LANG2_N"] = LANG.get(second, second), f"{int(lang.iloc[-1]) if len(lang) else 0:,}"
-    v["LANG2_PRESS"] = f"{int(((d.language == second) & (d.source_type == 'press')).sum()):,}"
     v["EN_N"], v["EN_PCT"] = f"{(d.language == 'en').sum():,}", f"{100 * (d.language == 'en').mean():.0f}"
     src = d.source_db.str.split("; ").explode().replace({
         "BIS central bankers' speeches (RSS)": "BIS central bankers' speeches",
@@ -270,12 +291,14 @@ def main():
         f"{tex(r.authors.split('; ')[0].split()[-1]) if isinstance(r.authors, str) else ''} ({int(r.year)}) & "
         f"{tex(r.title.title() if r.title.isupper() else r.title, 58)} & {int(r.cited_by_count):,} \\\\"
         for r in cited.itertuples())
+    inst = d[["record_id"]].merge(fields, on="record_id").institutions.dropna().str.split("; ").explode()
+    inst_counts = inst[inst != ""].value_counts()
     v["VOICES"] = (r"\begin{columns}[T]" + "".join(
         r"\begin{column}{0.32\textwidth}\scriptsize\textbf{" + t + r"}\\[2pt]"
         + r"\begin{tabular}{@{}p{0.8\linewidth}r@{}}" + rows(s, 8, 30) + r"\end{tabular}\end{column}"
-        for t, s in [("Speeches", d[d.source_type == "speech"].issuer.value_counts()),
-                     ("Official documents", d[d.source_type == "official"].issuer.value_counts()),
-                     ("Press outlets", d[d.source_type == "press"].issuer.value_counts())]) + r"\end{columns}")
+        for t, s in [("Speeches, by central bank", d[d.source_type == "speech"].issuer.value_counts()),
+                     ("Documents, by institution", d[d.source_type == "official"].issuer.value_counts()),
+                     ("Research, by author institution", inst_counts)]) + r"\end{columns}")
     top_bank = d[d.source_type == "speech"].issuer.value_counts()
     v["TOP_BANK"] = tex(top_bank.index[0]) if len(top_bank) else "--"
 
@@ -427,7 +450,7 @@ def main():
     v["BURST_LATE"] = ", ".join(tex(k) for k in bu[bu.start >= "2025Q1"].keyword.head(4))
 
     # --- paper framing: earlier reviews, found in the corpus itself
-    rv = d[(d.source_type == "academic")
+    rv = d_theme[(d_theme.source_type == "academic")
            & d.title.str.contains(r"bibliometr|scientometr|systematic\s+(?:literature\s+)?review|literature\s+review|"
                                   r"mapping\s+study|text\s+mining", case=False, na=False)
            & d.title.str.contains(r"CBDC|central\s+bank\s+digital|digital\s+(?:euro|yuan|rupee|currenc)", case=False, na=False)]
@@ -468,7 +491,7 @@ def main():
     v["CAGR"] = f"{100 * L['cagr']:.0f}"
 
     # --- topics (SBERT + BERTopic, c-TF-IDF labels) and what is new in each period
-    tp = nlp.topics(d, ROOT, ROOT / "data/cache/embeddings.npz")
+    tp = nlp.topics(d, ROOT, ROOT / "data/cache/embeddings.npz", min_size=40, selection="leaf")
     tt = tp["table"]
     jur = lambda terms: any(w in JURISDICTION for w in terms[:2])
     shown = tt.head(12)
@@ -526,7 +549,7 @@ def main():
     snt = snt[snt.record_id.isin(d.record_id)].copy()
     snt["actor"] = snt.source_type.replace({"official": "speech"})
     doc = snt.groupby(["record_id", "actor"]).agg(tone=("tone", "mean"), year=("year", "first")).reset_index()
-    actors = [("academic", "Academics", "c1"), ("speech", "Central banks", "c2"), ("press", "Press", "c4")]
+    actors = [("academic", "Research economists", "c1"), ("speech", "Central banks \\& institutions", "c2")]
     tyrs = list(range(2019, today.year + 1))
     v["TONE_PLOTS"] = "\n".join(
         f"\\addplot[{c}, thick, mark=*, mark size=1.2pt] coordinates {{"
@@ -554,14 +577,27 @@ def main():
     v["TONE_ACAD"] = (f"{ac[ac.year == tyrs[0]].tone.mean():.2f} in {tyrs[0]} to "
                       f"{ac[ac.year == today.year - 1].tone.mean():.2f} in {today.year - 1}")
 
+    # --- do events move tone? 180 days after vs before each event, against random dates
+    dpr = d.date_precision.fillna("")
+    days = d[dpr.str.startswith("day") & ~dpr.str.contains("Jan 1")].set_index("record_id").publication_date
+    doc["day"] = pd.to_datetime(doc.record_id.map(days), errors="coerce")
+    te, te95 = A.tone_events(doc)
+    v["TEV_ROWS"] = "\n".join(
+        f"{pd.Timestamp(r.date):%b %Y} & {tex(r.event)} & {r.before} & {r.after} & "
+        + (f"\\textbf{{{r.delta:+.3f}}}" if r.p < 0.05 else f"{r.delta:+.3f}") + f" & {r.p:.2f} \\\\"
+        for r in te.itertuples())
+    v["TEV_NSIG"], v["TEV_95"] = str(int((te.p < 0.05).sum())), f"{te95:.3f}"
+    v["TEV_MIN_P"] = f"{te.p.min():.2f}"
+
     # --- how (2): stance. Levels from the hand-coded texts (50 per actor); changes over time from a local LLM
     # on a stratified sample (its bias towards "favourable" inflates levels but largely cancels in differences)
     ss = nlp.stance_sample(d, ROOT, ROOT / "data/cache/stance_sample.csv")  # cached: codes only what is missing
     sv = pd.read_csv(OUT / "validation_stance.csv").merge(pd.read_csv(OUT / "validation_stance_llm.csv"), on="record_id")
+    sv = sv[sv.record_id.isin(d.record_id)]
     sv["actor"] = sv.source_type.replace({"official": "speech"})
     vst_k = vst.loc["Local LLM, Qwen2.5 7B", "kappa"]
     level, trend = [], []
-    for a, lbl in [("academic", "Academics"), ("speech", "Central banks"), ("press", "Press")]:
+    for a, lbl in [("academic", "Research economists"), ("speech", "Central banks \\& institutions")]:
         h = sv[sv.actor == a]["manual: stance"]
         cell_ = lambda lab: (lambda lo_hi: f"{100 * (h == lab).mean():.0f} \\tiny[{100 * lo_hi[0]:.0f}--{100 * lo_hi[1]:.0f}]")(
             wilson((h == lab).sum(), len(h)))
@@ -579,22 +615,72 @@ def main():
     v["STANCE_RAWFAV"] = f"{100 * (sv.llm == 'favourable').mean():.0f}"
     v["STANCE_TRUEFAV"] = f"{100 * (sv['manual: stance'] == 'favourable').mean():.0f}"
     hc = sv.groupby("actor")["manual: stance"].value_counts(normalize=True).unstack().fillna(0)
-    v["STANCE_TAKE"] = (f"By reading: {100 * hc.loc['speech', 'favourable']:.0f}\\% of central bank texts are favourable, "
-                        f"{100 * hc.loc['academic', 'favourable']:.0f}\\% of research; criticism is rare and mostly in the press "
-                        f"({100 * hc.loc['press', 'critical']:.0f}\\%)")
+    v["STANCE_TAKE"] = (f"By reading: {100 * hc.loc['speech', 'favourable']:.0f}\\% of central bank texts are favourable; "
+                        f"research economists are mostly \\alert{{neutral}} ({100 * hc.loc['academic', 'neutral']:.0f}\\%): "
+                        "they analyse, central banks advocate")
+    st_fav = {a: [100 * (ss[(ss.actor == a) & (ss.period == p_)].stance == "favourable").mean() for p_ in periods]
+              for a in ("academic", "speech")}
+
+    # --- the 2022 sanctions: difference-in-differences on texts about Russia (or in Russian) vs the others
+    mtab = mo["table"].merge(d[["record_id", "language", "keywords_indexed"]], on="record_id")
+    treated = (mtab.language == "ru") | (mtab.title.fillna("") + " " + mtab.text + " "
+                                         + mtab.keywords_indexed.fillna("")).str.contains(A.RUSSIA)
+    dd_ = {k: A.did(mtab, treated, k, years=(2020, today.year)) for k in A.MOTIVES}
+    geo = dd_["Geopolitics and sanctions"]
+    v["DID_PLOT"] = " ".join(f"({t},{g:.1f}) +- (0,{(hi - lo) / 2:.1f})" for t, g, lo, hi in geo["by_year"])
+    v["DID_POOLED"] = f"${geo['pooled'][0]:+.1f}$ points [{geo['pooled'][1]:+.0f}, {geo['pooled'][2]:+.0f}]"
+    v["DID_NT"], v["DID_N"] = f"{geo['n_treated']:,}", f"{geo['n']:,}"
+    v["DID_ROWS"] = "\n".join(
+        f"{tex(k, 34)} & " + (f"\\textbf{{{e['pooled'][0]:+.1f}}}" if e["pooled"][1] > 0 or e["pooled"][2] < 0
+                              else f"{e['pooled'][0]:+.1f}") + f" \\tiny[{e['pooled'][1]:+.0f}, {e['pooled'][2]:+.0f}] \\\\"
+        for k, e in sorted(dd_.items(), key=lambda kv: -kv[1]["pooled"][0]))
+    v["DID_OTHERS"] = str(sum(1 for k, e in dd_.items() if k != "Geopolitics and sanctions"
+                              and (e["pooled"][1] > 0 or e["pooled"][2] < 0)))
+
+    # --- synthesis: the discussion and its environment, period by period
+    def in_period(y, p_):
+        lo_y, hi_y = next((a_, b_) for l_, a_, b_ in A.PERIODS if l_ == p_)
+        return lo_y <= y <= hi_y
+    ev_sig = set(ev[ev.p < 0.05].event)
+    syn = {
+        "Policy events (bold: attention reacts)": [
+            "; ".join((f"\\textbf{{{tex(e)}}}" if e in ev_sig else tex(e)) for dt_, e in A.EVENTS if in_period(int(dt_[:4]), p_))
+            or "--" for p_ in periods],
+        "Texts per year": [f"{d[d.year.between(*next((a_, min(b_, today.year)) for l_, a_, b_ in A.PERIODS if l_ == p_))].year.value_counts().mean():,.0f}"
+                           for p_ in periods],
+        "Bursting keywords": [", ".join(tex(k) for k in bu[bu.start.map(lambda q: in_period(int(q[:4]), p_))].keyword.head(3)) or "--"
+                              for p_ in periods],
+        "Most frequent motivations": [", ".join(tex(k.split(" (")[0].lower()) for k in mo["by_period"][p_].sort_values(ascending=False).index[:3])
+                                      for p_ in periods],
+        "Net tone (research / central banks)": [
+            " / ".join(f"{doc[(doc.actor == a) & doc.year.map(lambda y: in_period(y, p_))].tone.mean():.2f}" for a in ("academic", "speech"))
+            for p_ in periods],
+        "Favourable, LLM (research / central banks)": [f"{st_fav['academic'][i]:.0f}\\% / {st_fav['speech'][i]:.0f}\\%"
+                                                       for i in range(len(periods))],
+    }
+    v["SYN_ROWS"] = "\n".join(f"{k} & " + " & ".join(vals) + " \\\\" for k, vals in syn.items())
 
     # --- robustness: the headline results on alternative samples
     ids_all = set(d.record_id)
     journal = set(d[(d.source_type != "academic") | (d.document_type == "article")].record_id)
     stance_doc = ss.assign(actor=ss.actor)
     rob = robustness(d, mo["table"], doc, stance_doc, {
-        "Baseline": (ids_all, None),
+        "Baseline: economists": (ids_all, None),
         "Main theme only": (set(d[d.relevance == "main theme"].record_id), None),
         "English only": (set(d[d.language == "en"].record_id), None),
         "Journal articles only (research)": (journal, None),
         f"Without {today.year} (partial year)": (set(d[d.year < today.year].record_id), None),
         "High-recall motivation coding": (ids_all, mu["table"]),
     })
+    # same results when research from every discipline is kept (press still excluded: no author)
+    wide = d_theme[d_theme.source_type != "press"]
+    mo_w = A.motivations(wide, ROOT)
+    snt_w = nlp.tone(wide, ROOT, ROOT / "data/cache/tone.csv")
+    snt_w = snt_w[snt_w.record_id.isin(wide.record_id)].assign(actor=lambda x: x.source_type.replace({"official": "speech"}))
+    doc_w = snt_w.groupby(["record_id", "actor"]).agg(tone=("tone", "mean"), year=("year", "first")).reset_index()
+    ss_w = pd.read_csv(ROOT / "data/cache/stance_sample.csv")
+    rob += robustness(wide, mo_w["table"], doc_w, ss_w[ss_w.record_id.isin(wide.record_id)],
+                      {"All disciplines (not only economists)": (set(wide.record_id), None)})
 
     def cell(e):
         return "--" if e != e or (isinstance(e, tuple) and e[0] != e[0]) else (
@@ -643,40 +729,42 @@ TEMPLATE = r"""\PassOptionsToPackage{table}{xcolor}
 \setbeamertemplate{note page}{\pagecolor{white}\vspace{6mm}\hspace{6mm}\begin{minipage}{0.9\paperwidth}\large\insertnote\end{minipage}}
 \newcommand{\ymaxev}{<<EV_YMAX>>}
 
-\title{A Bibliometric Corpus on Central Bank Digital Currencies}
-\subtitle{Data, methods and first results of a paper in progress}
+% links between each result and the slide that explains its method
+\makeatletter\newcommand{\slabel}[1]{\edef\@currentlabel{\the\c@framenumber}\label{#1}}\makeatother
+\newcommand{\method}[1]{\hfill\hyperref[#1]{\tiny\textcolor{c4}{$\triangleright$ method explained: slide~\ref*{#1}}}}
+\newcommand{\usedon}[1]{\hyperref[#1]{\textcolor{c4}{slide~\ref*{#1}}}}
+\newcommand{\mhead}[1]{\textcolor{c1}{\textbf{#1}}\\[1pt]}
+
+\title{How Economists Discuss Central Bank Digital Currencies}
+\subtitle{Themes, tone and stance, 2014--<<Y1>>: a bibliometric and text-as-data study}
 \author{Adriel Mazere}
 \institute{M2 -- Private crypto}
 \date{<<DATE>>}
 \begin{document}
 \begin{frame}
 \titlepage
-\note{\textbf{Title (0:15). Total: about 23 minutes.} This talk presents the groundwork of a paper: a bibliometric and text-as-data study of everything written on central bank digital currencies.}
+\note{\textbf{Title (0:15). Total: about 25 minutes.}}
 \end{frame}
 
 \begin{frame}{The paper in one slide}
-\textbf{Research question.} Why do researchers, central bankers and journalists write about CBDCs, and how has the agenda shifted since 2014?
-\\[3pt]
-\alert{What} is written? \quad \alert{Who} writes? \quad \alert{Why} (stated motivations)? \quad \alert{How} (tone)? \quad \alert{When} (around which events)?\\[6pt]
-\textbf{Contribution.}
-\begin{enumerate}\setlength\itemsep{2pt}
-\item \alert{Data}: research, speeches, official documents and press, in <<N_LANG>> languages: <<TIMES>> times the largest earlier review.
-\item \alert{Measurement}: relevance filter, motivations and tone, each checked against hand coding.
-\item \alert{Dynamics}: attention tested against policy events with placebo inference.
-\end{enumerate}
+\textbf{Research question.} How did economists' discussion of central bank digital currencies (its themes, tone and stance) evolve between 2014 and <<Y1>>, and how did it move with changes in the policy environment?\\[5pt]
+\small
+\begin{tabular}{@{}ll@{}}
+\alert{Who} writes? & research economists, central banks and institutions\\
+\alert{What} do they write about? & themes and topics, and how they shift\\
+\alert{How} do they discuss CBDCs? & \textbf{tone and stance: the core of the paper}\\
+\alert{Why}, in their own words? & stated motivations\\
+\alert{When}, and with which environment? & bursts, policy events, sanctions\\
+\end{tabular}\\[5pt]
+\textbf{Scope.} Descriptive: we measure changes and show what moves with them; we do not claim causes.
 \vfill
-\begin{center}\large <<N_ALL>> collected \quad$\to$\quad \alert{<<N>>} with CBDC as a theme \quad$\cdot$\quad <<Y0>>--<<Y1>>\end{center}
-\note{\textbf{The paper in one slide (1:00).}
-\begin{itemize}
-\item One question: why do people write about CBDCs, and how has that changed?
-\item Five sub-questions structure the talk: what, who, why, how, when.
-\item Three contributions: the data, validated measures, and the timing of attention.
-\item Headline: <<N_ALL>> texts collected, <<N>> keep CBDC as a theme.
-\end{itemize}}
+\begin{center}<<N_ALL>> texts collected \;$\to$\; <<N_THEME>> with CBDC as a theme \;$\to$\; \alert{<<N>> written by economists}\end{center}
+\note{\textbf{The paper in one slide (1:00).} One question, five sub-questions; tone and stance are the core.}
 \end{frame}
+
 \begin{frame}{Outline}
 \tableofcontents
-\note{\textbf{Outline (0:15).} Data first, then one section per question (what, who, why, how, when), each opening with its method; robustness; conclusion.}
+\note{\textbf{Outline (0:10).}}
 \end{frame}
 
 % =====================================================================
@@ -688,7 +776,7 @@ TEMPLATE = r"""\PassOptionsToPackage{table}{xcolor}
 \end{frame}
 
 \begin{frame}{Related literature: what the field builds on}
-% to be completed: reading list + co-citation clusters (section ``Who'')
+% to be completed: reading list + co-citation clusters (section ``Who writes'')
 \note{\textbf{Literature (0:45).}}
 \end{frame}
 
@@ -701,42 +789,34 @@ Fahad \& Bulut (2024) & Scopus & 169 of 323 & Biblioshiny\\
 Bapat \& Sharma (2025) & Scopus & 371 & bibliometrics + TCCM\\
 Prodan et al.\ (2024) & Scopus + WoS & 747 of 1{,}024 & PRISMA, VOSviewer\\
 Paulovici (2026) & Scopus & 892 & VOSviewer\\\midrule
-\textbf{This study} & \textbf{5 databases, speeches, press\dots} & \textbf{<<N>>} & \textbf{+ text as data}\\
+\textbf{This study} & \textbf{5 databases + central banks} & \textbf{<<N>>} & \textbf{+ text as data}\\
 \bottomrule\end{tabular}\\[6pt]
 \small
 \begin{itemize}\setlength\itemsep{1pt}
-\item \alert{Gap}: one or two databases (Scopus, WoS), mostly English journal articles: central bankers and the press are absent.
-\item Maps say \emph{what} is studied, not \emph{why}; no measure is validated.
-\item \alert{Here}: every type of text and language, the five W's, and every coder checked on hand-coded texts.
+\item \alert{Gap}: one or two databases, mostly English journal articles; central banks absent; who writes is not checked.
+\item Maps say \emph{what} is studied, not \emph{how} (tone, stance) or \emph{why}; no measure is validated.
+\item \alert{Here}: economists only (checked text by text), all languages, tone and stance over time, every coder validated.
 \end{itemize}
 \scriptsize Found in our own corpus: <<N_REVIEWS>> titles announce a literature, systematic or bibliometric review of CBDCs (<<REV_Y0>>--<<REV_Y1>>).
-\note{\textbf{What this paper adds (1:00).}
-\begin{itemize}
-\item The topic is not new for bibliometrics: about <<N_REVIEWS>> reviews, most of them since 2023.
-\item The bibliometric ones rely on Scopus or Web of Science: a few hundred journal articles, often English only (Prodan et al.\ drop non-English texts).
-\item The closest to us is Hoang et al.\ (2023, RIBAF): text mining, but still academic only.
-\item Our angle: every type of text, every language, and measures that are validated.
-\end{itemize}}
+\note{\textbf{What this paper adds (1:00).} The closest is Hoang et al.\ (2023, RIBAF): text mining, but academic only and no stance.}
 \end{frame}
-\begin{frame}{Approach: one method per question}
+
+\begin{frame}{Approach: one tool per question}
 \scriptsize
 \setlength{\tabcolsep}{4pt}
-\begin{tabular}{@{}lp{0.43\textwidth}p{0.36\textwidth}@{}}\toprule
-\textbf{Question} & \textbf{Used} & \textbf{Also tested, and why not}\\\midrule
-What? & topics: \alert{BERTopic} (SBERT, UMAP, HDBSCAN), labels by \alert{c-TF-IDF}; co-word and Callon map; \alert{covariate logit} on topic shares & LDA / STM: bag of words, one language at a time; their covariate model is applied to BERTopic instead\\
-Who? & co-citation, co-authorship, Lotka, Bradford, \alert{affiliations}; \alert{log-odds} with Dirichlet prior & plain TF-IDF: no shrinkage of rare words\\
-Why? & motivations: \alert{validated codebook}, $\kappa = <<MVAL_CB>>$; covariate logit & SBERT, NLI, local LLMs: $\kappa \le <<MVAL_BEST_ALT>>$\\
-How? & tone: \alert{FinBERT} on CBDC sentences, $\kappa = <<TONE_KAPPA>>$; stance: levels by reading, changes by a \alert{local LLM} on a stratified sample, $\kappa = <<STANCE_K>>$ & stance: <<ST_ALT_LIST>>\\
-When? & vocabulary: \alert{c-TF-IDF} by period; \alert{Kleinberg bursts}; \alert{event study} with placebo dates & Poisson $z$-test: <<EV_P>>\% false positives\\\midrule
-All & six robustness specifications; every coder checked on hand-coded texts & \\
-\bottomrule\end{tabular}
-\note{\textbf{Approach (0:45).}
-\begin{itemize}
-\item One row per question; the middle column is what the results use.
-\item The right column matters for the paper: each alternative was run against the same hand-coded texts, and lost.
-\item Remaining improvements are tuning (more labels, bigger language models), not new methods.
-\end{itemize}}
+\begin{tabular}{@{}lp{0.36\textwidth}p{0.3\textwidth}l@{}}\toprule
+\textbf{Question} & \textbf{Tool} & \textbf{Why this one} & \textbf{Explained}\\\midrule
+Who? & co-citation, co-authorship (association strength, Louvain); laws; log-odds with Dirichlet prior & standard science maps; log-odds shrinks rare words & \usedon{m:net}, \usedon{m:logodds}\\
+What? & thematic map; \alert{BERTopic} (SBERT, UMAP, HDBSCAN); labels by \alert{c-TF-IDF} & groups texts by meaning, across languages & \usedon{m:sbert}, \usedon{m:bertopic}\\
+How? & tone: \alert{FinBERT} on CBDC sentences ($\kappa = <<TONE_KAPPA>>$); stance: reading + \alert{local LLM} ($\kappa = <<STANCE_K>>$) & best of the coders tested against reading & \usedon{m:finbert}, \usedon{m:stance}\\
+Why? & \alert{validated codebook} ($\kappa = <<MVAL_CB>>$) + \alert{covariate logit} & beats SBERT, NLI, LLMs ($\kappa \le <<MVAL_BEST_ALT>>$) & \usedon{m:codebook}, \usedon{m:logit}\\
+When? & \alert{Kleinberg bursts}; \alert{event studies} with placebo dates; \alert{difference-in-differences} & placebo fixes false positives (<<EV_P>>\%) & \usedon{m:burst}, \usedon{m:event}, \usedon{m:did}\\\midrule
+All & 7 robustness specifications; every coder checked on hand-coded texts & & \usedon{m:robust}\\
+\bottomrule\end{tabular}\\[4pt]
+\small Every result slide links to the slide that explains its method (appendix).
+\note{\textbf{Approach (0:45).}}
 \end{frame}
+
 % =====================================================================
 \section{Data}
 
@@ -758,49 +838,11 @@ All & six robustness specifications; every coder checked on hand-coded texts & \
 \small
 \begin{itemize}
 \item 115 search phrases, 12 languages: \emph{CBDC, digital euro, e-CNY, eNaira, Drex, digital fiat currency, Fedcoin, euro numérique, digitaler Euro, digital ruble\dots}
-\item \alert{Recall first}: nothing is filtered at harvest time; every step is resumable.
+\item \alert{Recall first}: collect everything, then filter in four steps: homonyms, centrality, labels, \alert{economists}.
 \end{itemize}
-\note{\textbf{Pipeline (0:45).}
-\begin{itemize}
-\item Four families of sources, each harvested into its own raw file.
-\item Then full text is downloaded and parsed, then everything is merged into one CSV.
-\item Search vocabulary includes older names (digital fiat currency, Fedcoin) to reach the pre-2017 literature.
-\item Design choice: collect broadly, decide relevance later.
-\end{itemize}}
+\note{\textbf{Pipeline (0:40).}}
 \end{frame}
-\begin{frame}[fragile]{Press: recursive bisection of time windows}
-\begin{columns}[T]
-\begin{column}{0.53\textwidth}
-\begin{lstlisting}
-stack = monthly_windows("2000-01-01", today)
-while stack:
-    a, b = stack.pop()
-    items = fetch(query, after=a, before=b)
-    if len(items) >= CAP and (b - a).days > 1:
-        m = a + (b - a) / 2
-        stack += [(m, b), (a, m)]
-        continue
-    save(items)
-    checkpoint(query, a, b, len(items))
-\end{lstlisting}
-\end{column}
-\begin{column}{0.43\textwidth}\small
-A search returns at most $C=100$ items. For a window $W=[a,b)$ with $N(W)$ articles:
-\begin{itemize}
-\item $N(W) < 95$ or $|W| \leq 1$ day: \alert{keep} $W$;
-\item otherwise \alert{split} at $m = a + \frac{b-a}{2}$.
-\item Depth $\leq \lceil \log_2 31 \rceil = 5$ per month; $2L-1$ requests for $L$ windows kept.
-\item 55 searches (country editions $\times$ languages).
-\end{itemize}
-\end{column}
-\end{columns}
-\note{\textbf{Press harvesting (0:45).}
-\begin{itemize}
-\item Problem: a news search returns at most 100 results, but a busy month has thousands.
-\item Solution: if a month is full, cut it in two, and repeat until each window holds fewer than the cap, down to one day.
-\item A month needs at most 5 levels of splitting; the cost is $2L-1$ requests.
-\end{itemize}}
-\end{frame}
+
 \begin{frame}[fragile]{Step 1: is it really \emph{Central Bank Digital Currency}?}
 \begin{columns}[T]
 \begin{column}{0.5\textwidth}
@@ -831,12 +873,9 @@ TERMS = {
 \end{itemize}
 \end{column}
 \end{columns}
-\note{\textbf{Homonyms (0:45).}
-\begin{itemize}
-\item Each concept is a regular expression; the same list drives searching and scoring.
-\item ``CBDC'' also means \emph{chronic bullous dermatosis of childhood}: an ambiguous term only counts if the text also talks about money or payments.
-\end{itemize}}
+\note{\textbf{Homonyms (0:30).}}
 \end{frame}
+
 \begin{frame}{Step 2: how central is CBDC to the text?}
 Each available field $f$ gets a centrality $c_f \in [0,1]$:
 \begin{align*}
@@ -851,13 +890,9 @@ $\rho$ = mentions per 1{,}000 words; $\sigma$ = share of the ten slices of the t
 \qquad F = \text{fields available}
 \]
 \small One field clearly about CBDC suffices; a passing mention stays low; missing fields are not penalised.
-\note{\textbf{Theme score (0:45).}
-\begin{itemize}
-\item Not ``does the word appear'' but ``is it the subject''.
-\item Title: strongest signal. Abstract: share of sentences. Full text: density and spread across the document.
-\item The max rewards one clear signal; the mean rewards consistency. Keywords weigh less: partly machine-assigned.
-\end{itemize}}
+\note{\textbf{Theme score (0:30).}}
 \end{frame}
+
 \begin{frame}{Step 3: labels, and how good is the filter?}
 \begin{columns}[T]
 \begin{column}{0.58\textwidth}\scriptsize
@@ -873,21 +908,33 @@ Strata $h$ weighted by size $N_h$; $T$ = theme labels:
 \[ \widehat{P} = \frac{\sum_{h\in T} N_h \hat p_h}{\sum_{h\in T} N_h}, \qquad \widehat{R} = \frac{\sum_{h\in T} N_h \hat p_h}{\sum_{h} N_h \hat p_h} \]
 \begin{itemize}\setlength\itemsep{1pt}
 \item Precision \alert{<<REL_PREC>>}, recall \alert{<<REL_REC>>}.
-\item Main theme is reliable; \alert{secondary theme is noisy} $\Rightarrow$ robustness on main theme only.
-\item Most missed texts: press without text ($\approx$ <<REL_MISSED>>).
+\item Secondary theme is noisy $\Rightarrow$ robustness on main theme only.
 \end{itemize}
 \end{column}
 \end{columns}
 \vspace{2pt}
-\small From here on: \alert{main + secondary theme} (<<N>> texts).
-\note{\textbf{Validating the filter (0:50).}
-\begin{itemize}
-\item A paper needs to show the filter works: I read a stratified sample without seeing the label.
-\item Main theme: almost always right. Secondary theme: only a minority really is about CBDCs, so every result is re-run on main theme only.
-\item Recall loss comes mainly from press items whose text could not be fetched.
-\end{itemize}}
+\small Kept: \alert{main + secondary theme} (<<N_THEME>> texts).
+\note{\textbf{Validating the filter (0:40).}}
 \end{frame}
-\begin{frame}{Sources and completeness}
+
+\begin{frame}{Step 4: is it written by an economist?}
+\slabel{r:econ}
+\footnotesize
+\begin{tabular}{@{}p{0.62\textwidth}rl@{}}\toprule
+\textbf{Texts with CBDC as a theme} & \textbf{Texts} & \\\midrule
+<<ECON_ROWS>>
+\bottomrule\end{tabular}\\[4pt]
+\scriptsize Field = OpenAlex primary topic (``Economics, Econometrics and Finance''); institutions = authors' affiliations in OpenAlex. Research dropped: <<ECON_DROPPED>>.\\[4pt]
+\small
+\begin{itemize}\setlength\itemsep{1pt}
+\item \alert{<<N>> texts by economists}: research economists, and central banks and international institutions (staff economists, institutional voice).
+\item Press dropped: no author is known, and journalists are not economists.
+\end{itemize}
+\method{m:econ}
+\note{\textbf{Economists (0:50).} This answers the course's question: the corpus is economists' writing, checked text by text.}
+\end{frame}
+
+\begin{frame}{Sources and completeness (economists' corpus)}
 \begin{columns}[T]
 \begin{column}{0.46\textwidth}\footnotesize
 \begin{tabular}{@{}lr@{}}\toprule
@@ -907,30 +954,34 @@ Strata $h$ weighted by size $N_h$; $T$ = theme labels:
 \bottomrule\end{tabular}
 \end{column}
 \end{columns}
-\note{\textbf{Sources (0:35).}
-\begin{itemize}
-\item <<TOP_TYPE>> form the largest group; speeches and official documents are few but long and fully available.
-\item Completeness: most texts are dated to the day; full text and references are the scarcest fields.
-\end{itemize}}
+\note{\textbf{Sources (0:30).}}
 \end{frame}
+
 \begin{frame}{A literature that took off after 2020}
-\begin{center}
+\slabel{r:growth}
+\begin{columns}[c]
+\begin{column}{0.66\textwidth}
 \begin{tikzpicture}
-\begin{axis}[ybar stacked, width=0.95\textwidth, height=0.68\textheight, bar width=14pt,
-  cycle list name=corpus, xtick=data, xticklabel style={/pgf/number format/1000 sep=},
+\begin{axis}[ybar stacked, width=\textwidth, height=0.7\textheight, bar width=11pt,
+  cycle list name=corpus, xtick=data, xticklabel style={/pgf/number format/1000 sep=, font=\scriptsize, rotate=45, anchor=north east},
   ymin=0, legend style={at={(0.02,0.98)},anchor=north west,font=\scriptsize,draw=none},
   ylabel={Documents}, tick label style={font=\scriptsize}, axis lines*=left, ymajorgrids]
 <<YEAR_PLOTS>>
 \end{axis}
 \end{tikzpicture}
-\end{center}
-\scriptsize <<BEFORE>> documents date from before <<YEAR0>>; <<THIS_YEAR>> runs to <<THIS_MONTH>>. Press counts follow the search engine's coverage, which favours recent articles: read trends on academic texts.
-\note{\textbf{Growth (0:40).}
+\end{column}
+\begin{column}{0.32\textwidth}\small
 \begin{itemize}
 \item From <<GROWTH>>.
-\item Turning point 2020: COVID and the decline of cash, Libra (2019), the ECB report on a digital euro (Oct.\ 2020).\item Caution: the press bar for <<THIS_YEAR>> is mostly a harvesting effect (news search returns recent articles first); in the paper, press is normalised by its coverage.
-\end{itemize}}
+\item Growth <<CAGR>>\% a year.
+\item Turning point 2020: Libra (2019), COVID, the ECB report (Oct.\ 2020).
+\end{itemize}
+\scriptsize <<BEFORE>> documents before <<YEAR0>>; <<THIS_YEAR>> runs to <<THIS_MONTH>>.
+\end{column}
+\end{columns}
+\note{\textbf{Growth (0:30).}}
 \end{frame}
+
 \begin{frame}{Languages}
 \begin{columns}[c]
 \begin{column}{0.58\textwidth}
@@ -945,117 +996,45 @@ Strata $h$ weighted by size $N_h$; $T$ = theme labels:
 \end{column}
 \begin{column}{0.4\textwidth}\small
 \begin{itemize}
-\item English dominates: <<EN_N>> texts (<<EN_PCT>>\%); chart shows the others.
-\item Second language: \alert{<<LANG2>>} (<<LANG2_N>> texts, of which <<LANG2_PRESS>> press).
-\item Speeches kept in their original language.
+\item English dominates: <<EN_N>> texts (<<EN_PCT>>\%); the chart shows the others.
+\item Second language: \alert{<<LANG2>>} (<<LANG2_N>> texts).
+\item Everything kept in its original language: the topic model and the codebook are multilingual.
 \end{itemize}
 \end{column}
 \end{columns}
-\note{\textbf{Languages (0:25).} English dominates, but <<LANG2>> is a large second block: a reminder that English-only databases miss part of the debate.}
+\note{\textbf{Languages (0:20).}}
 \end{frame}
-% =====================================================================
-\section{What is written}
 
-\begin{frame}{Method: science maps}
-\begin{itemize}
-\item \textbf{Networks.} Nodes = references, authors or keywords; $c_{ij}$ = documents where $i$ and $j$ appear together, $c_i$ = occurrences of $i$. Edges weighted by \alert{association strength}:
-\[ s_{ij} = \frac{c_{ij}}{c_i\,c_j} \]
-\item \textbf{Clusters.} Louvain algorithm, maximising modularity
-\[ Q = \frac{1}{2m}\sum_{i,j}\Big[s_{ij} - \frac{k_i k_j}{2m}\Big]\,\delta(g_i,g_j) \]
-\item \textbf{Layout.} Force-directed: linked nodes end up close. Size $\propto \sqrt{c_i}$, colour = cluster.
-\end{itemize}
-\note{\textbf{Method (0:40).}
-\begin{itemize}
-\item Association strength corrects for popularity: two very frequent items co-occur often by chance.
-\item Louvain groups nodes so that links are dense inside groups and sparse between them; $Q$ measures how clear the grouping is.
-\end{itemize}}
-\end{frame}
-\begin{frame}{Thematic map: which themes drive the field?}
-\begin{columns}[c]
-\begin{column}{0.47\textwidth}
-<<THEMATIC>>
-\end{column}
-\begin{column}{0.51\textwidth}\scriptsize
-Keyword clusters (Callon), with $e_{ij} = c_{ij}^2 / (c_i c_j)$:
-\[ \text{centrality} = 10\!\!\sum_{i\in C,\,j\notin C}\!\! e_{ij}, \qquad \text{density} = \frac{100}{|C|}\!\sum_{i,j\in C}\! e_{ij} \]
-\begin{tabular}{@{}lp{0.62\linewidth}l@{}}\toprule
- & \textbf{Theme} (top keywords) & \textbf{Quadrant}\\\midrule
-<<THEME_ROWS>>
-\bottomrule\end{tabular}
-\end{column}
-\end{columns}
-\note{\textbf{Thematic map (0:50).}
-\begin{itemize}
-\item Centrality: how connected a theme is to the others. Density: how developed it is internally.
-\item Motor themes (central and developed): <<MOTOR>>.
-\item Niche themes are developed but isolated; basic themes are transversal but less structured.
-\end{itemize}}
-\end{frame}
-\begin{frame}{How the themes evolve}
-\scriptsize
-\begin{tabular}{@{}p{0.42\textwidth}rrrr@{}}\toprule
-\textbf{Keyword} (\% of the period's papers) & <<EVO_HEAD>>\\\midrule
-<<EVO_ROWS>>
-\bottomrule\end{tabular}\\[4pt]
-Sorted by change between the last two periods. Darker = more frequent.\\[3pt]
-\textbf{New in each period} (c-TF-IDF, periods as classes): <<PERIOD_TERMS>>.
-\note{\textbf{Evolution (0:35).}
-\begin{itemize}
-\item Rising fastest: <<EVO_UP>>; falling most: <<EVO_DOWN>> (shares, while the field itself grows).
-\item The literature moves from ``how would it work'' to ``who adopts it and for whom''.
-\item Bottom line, TF-IDF answers ``when'': each period's vocabulary compared to the others.
-\end{itemize}}
-\end{frame}
-\begin{frame}{What: topics found by meaning (SBERT + BERTopic)}
-\scriptsize
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{@{}rp{0.4\textwidth}rrrrrr@{}}\toprule
- & \textbf{Topic} (top c-TF-IDF terms) & \textbf{Texts} & \multicolumn{3}{c}{\textbf{\% of the period's texts}} & \multicolumn{2}{c}{\textbf{Adjusted, points}}\\
- & & & <<PERIOD_HEAD>> & \textbf{change} & \textbf{CB}\\\midrule
-<<TOPIC_ROWS>>
-\bottomrule\end{tabular}\\[3pt]
-<<TOPIC_N>> texts (research, speeches, official), multilingual SBERT; <<TOPIC_K>> topics (<<TOPIC_OUT>>\% outliers reassigned). Labels: $W_{t,c} = \frac{\text{tf}_{t,c}}{|c|}\log\!\big(1+\frac{A}{f_t}\big)$. Adjusted: logit of topic membership on period, actor, English (the covariate model of an STM); change = 2023--26 vs 2014--19; CB = central banks vs academics; \textbf{bold}: 95\% CI excludes 0.\\[2pt]
-\small Topics tied to \alert{one jurisdiction}: <<TOPIC_JUR>>.
-\note{\textbf{Topics (1:00).}
-\begin{itemize}
-\item Unlike keywords, embeddings group texts by meaning and across languages: a Russian and an English paper on the digital ruble land together.
-\item Two kinds of topics: issues (privacy, cross-border, stablecoins, adoption) and jurisdictions (digital euro, ruble, e-CNY, rupee).
-\item Jurisdiction topics keep a stable share, but move away from the digital euro towards the ruble, the e-CNY and the rupee: the literature follows national projects.
-\item Central banks dominate one topic, the digital euro; researchers the rest.
-\end{itemize}}
-\end{frame}
 % =====================================================================
 \section{Who writes}
 
-\begin{frame}{Academic literature}
+\begin{frame}{Research economists: outlets, most cited, laws}
+\slabel{r:research}
 \begin{columns}[T]
 \begin{column}{0.4\textwidth}\scriptsize\textbf{Main outlets}\\[2pt]
 \begin{tabular}{@{}p{0.8\linewidth}r@{}}<<VENUE_ROWS>>\end{tabular}\\[4pt]
-Working papers (SSRN, RePEc) outweigh journals.\\[4pt]
 \textbf{Bibliometric laws.} <<LAWS>>
 \end{column}
 \begin{column}{0.58\textwidth}\scriptsize\textbf{Most cited papers} (global citations)\\[2pt]
 \begin{tabular}{@{}p{0.2\linewidth}p{0.66\linewidth}r@{}}
 <<CITED_ROWS>>
-\end{tabular}
+\end{tabular}\\[6pt]
+\small Working papers (SSRN, RePEc) weigh as much as journals; a young, open field: most authors write once.
 \end{column}
 \end{columns}
-\note{\textbf{Academic literature (0:45).}
-\begin{itemize}
-\item Much of the debate happens in working papers, often by central bank economists.
-\item The most cited papers are macro-modelling papers from 2016--2020.
-\item Laws: output grows <<CAGR>>\% a year; most authors write once (a Lotka exponent above 2): a young, open field around a small core of sources.
-\end{itemize}}
+\method{m:laws}
+\note{\textbf{Research economists (0:40).}}
 \end{frame}
-\begin{frame}{Who speaks: central banks, authorities, press}
+
+\begin{frame}{Who speaks: central banks, institutions, research centres}
 <<VOICES>>
-\note{\textbf{Voices (0:35).}
-\begin{itemize}
-\item <<TOP_BANK>> leads the speeches: the digital euro project makes it the most vocal institution.
-\item The press is led by specialised fintech outlets before generalist media.
-\end{itemize}}
+\vspace{3pt}
+\small \alert{<<TOP_BANK>>} is the most vocal central bank: the digital euro makes it the hub of the debate.
+\note{\textbf{Voices (0:35).} Institutions under their own names: speeches by central bank, documents by institution, research by the authors' institutions.}
 \end{frame}
+
 \begin{frame}{Co-citation: the intellectual base}
+\slabel{r:cocit}
 \begin{columns}[T]
 \begin{column}{0.7\textwidth}
 <<COCIT_NET>>
@@ -1070,16 +1049,12 @@ Working papers (SSRN, RePEc) outweigh journals.\\[4pt]
 \begin{itemize}\setlength\itemsep{0pt}
 <<COCIT_CLUSTERS>>
 \end{itemize}
-<<COCIT_STATS>>
-\note{\textbf{Co-citation (0:50).}
-\begin{itemize}
-\item Same method as the keyword maps: here the items are references.
-\item Two references are linked when the same paper cites both: this shows what the field builds on.
-\item Core: <<COCIT_CORE>>.
-\item Clusters read as schools: CBDC design and bank intermediation models; central bank policy reports; adoption studies.
-\end{itemize}}
+<<COCIT_STATS>> \method{m:net}
+\note{\textbf{Co-citation (0:50).} Core: <<COCIT_CORE>>.}
 \end{frame}
+
 \begin{frame}{Co-authorship: research communities}
+\slabel{r:coauth}
 \begin{columns}[T]
 \begin{column}{0.62\textwidth}
 <<COAUTH_NET>>
@@ -1091,36 +1066,156 @@ Working papers (SSRN, RePEc) outweigh journals.\\[4pt]
 <<CB_AUTH>>
 \end{column}
 \end{columns}
-\note{\textbf{Co-authorship (0:45).}
-\begin{itemize}
-\item Small, separate teams: the field is fragmented, around institutions (BIS, IMF, academic groups).
-\item Productivity is concentrated on a few very prolific authors.
-\item Who sets the agenda: central bank and international-institution economists write few of the papers but collect a third of the citations, though their share of papers is shrinking as the field opens up.
-\end{itemize}}
+\method{m:net}
+\note{\textbf{Co-authorship (0:45).}}
 \end{frame}
-\begin{frame}{Who says what: academics, central bankers, press}
-\scriptsize
-Distinctive words, \alert{log-odds ratio with informative Dirichlet prior} (Monroe, Colaresi \& Quinn, 2008), group $i$ vs.\ others $j$:
-\[
-\delta_w = \log\frac{y_{iw}+\alpha_w}{n_i+\alpha_0-y_{iw}-\alpha_w} - \log\frac{y_{jw}+\alpha_w}{n_j+\alpha_0-y_{jw}-\alpha_w},
-\qquad z_w = \delta_w \Big/ \sqrt{\tfrac{1}{y_{iw}+\alpha_w}+\tfrac{1}{y_{jw}+\alpha_w}}
-\]
+
+\begin{frame}{Who says what: research economists vs central bankers}
+\slabel{r:logodds}
 \footnotesize
-\begin{tabular}{@{}p{0.3\textwidth}p{0.3\textwidth}p{0.3\textwidth}@{}}\toprule
+Words most over-used by each group compared with the other ($z$-scores):\\[4pt]
+\begin{tabular}{@{}p{0.42\textwidth}p{0.42\textwidth}@{}}\toprule
 <<DIST_HEAD>>\\\midrule
 <<DIST_ROWS>>
-\bottomrule\end{tabular}\\[3pt]
-\scriptsize English texts; $z$-scores; $\alpha_w = \alpha_0\cdot$ corpus frequency of $w$; topic words removed. Academics: title + abstract; central bankers: speeches; press: headlines.
-\note{\textbf{Framing (0:40).}
-\begin{itemize}
-\item The prior shrinks rare words, so the list is not dominated by noise.
-\item <<DIST_TAKE>>.
-\end{itemize}}
+\bottomrule\end{tabular}\\[4pt]
+\scriptsize English texts; research: title + abstract; central bankers: speeches; topic words (\emph{CBDC, digital, currency\dots}) removed.\\[3pt]
+\small \alert{Reading}: <<DIST_TAKE>>.
+\method{m:logodds}
+\note{\textbf{Framing (0:40).}}
 \end{frame}
-% =====================================================================
-\section{Why study CBDCs?}
 
-\begin{frame}[fragile]{Why study CBDCs? Coding stated motivations}
+% =====================================================================
+\section{What is written}
+
+\begin{frame}{Thematic map: which themes drive the field?}
+\slabel{r:thematic}
+\begin{columns}[c]
+\begin{column}{0.47\textwidth}
+<<THEMATIC>>
+\end{column}
+\begin{column}{0.51\textwidth}\scriptsize
+Keyword clusters placed by \alert{centrality} (links to other themes) and \alert{density} (internal cohesion).\\[3pt]
+\begin{tabular}{@{}lp{0.62\linewidth}l@{}}\toprule
+ & \textbf{Theme} (top keywords) & \textbf{Quadrant}\\\midrule
+<<THEME_ROWS>>
+\bottomrule\end{tabular}\\[3pt]
+\small Motor themes: <<MOTOR>>.
+\end{column}
+\end{columns}
+\method{m:callon}
+\note{\textbf{Thematic map (0:45).}}
+\end{frame}
+
+\begin{frame}{How the themes evolve}
+\slabel{r:evo}
+\scriptsize
+\begin{tabular}{@{}p{0.42\textwidth}rrrr@{}}\toprule
+\textbf{Keyword} (\% of the period's papers) & <<EVO_HEAD>>\\\midrule
+<<EVO_ROWS>>
+\bottomrule\end{tabular}\\[4pt]
+Sorted by change between the last two periods. Darker = more frequent.\\[3pt]
+\textbf{New in each period} (c-TF-IDF, periods as classes): <<PERIOD_TERMS>>.\\[2pt]
+\small Rising fastest: \alert{<<EVO_UP>>}; falling most: \alert{<<EVO_DOWN>>}.
+\method{m:ctfidf}
+\note{\textbf{Evolution (0:35).}}
+\end{frame}
+
+\begin{frame}{Topics found by meaning (SBERT + BERTopic)}
+\slabel{r:topics}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}rp{0.4\textwidth}rrrrrr@{}}\toprule
+ & \textbf{Topic} (top c-TF-IDF terms) & \textbf{Texts} & \multicolumn{3}{c}{\textbf{\% of the period's texts}} & \multicolumn{2}{c}{\textbf{Adjusted, points}}\\
+ & & & <<PERIOD_HEAD>> & \textbf{change} & \textbf{CB}\\\midrule
+<<TOPIC_ROWS>>
+\bottomrule\end{tabular}\\[3pt]
+<<TOPIC_N>> texts; <<TOPIC_K>> topics (<<TOPIC_OUT>>\% outliers reassigned). Adjusted: logit on period, actor, English; change = 2023--26 vs 2014--19; CB = central banks vs research; \textbf{bold}: 95\% CI excludes 0.\\[2pt]
+\small Topics tied to \alert{one jurisdiction}: <<TOPIC_JUR>>.
+\method{m:bertopic}
+\note{\textbf{Topics (1:00).} Embeddings group texts by meaning across languages; the literature follows national projects.}
+\end{frame}
+
+% =====================================================================
+\section{How: tone and stance}
+
+\begin{frame}{Tone: how positive is what economists say about CBDCs?}
+\slabel{r:tone}
+\begin{columns}[T]
+\begin{column}{0.46\textwidth}
+\begin{tikzpicture}
+\begin{axis}[width=\textwidth, height=0.62\textheight, xtick={<<TONE_XTICKS>>}, xticklabel style={/pgf/number format/1000 sep=, font=\tiny, rotate=45, anchor=north east, inner sep=1pt},
+  yticklabel style={font=\scriptsize, /pgf/number format/fixed}, ylabel={net tone}, ylabel style={font=\scriptsize},
+  legend style={at={(0.5,-0.18)}, anchor=north, font=\tiny, draw=none, legend columns=2}, axis lines*=left, ymajorgrids]
+<<TONE_PLOTS>>
+\end{axis}
+\end{tikzpicture}
+\end{column}
+\begin{column}{0.52\textwidth}\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}p{0.3\linewidth}rrrrr@{}}\toprule
+ & \textbf{Texts} & \textbf{Sent.} & \textbf{\%+} & \textbf{\%--} & \textbf{Net tone}\\\midrule
+<<TONE_ROWS>>
+\bottomrule\end{tabular}\\[4pt]
+FinBERT on the <<N_SENT>> English sentences that name a CBDC. Sentence tone $= P(+) - P(-)$, averaged per text, then per group ($\pm$ 95\% CI). <<TONE_VAL>>\\[4pt]
+\small \alert{Reading}: tone rises steadily in both groups; research economists from <<TONE_ACAD>>; central banks stay slightly more positive.
+\end{column}
+\end{columns}
+\method{m:finbert}
+\note{\textbf{Tone (1:00).} Only sentences naming a CBDC are scored: tone about CBDCs, not about the economy.}
+\end{frame}
+
+\begin{frame}{Do policy events move the tone?}
+\slabel{r:tev}
+\begin{columns}[T]
+\begin{column}{0.6\textwidth}\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llrrrr@{}}\toprule
+\textbf{Date} & \textbf{Event} & \textbf{Before} & \textbf{After} & $\Delta$\textbf{tone} & $p$\\\midrule
+<<TEV_ROWS>>
+\bottomrule\end{tabular}
+\end{column}
+\begin{column}{0.38\textwidth}\small
+For each event: mean tone of the texts in the 180 days \emph{after} minus the 180 days \emph{before}. Compared with 500 random dates: $p$ = share of random dates with a larger $|\Delta|$ (95th percentile: <<TEV_95>>).\\[6pt]
+\alert{Result}: <<TEV_NSIG>> of 12 events move the tone (smallest $p$ = <<TEV_MIN_P>>).\\[4pt]
+Tone \alert{drifts}, it does not \alert{jump}: no single event explains the rise.
+\end{column}
+\end{columns}
+\method{m:tev}
+\note{\textbf{Tone and events (0:50).} A negative result, and an informative one: the change is gradual.}
+\end{frame}
+
+\begin{frame}{Stance: for or against CBDCs?}
+\slabel{r:stance}
+\begin{columns}[T]
+\begin{column}{0.44\textwidth}\scriptsize
+\textbf{Level}, read by hand, \% [95\% CI]\\[2pt]
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}p{0.36\linewidth}rrr@{}}\toprule
+ & $n$ & \textbf{Favourable} & \textbf{Critical}\\\midrule
+<<STANCE_LEVEL>>
+\bottomrule\end{tabular}\\[6pt]
+\small <<STANCE_TAKE>>.
+\end{column}
+\begin{column}{0.54\textwidth}\scriptsize
+\textbf{Change} (local LLM, <<STANCE_N>> texts sampled per actor $\times$ period), \% favourable\\[2pt]
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}p{0.27\linewidth}rrrr@{}}\toprule
+ & <<PERIOD_HEAD>> & \textbf{Change, pts}\\\midrule
+<<STANCE_TREND>>
+\bottomrule\end{tabular}\\[4pt]
+The LLM ($\kappa = <<STANCE_K>>$, best of five coders) calls <<STANCE_RAWFAV>>\% of the hand-coded texts favourable against <<STANCE_TRUEFAV>>\% by reading: its levels are inflated, so only its \emph{changes} are used. \textbf{Bold}: CI excludes 0.\\[4pt]
+\small \alert{Reading}: both groups become more favourable; central banks much more, as their own projects advance.
+\end{column}
+\end{columns}
+\method{m:stance}
+\note{\textbf{Stance (1:00).} Tone = how positive the words are; stance = whether the author is for or against.}
+\end{frame}
+
+% =====================================================================
+\section{Why: stated motivations}
+
+\begin{frame}[fragile]{Coding stated motivations}
+\slabel{r:codebook}
 \begin{columns}[T]
 \begin{column}{0.53\textwidth}
 \begin{lstlisting}
@@ -1140,143 +1235,73 @@ MOTIVES = {
 \end{column}
 \begin{column}{0.44\textwidth}\small
 \begin{itemize}
-\item Motivations are stated in the \alert{introduction} (else abstract, else opening of the text).
-\item 10 motivations, codebook built by reading introductions.
-\item For text $t$, motivation $k$, group $G$:
-\begin{align*} m_{k}(t) &= \mathbf{1}[\text{regex}_k \text{ matches } t]\\ \text{share}_k(G) &= \tfrac{1}{|G|}\textstyle\sum_{t\in G} m_k(t) \end{align*}
-\item <<MOTIVE_N>> texts coded; <<MOTIVE_ANY>>\% state at least one motivation.
+\item Motivations are stated in the \alert{introduction} (else abstract, else opening).
+\item 10 motivations; codebook built by reading introductions; several per text allowed.
+\item <<MOTIVE_N>> texts coded; <<MOTIVE_ANY>>\% state at least one.
 \item <<VAL_LINE>>
 \end{itemize}
 \end{column}
 \end{columns}
-\note{\textbf{Motivations: method (0:35).}
-\begin{itemize}
-\item The ``why'' requires reading, so the reading is done once to build the codebook, then applied to every text.
-\item A text can have several motivations. Press is excluded: headlines are too short.
-\item Validation: codebook tuned on 100 texts, then tested on 50 others never used for tuning. High precision, modest recall: what is found is right, but about half is missed (non-English texts, paraphrases). Details in the backup slide.
-\end{itemize}}
+\method{m:codebook}
+\note{\textbf{Motivations: method (0:35).}}
 \end{frame}
-\begin{frame}{Why study CBDCs? Results}
+
+\begin{frame}{Why: what economists say CBDCs are for}
+\slabel{r:motives}
 \scriptsize
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{@{}p{0.29\textwidth}rrrrr@{}}\toprule
  & \multicolumn{3}{c}{\textbf{\% of texts}} & \multicolumn{2}{c}{\textbf{Adjusted effect, points [95\% CI]}}\\
 \textbf{Motivation} & <<MOTIVE_HEAD>>\\
- & & & & \textbf{2023--26 vs 2014--19} & \textbf{vs academics}\\\midrule
+ & & & & \textbf{2023--26 vs 2014--19} & \textbf{vs research}\\\midrule
 <<MOTIVE_ROWS>>
 \bottomrule\end{tabular}\\[3pt]
 Logit of each motivation on period, actor and English; average marginal effects, robust SEs. \textbf{Bold}: CI excludes 0.
 \begin{itemize}\setlength\itemsep{0pt}
 \item \alert{Rising:} <<MOTIVE_UP>>. \quad \alert{Falling:} <<MOTIVE_DOWN>>.
-\item Actors differ: <<MOTIVE_GAP>>. \quad <<VAL_CAVEAT>>
+\item From a \alert{monetary-policy instrument} to a tool for \alert{inclusion, payments and geopolitics}. <<VAL_CAVEAT>>
 \end{itemize}
-\note{\textbf{Motivations: results (1:00).}
-\begin{itemize}
-\item The adjusted columns compare like with like: same mix of actors and languages in each period.
-\item Early literature: monetary policy, how a CBDC changes rates and bank funding. Recent literature: inclusion, cross-border payments, geopolitics, privacy.
-\item Central bankers and academics do not give the same reasons.
-\end{itemize}}
+\method{m:logit}
+\note{\textbf{Motivations: results (1:00).}}
 \end{frame}
-\begin{frame}{Why: is the codebook the best coder?}
+
+\begin{frame}{Is the codebook the best coder?}
+\slabel{r:coders}
 \begin{columns}[T]
 \begin{column}{0.58\textwidth}\scriptsize
 \begin{tabular}{@{}lrrrr@{}}\toprule
 \textbf{Coder} & \textbf{P} & \textbf{R} & $F_1$ & $\kappa$\\\midrule
 <<MVAL_ROWS>>
 \bottomrule\end{tabular}\\[3pt]
-50 held-out texts $\times$ 10 motivations; thresholds and classifiers set on the 100 development texts. NLI: multilingual mDeBERTa; LLMs: Qwen2.5 Instruct, 4-bit, run locally (\texttt{scripts/validate\_coders.py}).
+50 held-out texts $\times$ 10 motivations; thresholds and classifiers set on 100 development texts.
 \end{column}
 \begin{column}{0.4\textwidth}\small
 \begin{itemize}\setlength\itemsep{2pt}
 \item \alert{The codebook wins}: $\kappa = <<MVAL_CB>>$; best alternative <<MVAL_BEST_ALT>>.
-\item Models confuse ``mentions privacy'' with ``studies CBDCs because of privacy''; LLMs over-tag.
+\item Models confuse ``mentions privacy'' with ``studies CBDCs because of privacy''.
 \item Trends hold: <<MOTIVE_ROBUST>>
 \end{itemize}
 \end{column}
 \end{columns}
-\note{\textbf{Measuring motivations (0:40).}
-\begin{itemize}
-\item Five machine coders against the same hand-coded texts: SBERT in two ways, an NLI model, two local LLMs.
-\item None beats the codebook; the codebook's weakness is recall, so shares are lower bounds.
-\item A larger LLM behind an API could do better; it would be checked the same way. That is tuning, not a new method.
-\end{itemize}}
+\method{m:codebook}
+\note{\textbf{Measuring motivations (0:35).}}
 \end{frame}
-% =====================================================================
-\section{How CBDCs are discussed}
 
-\begin{frame}{How: the tone of what is said about CBDCs}
-\begin{columns}[T]
-\begin{column}{0.46\textwidth}
-\begin{tikzpicture}
-\begin{axis}[width=\textwidth, height=0.62\textheight, xtick={<<TONE_XTICKS>>}, xticklabel style={/pgf/number format/1000 sep=, font=\tiny, rotate=45, anchor=north east, inner sep=1pt},
-  yticklabel style={font=\scriptsize, /pgf/number format/fixed}, ylabel={net tone}, ylabel style={font=\scriptsize},
-  legend style={at={(0.5,-0.18)}, anchor=north, font=\tiny, draw=none, legend columns=3}, axis lines*=left, ymajorgrids]
-<<TONE_PLOTS>>
-\end{axis}
-\end{tikzpicture}
-\end{column}
-\begin{column}{0.52\textwidth}\scriptsize
-\setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}lrrrrr@{}}\toprule
- & \textbf{Texts} & \textbf{Sent.} & \textbf{\%+} & \textbf{\%--} & \textbf{Net tone}\\\midrule
-<<TONE_ROWS>>
-\bottomrule\end{tabular}\\[4pt]
-FinBERT on the <<N_SENT>> English sentences that name a CBDC (central banks: speeches and official documents). Sentence tone $= P(+) - P(-)$, averaged per text, then per group ($\pm$ 95\% CI).\\[3pt]
-<<TONE_VAL>>
-\end{column}
-\end{columns}
-\note{\textbf{Tone (0:50).}
-\begin{itemize}
-\item Only sentences that name a CBDC are scored, so this is the tone about CBDCs, not about the economy in general.
-\item Central banks are the most positive, the press the least.
-\item Academic tone rises (<<TONE_ACAD>>), in line with the move from risks (stability) to benefits (inclusion).
-\item Validation: FinBERT rarely confuses positive with negative, but sees tone in neutral sentences: compare groups and years, do not read levels.
-\end{itemize}}
-\end{frame}
-\begin{frame}{How: stance towards CBDCs}
-\begin{columns}[T]
-\begin{column}{0.44\textwidth}\scriptsize
-\textbf{Level} (read: 50 texts per actor), \% [95\% CI]\\[2pt]
-\setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}lrrr@{}}\toprule
- & $n$ & \textbf{Favourable} & \textbf{Critical}\\\midrule
-<<STANCE_LEVEL>>
-\bottomrule\end{tabular}\\[6pt]
-\small <<STANCE_TAKE>>.
-\end{column}
-\begin{column}{0.54\textwidth}\scriptsize
-\textbf{Change} (local LLM, <<STANCE_N>> texts sampled per actor $\times$ period), \% favourable\\[2pt]
-\setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}lrrrr@{}}\toprule
- & <<PERIOD_HEAD>> & \textbf{Change, pts}\\\midrule
-<<STANCE_TREND>>
-\bottomrule\end{tabular}\\[4pt]
-The LLM (Qwen2.5 7B, $\kappa = <<STANCE_K>>$, best of five coders) calls <<STANCE_RAWFAV>>\% of the hand-coded texts favourable against <<STANCE_TRUEFAV>>\% by reading: its levels are inflated, so only its \emph{changes} are used (assuming a stable bias). \textbf{Bold}: CI excludes 0.
-\end{column}
-\end{columns}
-\note{\textbf{Stance (0:50).}
-\begin{itemize}
-\item Tone says how positive the words are; stance says whether the author is for or against CBDCs.
-\item Levels come from reading: central banks are the advocates, researchers mostly neutral, criticism is rare and mostly in the press.
-\item Changes come from the language model, run on a random sample: central banks have become much more favourable since 2020, as their own projects advanced.
-\end{itemize}}
-\end{frame}
 % =====================================================================
-\section{When attention rises}
+\section{When: the environment}
 
-\begin{frame}{When: which themes burst, and when}
+\begin{frame}{Which themes burst, and when}
+\slabel{r:burst}
 \hspace*{3.3cm}<<BURSTS>>\\[2pt]
-\scriptsize Kleinberg (2002) burst detection on keywords, by quarter: keyword $w$ in $r_t$ of $d_t$ papers; normal rate $p_0 = R/D$, burst rate $p_1 = 2p_0$; cost $\sigma_i(t) = -\ln\big[\binom{d_t}{r_t} p_i^{r_t}(1-p_i)^{d_t-r_t}\big]$, entering a burst costs $\ln T$; the cheapest state path (Viterbi) gives the bursts. Darker = stronger.
-\note{\textbf{Bursts (0:45).}
-\begin{itemize}
-\item Where the event study tests dates I chose, burst detection lets the data say when a theme suddenly takes off.
-\item Early bursts: <<BURST_EARLY>>. Latest bursts: <<BURST_LATE>>.
-\item Read with the topics: the field moves from monetary policy to sovereignty, tokenisation and national projects.
-\end{itemize}}
+\small \alert{Reading}: early bursts on <<BURST_EARLY>>; the latest on <<BURST_LATE>>.
+\method{m:burst}
+\note{\textbf{Bursts (0:40).} The data say when a theme suddenly takes off.}
 \end{frame}
-\begin{frame}{When? Attention around policy events}
+
+\begin{frame}{Attention around policy events}
+\slabel{r:event}
 \begin{columns}[c]
-\begin{column}{0.5\textwidth}
+\begin{column}{0.48\textwidth}
 \begin{tikzpicture}
 \begin{axis}[width=\textwidth, height=0.62\textheight, ymin=0, ymax=\ymaxev, xmin=2019, xmax=<<THIS_YEAR>>.85,
   xticklabel style={/pgf/number format/1000 sep=, font=\scriptsize}, xtick={2019,...,<<THIS_YEAR>>},
@@ -1287,83 +1312,564 @@ The LLM (Qwen2.5 7B, $\kappa = <<STANCE_K>>$, best of five coders) calls <<STANC
 \end{axis}
 \end{tikzpicture}
 \end{column}
-\begin{column}{0.48\textwidth}\scriptsize
-\setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}rlp{0.46\linewidth}rrr@{}}\toprule
+\begin{column}{0.5\textwidth}\tiny
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{@{}rlp{0.52\linewidth}rrr@{}}\toprule
  & \textbf{Date} & \textbf{Event} & \textbf{Ratio} & $z$ & $p$\\\midrule
 <<EV_ROWS>>
 \bottomrule\end{tabular}\\[3pt]
-Baseline $\lambda$ = daily rate over $[-90,-15]$ days; $E = 15\lambda$; ratio $= N_{[0,14]}/E$; $z = (N-E)/\sqrt{E}$.
-\alert{Placebo}: on <<EV_NPL>> random dates, <<EV_P>>\% have $z > 1.96$ (overdispersion, trend), so $p$ = share of placebo dates with a larger $z$ (95th percentile: $z = <<EV_Z95>>$).
+\scriptsize Texts in the 15 days after the event vs.\ the rate of the 3 months before. $p$ = share of <<EV_NPL>> random dates with a larger $z$ (the naive test flags <<EV_P>>\% of them).\\[2pt]
+\alert{Reading}: <<EV_TAKE>>
 \end{column}
 \end{columns}
-\note{\textbf{Event study (0:50).}
-\begin{itemize}
-\item For each event, compare the texts in the two weeks after it with the rate of the three months before.
-\item The naive Poisson test is far too lenient: a quarter of random dates would look significant. So each event is compared with the placebo dates instead.
-\item Red lines: $p < 0.05$ against the placebo distribution.
-\item <<EV_TAKE>>
-\item Attention follows institutional milestones (central bank reports, legislation) more than market news. Sand Dollar comes 18 days after the ECB report: the two windows overlap.
-\end{itemize}}
+\method{m:event}
+\note{\textbf{Event study (0:50).} Red lines: $p < 0.05$ against placebo dates.}
 \end{frame}
+
+\begin{frame}{The 2022 sanctions: did geopolitics enter the discussion?}
+\slabel{r:did}
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\begin{tikzpicture}
+\begin{axis}[width=\textwidth, height=0.6\textheight, xtick={2020,...,<<THIS_YEAR>>}, xticklabel style={/pgf/number format/1000 sep=, font=\scriptsize},
+  yticklabel style={font=\scriptsize}, ylabel={gap, points}, ylabel style={font=\scriptsize}, axis lines*=left, ymajorgrids,
+  extra x ticks={2021.5}, extra x tick labels={}, extra x tick style={grid=major, major grid style={c2, dashed}}]
+\addplot[c1, thick, mark=*, mark size=1.5pt, error bars/.cd, y dir=both, y explicit] coordinates {<<DID_PLOT>>};
+\draw[gray] (axis cs:2020,0) -- (axis cs:<<THIS_YEAR>>,0);
+\end{axis}
+\end{tikzpicture}\\
+\scriptsize Gap in the share stating \emph{geopolitics and sanctions}: texts about Russia (or in Russian) minus the others, relative to 2021; 95\% CI.
+\end{column}
+\begin{column}{0.48\textwidth}\scriptsize
+<<DID_NT>> texts about Russia among <<DID_N>> (2020--<<THIS_YEAR>>). Pooled effect after 2021, every motivation:\\[2pt]
+\begin{tabular}{@{}p{0.6\linewidth}l@{}}\toprule
+\textbf{Motivation} & \textbf{DiD, points}\\\midrule
+<<DID_ROWS>>
+\bottomrule\end{tabular}\\[4pt]
+\small \alert{Reading}: geopolitics rises by <<DID_POOLED>> more in texts about Russia, and the gap widens each year. But <<DID_OTHERS>> other motivations shift too: \alert{consistent with} a sanctions effect, not proof.
+\end{column}
+\end{columns}
+\method{m:did}
+\note{\textbf{Sanctions (1:00).} Only one clean pre-year (2020): pre-trends cannot be fully tested.}
+\end{frame}
+
+% =====================================================================
+\section{The discussion and its environment}
+
+\begin{frame}{Putting it together, period by period}
+\slabel{r:syn}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\tiny
+\begin{tabular}{@{}p{0.19\textwidth}p{0.25\textwidth}p{0.25\textwidth}p{0.26\textwidth}@{}}\toprule
+ & <<PERIOD_HEAD>>\\\midrule
+<<SYN_ROWS>>
+\bottomrule\end{tabular}\\[2pt]
+\scriptsize
+\begin{itemize}\setlength\itemsep{0pt}
+\item \alert{2014--19}: a monetary-policy question, alongside Libra and the decline of cash; few texts, cautious tone.
+\item \alert{2020--22}: central bank reports and pilots; the discussion grows and turns favourable.
+\item \alert{2023--26}: national projects, sanctions, cross-border payments; the most favourable period.
+\end{itemize}
+\note{\textbf{Synthesis (1:00).} Each row is a result from the previous sections.}
+\end{frame}
+
+\begin{frame}{What we can and cannot say about causes}
+\slabel{r:causal}
+\footnotesize
+\begin{tabular}{@{}p{0.25\textwidth}p{0.27\textwidth}p{0.2\textwidth}p{0.18\textwidth}@{}}\toprule
+\textbf{Link} & \textbf{Test} & \textbf{Result} & \textbf{Verdict}\\\midrule
+Events $\to$ attention & event study vs.\ placebo dates & <<EV_NSIG>> of <<EV_NTOT>> events & \textcolor{c6}{\textbf{timing evidence}}\\
+Events $\to$ tone & 180-day windows vs.\ placebo dates & <<TEV_NSIG>> of 12 events & \textcolor{c2}{\textbf{no effect found}}\\
+Sanctions $\to$ geopolitics motive & difference-in-differences & <<DID_POOLED>> & \textcolor{c3}{\textbf{consistent with}}\\
+Events $\to$ stance & -- & sample too small around each date & not testable\\
+Motivations $\leftrightarrow$ stance & -- & measured in the same texts & association only\\
+\bottomrule\end{tabular}\\[8pt]
+\small
+\begin{itemize}\setlength\itemsep{2pt}
+\item The paper stays \alert{descriptive}: it measures changes and shows what moves with them.
+\item Explaining \emph{why} economists changed their stance would need other evidence (interviews, authors' careers): hypotheses for further work.
+\end{itemize}
+\note{\textbf{Causality (0:50).} Answers the teacher's question directly.}
+\end{frame}
+
 % =====================================================================
 \section{Robustness}
 
 \begin{frame}{Robustness}
+\slabel{r:robust}
 \scriptsize
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{@{}lrcccrr@{}}\toprule
  & & \multicolumn{2}{c}{\textbf{Why: change, points}} & \textbf{How: tone} & \textbf{How: stance} & \textbf{When}\\
-\textbf{Specification} & \textbf{Texts} & \textbf{inclusion} & \textbf{monetary policy} & \textbf{CB -- press} & \textbf{fav.\ CB -- acad.} & \textbf{events}\\\midrule
+\textbf{Specification} & \textbf{Texts} & \textbf{inclusion} & \textbf{monetary policy} & \textbf{CB -- research} & \textbf{fav.\ CB -- research} & \textbf{events}\\\midrule
 <<ROB_ROWS>>
 \bottomrule\end{tabular}\\[4pt]
 Changes: 2023--26 vs 2014--19, adjusted (logit, 95\% CI). Tone: mean net tone gap. Stance: raw LLM labels, points. Events: $p < 0.05$ against placebo dates.\\[3pt]
-\small Signs and orders of magnitude hold in every specification.
-\note{\textbf{Robustness (0:50).}
-\begin{itemize}
-\item Each row re-runs the headline results on a different sample: only texts clearly about CBDCs, only English, only journal articles, without the partial year, or with the high-recall coding.
-\item The direction of every result is unchanged; magnitudes move a little. This is the table that answers a referee's ``what if''.
-\end{itemize}}
+\small Signs and orders of magnitude hold in every specification, including when research from every discipline is kept.
+\method{m:robust}
+\note{\textbf{Robustness (0:45).}}
 \end{frame}
+
 % =====================================================================
 \section{Conclusion}
 
 \begin{frame}{Takeaways and limits}
 \begin{columns}[T]
-\begin{column}{0.54\textwidth}\footnotesize
-\textbf{First results}
+\begin{column}{0.56\textwidth}\footnotesize
+\textbf{How economists' discussion of CBDCs evolved}
 \begin{itemize}\setlength\itemsep{1pt}
-\item \alert{What:} <<N>> texts; output grows <<CAGR>>\% a year; topics follow national projects.
-\item \alert{Who:} a core of co-cited papers (<<COCIT_CORE>>); central bank economists write <<CB_SHARE>>\% of papers but get <<CB_CITE>>\% of citations; <<TOP_BANK>> the most vocal central bank.
+\item \alert{Who:} <<N>> texts; central bank economists write <<CB_SHARE>>\% of the papers but get <<CB_CITE>>\% of citations.
+\item \alert{What:} from monetary policy and design to inclusion and national projects (digital ruble, rupee, e-CNY).
+\item \alert{How:} tone and stance become more favourable; research economists stay mostly neutral, central banks advocate.
 \item \alert{Why:} rising <<MOTIVE_UP>>; falling <<MOTIVE_DOWN>>.
-\item \alert{How:} central banks most positive in tone and stance, and increasingly so; criticism is rare, mostly in the press.
-\item \alert{When:} bursts move from monetary policy to sovereignty and tokenisation; <<EV_NSIG>> of <<EV_NTOT>> milestones move attention.
+\item \alert{When:} <<EV_NSIG>> of <<EV_NTOT>> events move attention, <<TEV_NSIG>> of 12 move tone; geopolitics rises after the 2022 sanctions.
 \end{itemize}
 \end{column}
-\begin{column}{0.43\textwidth}\footnotesize
+\begin{column}{0.41\textwidth}\footnotesize
 \textbf{Limits}
 \begin{itemize}\setlength\itemsep{1pt}
-\item Press: headlines only; coverage favours recent years; harvest cut short by rate limits.
-\item ``Secondary theme'' is noisy: results re-run on main theme only.
+\item Economists identified by field and affiliation, not by training.
 \item Motivations: recall $\approx$ 0.5 (lower bounds). Tone: English only. Stance: LLM for changes only.
-\item One coder (AI-assisted) for all validation samples.
-\item Keywords partly machine-assigned; authors matched on spelling.
+\item One coder (AI-assisted) for the validation samples.
+\item Descriptive: causes stay hypotheses.
 \end{itemize}
 \end{column}
 \end{columns}
-\note{\textbf{Takeaways (0:50).}
-\begin{itemize}
-\item Recap the five answers: what, who, why, how, when.
-\item Main message: CBDC research moved from a monetary-policy question to one of inclusion, cross-border payments and national projects; the tone has become more positive; attention follows central bank milestones.
-\item Limits are known and measured: what is left is finishing the press harvest and a second human reader, not new methods.
-\item Thank you; questions.
-\end{itemize}}
+\note{\textbf{Takeaways (0:50).} Thank you; questions.}
 \end{frame}
+
+% =====================================================================
 \appendix
+\section*{Methods explained}
+
+\begin{frame}{Methods explained: how to read this appendix}
+\small
+One slide per tool, each in four parts:
+\begin{itemize}
+\item \textbf{Idea}: what the tool does, in words.
+\item \textbf{How}: the computation, step by step, with its formula.
+\item \textbf{Why this tool}: what it solves, and what it was compared with.
+\item \textbf{Used on}: links to the result slides.
+\end{itemize}
+\vspace{4pt}
+\scriptsize
+\begin{tabular}{@{}llll@{}}\toprule
+\textbf{Tool} & \textbf{Slide} & \textbf{Tool} & \textbf{Slide}\\\midrule
+Who is an economist & \usedon{m:econ} & Covariate-adjusted logit & \usedon{m:logit}\\
+Networks: association strength, Louvain & \usedon{m:net} & Codebook and validation & \usedon{m:codebook}\\
+Thematic map (Callon) & \usedon{m:callon} & Tone (FinBERT) & \usedon{m:finbert}\\
+Bibliometric laws & \usedon{m:laws} & Stance (reading + LLM) & \usedon{m:stance}\\
+Log-odds with Dirichlet prior & \usedon{m:logodds} & Bursts (Kleinberg) & \usedon{m:burst}\\
+Sentence embeddings (SBERT) & \usedon{m:sbert} & Event study and placebo & \usedon{m:event}\\
+Topic model (BERTopic) & \usedon{m:bertopic} & Tone around events & \usedon{m:tev}\\
+Class-based TF-IDF & \usedon{m:ctfidf} & Difference-in-differences & \usedon{m:did}\\
+ & & Robustness & \usedon{m:robust}\\
+\bottomrule\end{tabular}
+\end{frame}
+
+\begin{frame}{Method: who counts as an economist}
+\slabel{m:econ}
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}\footnotesize
+\mhead{Idea}
+The course asks how \emph{economists} discuss CBDCs, so each text must be traced to an economist or an economic institution.\\[4pt]
+\mhead{How}
+\begin{itemize}\setlength\itemsep{1pt}
+\item \textbf{Research}: kept if OpenAlex classifies it in \emph{Economics, Econometrics and Finance} (primary topic, from title, abstract, venue, citations), or an author works at a central bank, the IMF or the BIS; without OpenAlex record: an economics venue.
+\item \textbf{Institutions}: central bank speeches; documents of central banks and international financial institutions.
+\item \textbf{Dropped}: other fields (computer science, law\dots), governments and parliaments, the press.
+\end{itemize}
+\end{column}
+\begin{column}{0.46\textwidth}\footnotesize
+\mhead{Why this tool}
+Authors' training is not recorded anywhere at scale; the field of the paper and the employer of the author are, and they are what defines a discipline in bibliometrics.\\[4pt]
+Speeches are kept as \emph{institutional} voices: written with the bank's economics staff, even when the speaker is not an economist.\\[4pt]
+Robustness: results with every discipline kept are on \usedon{r:robust}.\\[6pt]
+\mhead{Used on}
+\usedon{r:econ}, and every result after it.
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Method: networks (association strength, Louvain)}
+\slabel{m:net}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}\footnotesize
+\mhead{Idea}
+Two items (references, authors, keywords) are linked when they appear in the same paper; groups of tightly linked items are schools, teams or themes.\\[4pt]
+\mhead{How}
+\begin{enumerate}\setlength\itemsep{1pt}
+\item Count $c_{ij}$ = papers where $i$ and $j$ appear together; $c_i$ = papers with $i$.
+\item Normalise by \alert{association strength} $s_{ij} = c_{ij} / (c_i c_j)$: the ratio of observed to expected co-occurrence.
+\item Cluster with \alert{Louvain}: move nodes between groups while the modularity
+$Q = \frac{1}{2m}\sum_{ij}\big[s_{ij} - \frac{k_ik_j}{2m}\big]\delta(g_i,g_j)$ rises.
+\item Draw: force-directed layout; size $\propto\sqrt{c_i}$.
+\end{enumerate}
+\end{column}
+\begin{column}{0.44\textwidth}\footnotesize
+\mhead{Why this tool}
+Raw counts favour popular items: two classics are co-cited often by chance. Association strength removes this (van Eck \& Waltman, 2009); it is VOSviewer's default.\\[3pt]
+Louvain is fast and needs no number of clusters; $Q$ tells how clear the grouping is.\\[3pt]
+\textbf{Co-citation} (references cited together) shows the intellectual base; \textbf{co-authorship} shows teams.\\[6pt]
+\mhead{Used on}
+\usedon{r:cocit}, \usedon{r:coauth}, \usedon{r:thematic}.
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Method: thematic map (Callon)}
+\slabel{m:callon}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}\footnotesize
+\mhead{Idea}
+Place each cluster of keywords on two axes: how much it is linked to the rest of the field, and how developed it is inside.\\[4pt]
+\mhead{How}
+With the equivalence index $e_{ij} = c_{ij}^2 / (c_i c_j)$:
+\[ \text{centrality} = 10\!\!\sum_{i\in C,\,j\notin C}\!\! e_{ij}, \qquad \text{density} = \frac{100}{|C|}\!\sum_{i,j\in C}\! e_{ij} \]
+Quadrants, split at the medians:
+\begin{itemize}\setlength\itemsep{0pt}
+\item \textbf{motor}: central and dense; \textbf{basic}: central, loose;
+\item \textbf{niche}: dense, isolated; \textbf{emerging or declining}: neither.
+\end{itemize}
+\end{column}
+\begin{column}{0.44\textwidth}\footnotesize
+\mhead{Why this tool}
+A keyword list says what is frequent; the map says what \emph{structures} the field. It is the standard tool of science mapping (Callon et al.\ 1991; Cobo et al.\ 2011; bibliometrix).\\[3pt]
+Limit: keywords are partly machine-assigned, so the topic model (meaning-based) is used alongside.\\[6pt]
+\mhead{Used on}
+\usedon{r:thematic}.
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Method: bibliometric laws}
+\slabel{m:laws}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}\footnotesize
+\mhead{Idea}
+Three regularities describe the shape of any scientific field: how fast it grows, how output is spread among authors, and among journals.\\[4pt]
+\mhead{How}
+\begin{itemize}\setlength\itemsep{1pt}
+\item \textbf{Growth}: compound annual rate $g = (N_{y_1}/N_{y_0})^{1/(y_1-y_0)} - 1$.
+\item \textbf{Lotka}: share of authors with $n$ papers $f(n) \propto n^{-\beta}$; $\beta$ fitted on the log-log counts ($\beta \approx 2$ in mature fields).
+\item \textbf{Bradford}: sort sources by output, cut in three zones holding $\nicefrac{1}{3}$ of papers each; the first zone is the core.
+\end{itemize}
+\end{column}
+\begin{column}{0.44\textwidth}\footnotesize
+\mhead{Why this tool}
+They situate the field: a high growth rate and a large $\beta$ (most authors write once) mean a young, open field around a small core of outlets.\\[3pt]
+They are the descriptive baseline of every bibliometric review, so our numbers can be compared with the earlier reviews.\\[6pt]
+\mhead{Used on}
+\usedon{r:growth}, \usedon{r:research}.
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Method: distinctive words (log-odds with Dirichlet prior)}
+\slabel{m:logodds}
+\begin{columns}[T]
+\begin{column}{0.54\textwidth}\footnotesize
+\mhead{Idea}
+Which words does one group use \emph{more} than the other, once chance is accounted for?\\[4pt]
+\mhead{How}
+For word $w$, group $i$ vs.\ the other group $j$, with counts $y$, totals $n$, and a prior $\alpha_w = \alpha_0 \times$ (corpus frequency of $w$):
+\[\delta_w = \log\frac{y_{iw}+\alpha_w}{n_i+\alpha_0-y_{iw}-\alpha_w} - \log\frac{y_{jw}+\alpha_w}{n_j+\alpha_0-y_{jw}-\alpha_w}\]
+\[ z_w = \delta_w \Big/ \sqrt{\tfrac{1}{y_{iw}+\alpha_w}+\tfrac{1}{y_{jw}+\alpha_w}} \]
+Words are ranked by $z_w$.
+\end{column}
+\begin{column}{0.42\textwidth}\footnotesize
+\mhead{Why this tool}
+Plain frequencies list words everyone uses; TF-IDF or raw log-ratios are dominated by rare words (a word used twice by one group gets an infinite ratio). The prior \alert{shrinks} rare words towards zero and the $z$-score accounts for uncertainty (Monroe, Colaresi \& Quinn, 2008).\\[6pt]
+\mhead{Used on}
+\usedon{r:logodds}.
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Method: sentence embeddings (SBERT)}
+\slabel{m:sbert}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}\footnotesize
+\mhead{Idea}
+Turn each text into a vector of 384 numbers such that texts with similar \emph{meaning} get close vectors, whatever their words or language.\\[4pt]
+\mhead{How}
+\begin{itemize}\setlength\itemsep{1pt}
+\item A transformer network reads title + abstract (or opening) and averages its word representations into one vector $\mathbf{e}_t$.
+\item Model: \texttt{paraphrase-multilingual-MiniLM-L12-v2}, trained so that translations and paraphrases land together (50+ languages).
+\item Similarity: cosine $\cos(\mathbf{e}_s,\mathbf{e}_t) = \frac{\mathbf{e}_s\cdot\mathbf{e}_t}{\|\mathbf{e}_s\|\|\mathbf{e}_t\|}$.
+\end{itemize}
+\end{column}
+\begin{column}{0.44\textwidth}\footnotesize
+\mhead{Why this tool}
+Keywords and word counts treat ``digital ruble'' and its Russian original (\emph{tsifrovoy rubl'}) as unrelated; embeddings do not. With <<EN_PCT>>\% English and many Russian texts, this is what makes a single topic model possible.\\[3pt]
+Tested also as a motivation coder (similarity to prototypes): it lost to the codebook (\usedon{r:coders}).\\[6pt]
+\mhead{Used on}
+\usedon{r:topics}.
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Method: topic model (BERTopic)}
+\slabel{m:bertopic}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}\footnotesize
+\mhead{Idea}
+Find groups of texts about the same subject, without fixing the subjects in advance.\\[4pt]
+\mhead{How}
+\begin{enumerate}\setlength\itemsep{1pt}
+\item \textbf{Embed} each text (SBERT).
+\item \textbf{Reduce} 384 dimensions to 5 with \alert{UMAP}, which keeps neighbours together.
+\item \textbf{Cluster} with \alert{HDBSCAN}: dense regions become topics (at least 40 texts; leaf selection, which favours fine topics over one large blob); texts in no dense region are outliers, then assigned to the nearest topic.
+\item \textbf{Label} each topic by its c-TF-IDF terms (\usedon{m:ctfidf}).
+\end{enumerate}
+\end{column}
+\begin{column}{0.44\textwidth}\footnotesize
+\mhead{Why this tool}
+LDA and STM count words, one language at a time, and need the number of topics. BERTopic works on meaning, across languages, and finds the number itself (Grootendorst, 2022).\\[3pt]
+The covariate part of STM is kept: topic shares are adjusted for period, actor and language (\usedon{m:logit}).\\[6pt]
+\mhead{Used on}
+\usedon{r:topics}.
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Method: class-based TF-IDF (c-TF-IDF)}
+\slabel{m:ctfidf}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}\footnotesize
+\mhead{Idea}
+Which words characterise a class of texts (a topic, or a period) compared with all the others?\\[4pt]
+\mhead{How}
+Merge the texts of each class $c$ into one document; for term $t$:
+\[ W_{t,c} = \frac{\text{tf}_{t,c}}{|c|}\;\log\!\Big(1 + \frac{A}{f_t}\Big) \]
+$\text{tf}_{t,c}$ = count of $t$ in class $c$, $|c|$ = words in $c$, $A$ = average words per class, $f_t$ = count of $t$ in all classes. Words in more than 15\% of texts and generic words are removed.
+\end{column}
+\begin{column}{0.44\textwidth}\footnotesize
+\mhead{Why this tool}
+Ordinary TF-IDF scores words within one document; here the unit is a whole class. A frequent word in one class but rare elsewhere scores high: it is what is \emph{new} or \emph{specific}.\\[3pt]
+Periods as classes answer ``when'': which vocabulary appears in each period.\\[6pt]
+\mhead{Used on}
+\usedon{r:topics} (topic labels), \usedon{r:evo} (periods).
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Method: covariate-adjusted logit}
+\slabel{m:logit}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}\footnotesize
+\mhead{Idea}
+A raw change between periods can come from a change in \emph{who} writes (more central banks, more Russian texts). Compare like with like.\\[4pt]
+\mhead{How}
+For each outcome $y_t \in\{0,1\}$ (a motivation, a topic):
+\[ P(y_t=1) = \Lambda\big(a + b_{\text{period}} + c_{\text{actor}} + e\cdot\text{English}\big) \]
+\begin{itemize}\setlength\itemsep{1pt}
+\item \textbf{Average marginal effect}: predict every text in 2023--26, then in 2014--19, average the difference (points).
+\item 95\% CI: robust (HC1) standard errors; coefficients drawn 400 times from their estimated distribution.
+\end{itemize}
+\end{column}
+\begin{column}{0.44\textwidth}\footnotesize
+\mhead{Why this tool}
+It is the ``prevalence'' model of a structural topic model (Roberts et al., 2014), applied to any coded outcome. Marginal effects are read in percentage points, unlike log-odds coefficients.\\[6pt]
+\mhead{Used on}
+\usedon{r:motives}, \usedon{r:topics}, \usedon{r:robust}.
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Method: codebook and validation}
+\slabel{m:codebook}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}\footnotesize
+\mhead{Idea}
+Write down, for each of 10 motivations, the phrases authors use to state it; flag a text when its introduction contains one.\\[4pt]
+\mhead{How}
+\begin{enumerate}\setlength\itemsep{1pt}
+\item Read 100 introductions (\textbf{development set}); write regular expressions in 7 languages.
+\item Code 50 \emph{other} texts by reading (\textbf{test set}), never used for tuning.
+\item Compare: precision $=\frac{TP}{TP+FP}$, recall $=\frac{TP}{TP+FN}$, Cohen's
+$\kappa = \frac{p_o-p_e}{1-p_e}$ (agreement beyond chance).
+\end{enumerate}
+\end{column}
+\begin{column}{0.44\textwidth}\footnotesize
+\mhead{Why this tool}
+Motivations need reading; a codebook makes the reading explicit, reproducible and checkable.\\[3pt]
+Five machine coders were tested on the same texts (SBERT $\times$ 2, NLI mDeBERTa, Qwen2.5 3B and 7B): all lower $\kappa$.\\[3pt]
+High precision, recall $\approx 0.5$: shares are lower bounds; changes are robust (\usedon{r:coders}).\\[6pt]
+\mhead{Used on}
+\usedon{r:codebook}, \usedon{r:motives}, \usedon{r:coders}.
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Method: tone (FinBERT)}
+\slabel{m:finbert}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}\footnotesize
+\mhead{Idea}
+Measure how positive or negative the sentences \emph{about CBDCs} are.\\[4pt]
+\mhead{How}
+\begin{enumerate}\setlength\itemsep{1pt}
+\item Keep the English sentences that name a CBDC (same term list as the filter).
+\item FinBERT (a BERT model trained on financial news) gives $P(+), P(0), P(-)$ for each sentence.
+\item Sentence tone $= P(+) - P(-) \in[-1,1]$; averaged per text, then per group and year.
+\item Validation: 90 sentences read blind (30 per label); $\kappa = <<TONE_KAPPA>>$.
+\end{enumerate}
+\end{column}
+\begin{column}{0.44\textwidth}\footnotesize
+\mhead{Why this tool}
+Dictionary methods (Loughran--McDonald) miss context (``not risky''); general sentiment models misread finance (``liability'' is not negative). FinBERT is the standard for economic text (Araci, 2019).\\[3pt]
+Scoring only CBDC sentences isolates the tone \emph{about CBDCs}, not about the economy.\\[3pt]
+Limit: it sees tone in neutral sentences, so compare groups and years, not levels.\\[6pt]
+\mhead{Used on}
+\usedon{r:tone}, \usedon{r:tev}.
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Method: stance (reading + local language model)}
+\slabel{m:stance}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}\footnotesize
+\mhead{Idea}
+Tone is about words; stance is about the \emph{author's position}: favourable, neutral or critical towards issuing a CBDC.\\[4pt]
+\mhead{How}
+\begin{itemize}\setlength\itemsep{1pt}
+\item \textbf{Levels}: texts read by hand per actor; share with a \alert{Wilson} interval $\frac{\hat p + \frac{z^2}{2n} \pm z\sqrt{\frac{\hat p(1-\hat p)}{n}+\frac{z^2}{4n^2}}}{1+z^2/n}$.
+\item \textbf{Changes}: Qwen2.5 7B, run locally, labels a random sample of up to 100 texts per actor $\times$ period; change $= \hat p_{\text{late}} - \hat p_{\text{early}}$, CI $\pm 1.96\sqrt{\sum \hat p(1-\hat p)/n}$.
+\end{itemize}
+\end{column}
+\begin{column}{0.44\textwidth}\footnotesize
+\mhead{Why this tool}
+Stance needs understanding of the argument: only a language model can do it at scale. Five coders were tested; the LLM is best ($\kappa = <<STANCE_K>>$) but over-calls ``favourable''.\\[3pt]
+A constant bias cancels in a difference: so the LLM gives \emph{changes}, reading gives \emph{levels}.\\[6pt]
+\mhead{Used on}
+\usedon{r:stance}, \usedon{r:syn}.
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Method: bursts (Kleinberg)}
+\slabel{m:burst}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}\footnotesize
+\mhead{Idea}
+Let the data say when a keyword suddenly becomes frequent, instead of choosing dates.\\[4pt]
+\mhead{How}
+For keyword $w$, quarter $t$: $r_t$ of $d_t$ papers use it.
+\begin{itemize}\setlength\itemsep{1pt}
+\item Two states: normal rate $p_0 = R/D$ (overall), burst rate $p_1 = 2p_0$.
+\item Cost of a quarter in state $i$: $\sigma_i(t) = -\ln\big[\binom{d_t}{r_t} p_i^{r_t}(1-p_i)^{d_t-r_t}\big]$; entering a burst costs $\ln T$.
+\item The cheapest sequence of states (Viterbi algorithm) gives the bursts; weight = cost saved.
+\end{itemize}
+\end{column}
+\begin{column}{0.44\textwidth}\footnotesize
+\mhead{Why this tool}
+A simple growth rate reacts to noise; the entry cost means only sustained rises count. It is the standard ``burst detection'' of CiteSpace and science-of-science work (Kleinberg, 2002).\\[6pt]
+\mhead{Used on}
+\usedon{r:burst}, \usedon{r:syn}.
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Method: event study with placebo dates}
+\slabel{m:event}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}\footnotesize
+\mhead{Idea}
+Does writing on CBDCs jump right after a policy event, more than on an ordinary day?\\[4pt]
+\mhead{How}
+\begin{itemize}\setlength\itemsep{1pt}
+\item Baseline rate $\lambda$ = texts per day over days $[-90,-15]$ before the event.
+\item Expected over $[0,14]$: $E = 15\lambda$; ratio $= N/E$; $z = (N-E)/\sqrt{E}$.
+\item \alert{Placebo}: the same $z$ on <<EV_NPL>> random dates; $p$ = share of random dates with a larger $z$.
+\end{itemize}
+\end{column}
+\begin{column}{0.44\textwidth}\footnotesize
+\mhead{Why this tool}
+The usual Poisson test assumes a stable rate; attention trends upward and comes in waves, so <<EV_P>>\% of random dates look ``significant''. Comparing with random dates gives the right yardstick (as in finance event studies, MacKinlay 1997).\\[3pt]
+It is causal only in a narrow sense: timing of attention.\\[6pt]
+\mhead{Used on}
+\usedon{r:event}, \usedon{r:causal}.
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Method: do events move the tone?}
+\slabel{m:tev}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}\footnotesize
+\mhead{Idea}
+Same logic as the event study, applied to the tone of the texts rather than their number.\\[4pt]
+\mhead{How}
+\begin{itemize}\setlength\itemsep{1pt}
+\item Texts dated to the day, with a tone score.
+\item $\Delta = $ mean tone over $[t_0, t_0+180)$ minus mean tone over $[t_0-180, t_0)$.
+\item Same $\Delta$ on 500 random dates; $p$ = share with $|\Delta|$ at least as large (two-sided).
+\end{itemize}
+\end{column}
+\begin{column}{0.44\textwidth}\footnotesize
+\mhead{Why this tool}
+Tone rises over time anyway; a before/after difference alone would credit every event with that trend. Random dates carry the same trend, so only a jump beyond it counts.\\[3pt]
+180 days: enough texts on each side (100+).\\[6pt]
+\mhead{Used on}
+\usedon{r:tev}, \usedon{r:causal}.
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Method: difference-in-differences}
+\slabel{m:did}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}\footnotesize
+\mhead{Idea}
+If the 2022 sanctions pushed economists to discuss geopolitics, texts about Russia should change \emph{more} than the others after 2022.\\[4pt]
+\mhead{How}
+Linear probability model, robust SEs; $y$ = motivation stated, $T$ = text about Russia or in Russian:
+\[ y_{it} = a_T + b_t + \sum_{k\neq 2021} \gamma_k\, T_i\,\mathbf{1}[t=k] + \varepsilon_{it} \]
+$\gamma_k$ = gap in year $k$ relative to 2021. Pooled: one $\gamma$ for $t > 2021$.
+\end{column}
+\begin{column}{0.44\textwidth}\footnotesize
+\mhead{Why this tool}
+A simple before/after mixes the sanctions with everything else that happened in 2022; the other texts serve as the control.\\[3pt]
+Two checks: \textbf{pre-trends} ($\gamma_k \approx 0$ before 2022: only 2020 is usable) and \textbf{placebo outcomes} (other motivations should not move: some do). Hence ``consistent with'', not proof.\\[6pt]
+\mhead{Used on}
+\usedon{r:did}, \usedon{r:causal}.
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Method: robustness}
+\slabel{m:robust}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}\footnotesize
+\mhead{Idea}
+Re-run the headline results on samples that remove one possible source of error at a time.\\[4pt]
+\mhead{How}
+\begin{itemize}\setlength\itemsep{1pt}
+\item \textbf{Main theme only}: the secondary theme label is noisy.
+\item \textbf{English only}: language mix changes over time.
+\item \textbf{Journal articles only}: working papers and chapters differ.
+\item \textbf{Without the current year}: partial year.
+\item \textbf{High-recall coding}: codebook + SBERT matches.
+\item \textbf{All disciplines}: the economist filter itself.
+\end{itemize}
+\end{column}
+\begin{column}{0.44\textwidth}\footnotesize
+\mhead{Why this tool}
+Each measure has a known weakness; a result that holds whichever way the sample is cut does not depend on it. It answers a referee's ``what if'' in one table.\\[6pt]
+\mhead{Used on}
+\usedon{r:robust}.
+\end{column}
+\end{columns}
+\end{frame}
+
+\section*{Backup}
+
 \begin{frame}{Backup: validation of the motivation coding}
 \footnotesize
-Codebook tuned on 100 texts (development set), then evaluated on 50 \alert{held-out} texts; unit = first 1{,}500 characters of the introduction / abstract.
-\[ \text{precision} = \frac{TP}{TP+FP}, \quad \text{recall} = \frac{TP}{TP+FN}, \quad \kappa = \frac{p_o - p_e}{1 - p_e} \]
+Codebook tuned on 100 texts (development set), then evaluated on 50 \alert{held-out} texts; unit = first 1{,}500 characters of the introduction / abstract.\\[3pt]
 \begin{tabular}{@{}lrrrrr@{}}\toprule
 \textbf{Motivation} & \textbf{Read} & \textbf{Coded} & \textbf{Precision} & \textbf{Recall} & $\kappa$\\\midrule
 <<VAL_ROWS>>
@@ -1371,16 +1877,47 @@ Codebook tuned on 100 texts (development set), then evaluated on 50 \alert{held-
 <<VAL_ALL>>
 \bottomrule\end{tabular}\\[3pt]
 \scriptsize Read = texts where the reading found the motivation; Coded = texts flagged by the codebook. Files: \texttt{presentation/validation\_motivations\_dev.csv}, \texttt{\_test.csv}.
-\note{\textbf{Backup (only if asked).} The reference coding was done by reading each text against the codebook definitions (AI-assisted, spot-checked). Payment efficiency is the weakest category: it is expressed in too many ways for keywords.}
 \end{frame}
 
-\begin{frame}{Backup: how the score behaves}
+\begin{frame}{Backup: validation of the tone measure}
+\footnotesize
+30 sentences sampled per FinBERT label, read blind to the label.\\[4pt]
+\begin{tabular}{@{}lrrrr@{}}\toprule
+\textbf{FinBERT $\downarrow$ / reading $\rightarrow$} & \textbf{negative} & \textbf{neutral} & \textbf{positive} & \textbf{Precision}\\\midrule
+<<TONE_XTAB>>
+\bottomrule\end{tabular}\\[4pt]
+<<TONE_VAL>>\\[3pt]
+\scriptsize File: \texttt{presentation/validation\_tone.csv}.
+\end{frame}
+
+\begin{frame}{Backup: how the relevance score behaves}
 \footnotesize
 \begin{tabular}{@{}lrl@{}}\toprule
 \textbf{Example} & \textbf{Score} & \textbf{Label}\\\midrule
 <<EXAMPLE_ROWS>>
 \bottomrule\end{tabular}
-\note{\textbf{Backup (only if asked).} A speech with one paragraph on the digital euro is ``mentioned only''; a medical case report on CBDC (the skin disease) scores zero.}
+\end{frame}
+
+\begin{frame}[fragile]{Backup: press, recursive bisection of time windows}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\begin{lstlisting}
+stack = monthly_windows("2000-01-01", today)
+while stack:
+    a, b = stack.pop()
+    items = fetch(query, after=a, before=b)
+    if len(items) >= CAP and (b - a).days > 1:
+        m = a + (b - a) / 2
+        stack += [(m, b), (a, m)]
+        continue
+    save(items)
+    checkpoint(query, a, b, len(items))
+\end{lstlisting}
+\end{column}
+\begin{column}{0.43\textwidth}\small
+A news search returns at most $C=100$ items. A window holding more is cut in two until each holds fewer, down to one day: depth $\leq 5$ per month, $2L-1$ requests for $L$ windows. The press was collected, then left out of the economists' corpus.
+\end{column}
+\end{columns}
 \end{frame}
 
 \begin{frame}[fragile]{Backup: academic sources, cursor pagination under a rate limit}
@@ -1406,17 +1943,12 @@ class Throttle:
 \begin{column}{0.41\textwidth}\small
 \begin{itemize}
 \item Each phrase searched in titles and abstracts; results merged on the source id.
-\item Requests spaced by $t_{k+1}-t_k \geq \Delta$\\ ($\Delta = 0.12$\,s OpenAlex, $1.2$\,s Google News, $10$\,s GDELT).
-\item On HTTP 429: back-off $w_j = \min(60j,\,900)$\,s after the $j$-th consecutive failure.
+\item Requests spaced by $t_{k+1}-t_k \geq \Delta$.
+\item On HTTP 429: back-off $w_j = \min(60j,\,900)$\,s.
 \item Reference lists resolved into citations (for co-citation).
 \end{itemize}
 \end{column}
 \end{columns}
-\note{\textbf{Backup (only if asked).}
-\begin{itemize}
-\item APIs return results page by page; a cursor points to the next page until none is left.
-\item Free APIs limit the request rate: a throttle guarantees a minimum gap $\Delta$ between calls, and the program waits longer after each refusal.
-\end{itemize}}
 \end{frame}
 
 \begin{frame}[fragile]{Backup: full text and de-duplication}
@@ -1426,7 +1958,6 @@ class Throttle:
 \begin{itemize}
 \item PDFs (PyMuPDF) and web pages (trafilatura).
 \item Split into introduction / conclusion / section headings.
-\item Page metadata (date, author, outlet) fills gaps.
 \end{itemize}
 \end{column}
 \begin{column}{0.51\textwidth}
@@ -1439,49 +1970,33 @@ def key(r):
         return f"s:{r.date}:{norm(r.title)[:50]}"
     return "u:" + r.url
 \end{lstlisting}
-\small
-\begin{itemize}
-\item Second pass: same title + year across DOIs.
-\item Merge: most precise date, longest abstract, union of keywords.
-\end{itemize}
+\small Merge: most precise date, longest abstract, union of keywords.
 \end{column}
 \end{columns}
-\note{\textbf{Backup (only if asked).}
-\begin{itemize}
-\item The same paper appears in several databases: we match on DOI, else on normalised title and year.
-\item When merging, keep the best of each copy: the most precise date, the longest abstract.
-\end{itemize}}
-\end{frame}
-
-\begin{frame}{Backup: validation of the tone measure}
-\footnotesize
-30 sentences sampled per FinBERT label, read blind to the label.\\[4pt]
-\begin{tabular}{@{}lrrrr@{}}\toprule
-\textbf{FinBERT $\downarrow$ / reading $\rightarrow$} & \textbf{negative} & \textbf{neutral} & \textbf{positive} & \textbf{Precision}\\\midrule
-<<TONE_XTAB>>
-\bottomrule\end{tabular}\\[4pt]
-<<TONE_VAL>>\\[3pt]
-\scriptsize File: \texttt{presentation/validation\_tone.csv}.
-\note{\textbf{Backup (only if asked).} Errors are almost all ``toned vs.\ neutral'': FinBERT was trained on financial news, where descriptive sentences about a new product read as positive.}
 \end{frame}
 
 \begin{frame}{References}
-\scriptsize
-\begin{itemize}\setlength\itemsep{1pt}
+\fontsize{6.2}{7.2}\selectfont
+\begin{itemize}\setlength\itemsep{0pt}
 \item Araci, D. (2019). FinBERT: Financial sentiment analysis with pre-trained language models. arXiv:1908.10063.
 \item Aria, M., \& Cuccurullo, C. (2017). bibliometrix: An R-tool for comprehensive science mapping analysis. \emph{Journal of Informetrics}, 11(4).
 \item Blondel, V. D., Guillaume, J.-L., Lambiotte, R., \& Lefebvre, E. (2008). Fast unfolding of communities in large networks. \emph{J.\ Stat.\ Mech.}
 \item Callon, M., Courtial, J.-P., \& Laville, F. (1991). Co-word analysis as a tool for describing the network of interactions between basic and technological research. \emph{Scientometrics}, 22(1).
+\item Campello, R., Moulavi, D., \& Sander, J. (2013). Density-based clustering based on hierarchical density estimates. \emph{PAKDD}.
 \item Cobo, M. J., López-Herrera, A. G., Herrera-Viedma, E., \& Herrera, F. (2011). An approach for detecting, quantifying, and visualizing the evolution of a research field. \emph{Journal of Informetrics}, 5(1).
+\item Cohen, J. (1960). A coefficient of agreement for nominal scales. \emph{Educational and Psychological Measurement}, 20(1).
 \item Grootendorst, M. (2022). BERTopic: Neural topic modeling with a class-based TF-IDF procedure. arXiv:2203.05794.
 \item Kleinberg, J. (2002). Bursty and hierarchical structure in streams. \emph{KDD}.
+\item MacKinlay, A. C. (1997). Event studies in economics and finance. \emph{Journal of Economic Literature}, 35(1).
+\item McInnes, L., Healy, J., \& Melville, J. (2018). UMAP: Uniform manifold approximation and projection. arXiv:1802.03426.
 \item Monroe, B. L., Colaresi, M. P., \& Quinn, K. M. (2008). Fightin' words. \emph{Political Analysis}, 16(4).
 \item Reimers, N., \& Gurevych, I. (2019). Sentence-BERT. \emph{EMNLP}.
 \item Roberts, M. E., Stewart, B. M., Tingley, D., et al.\ (2014). Structural topic models for open-ended survey responses. \emph{AJPS}, 58(4).
+\item van Eck, N. J., \& Waltman, L. (2009). How to normalize cooccurrence data? \emph{JASIST}, 60(8).
 \item van Eck, N. J., \& Waltman, L. (2010). Software survey: VOSviewer. \emph{Scientometrics}, 84(2).
+\item Wilson, E. B. (1927). Probable inference, the law of succession, and statistical inference. \emph{JASA}, 22(158).
 \item Reviews cited: Bapat \& Sharma (2025); Fahad \& Bulut (2024); Hoang, Ngo \& Vu (2023); Kvedaravi\v{c}i\={u}t\.{e} \& \v{S}apkauskien\.{e} (2024); Paulovici (2026); Prodan et al.\ (2024): full records in the corpus.
 \end{itemize}
-\note{\textbf{References.}}
 \end{frame}
 \end{document}
 """
