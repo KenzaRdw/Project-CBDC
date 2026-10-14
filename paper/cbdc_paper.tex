@@ -91,23 +91,30 @@
 \subsection{What the field builds on}% reading list + co-citation clusters (Section~\ref{sec:who})
 \subsection{Bibliometric and text-as-data studies of CBDCs}
 
-Within our corpus, we observe 77 titles that announce a literature,
+
+Within our corpus, we observe 29 titles that announce a literature,
 systematic or bibliometric review of CBDCs, published between 2019 and
 2026. When comparing the five most recent bibliometric studies with ours, 
-we found three shared main limits. First, their data come from one or 
-two databases,Scopus and/or Web of Science, and are mostly journal 
-papers written in English. Working papers, central-bank speeches 
-and press are therefore mostly absent from their analysis, so
-that their sample is very limited compared to ours: a few hundred
-documents compared to 17,709. In addition, they build their analysis with
-standard tools that mainly describe what is studied, but not why. Finally,
+we found three shared main limits. First, their
+data come from one or two databases, Scopus and/or Web of Science, and are
+mostly journal papers written in English. Working papers, central-bank speeches 
+and central-bank documents are therefore mostly absent from their analysis, 
+so that their sample is very limited compared to ours: a few hundred documents 
+compared to 4,710. In addition, they build their analysis with standard tools that mainly
+describe what is studied, but not how (tone and stance) or why. Finally,
 their classifications are never checked against a reading of the texts
 themselves.
- 
+
 Our study addresses these three limits. Our corpus is much larger, with
-papers coming from five databases, speeches and
-press, in different languages. We ask not only what is written but also
-who writes it, why, how and when.
+papers coming from five databases, central-bank speeches and documents, in
+different languages, and every text is checked to be written by an
+economist or an economic institution. We ask not only what is written but
+also who writes it, how, why and when. Finally, each automatic
+classification we use is compared with our own reading of a sample of
+texts.
+
+MISSING : text-as-data studies
+
 
 % =====================================================================
 \section{Data}\label{sec:data}
@@ -126,6 +133,25 @@ who writes it, why, how and when.
 % =====================================================================
 \section{What is written}\label{sec:what}
 \subsection{Method: thematic map, topic model and covariate-adjusted shares}
+
+To see what is written by economists, we use two methods. The first one consists in 
+grouping keywords that often appear together in the same papers into themes. Then, we 
+place these themes on a thematic map with two axes: how much a theme is linked to the 
+other themes (\emph{centrality}) and how much its keywords are linked to each other 
+(\emph{density}). This allows us to classify themes into four types: motor, basic, niche, 
+and emerging or declining. 
+
+The second method consists in grouping texts by their meaning. To do so, we use \emph{SBERT}, 
+a multilingual model that turns each title and abstract into a vector, so that two texts saying 
+the same thing end up close, even if they are not written in the same language. We then group 
+these vectors into 24 topics with \emph{BERTopic} and label each topic with its most specific words.
+
+Finally, to make sure that a change in the share of a topic is not only due to a change in who 
+writes, we run a logit regression of each topic on the period, the type of author and the language. 
+That allows us to measure how the share of each topic changed between two periods (here, between 
+2014-2019 and 2023-2026), in percentage points, all else being equal.
+
+
 \subsection{Findings}
 
 % =====================================================================
