@@ -1,0 +1,30 @@
+# Python >= 3.10
+# Install with:  python -m venv .venv  &&  .venv/bin/pip install -r requirements.txt
+
+# --- Harvest, full text, build (run.py)
+requests>=2.31
+urllib3>=2.0
+beautifulsoup4>=4.12
+lxml>=5.0
+feedparser>=6.0
+trafilatura>=1.8
+pymupdf>=1.24
+langdetect>=1.0.9
+yake>=0.4.8
+pandas>=2.1
+numpy>=1.26
+
+# --- Analysis and slides (scripts/make_slides.py, scripts/validate_coders.py)
+torch>=2.2
+transformers>=4.40
+sentence-transformers>=3.0
+bertopic>=0.16
+umap-learn>=0.5.5
+hdbscan>=0.8.33
+scikit-learn>=1.4
+statsmodels>=0.14
+networkx>=3.2
+
+# Local LLM for the stance coding: Apple Silicon only. It is not installed on other
+# machines, where scripts/make_slides.py and scripts/validate_coders.py cannot run.
+mlx-lm>=0.19; sys_platform == "darwin" and platform_machine == "arm64"

@@ -35,6 +35,13 @@ then attach the file to a new release.
 
 ## Run
 
+Install the dependencies once (Python 3.10 or later):
+
+```bash
+python -m venv .venv
+.venv/bin/pip install -r requirements.txt     # Windows: .venv\Scripts\pip install -r requirements.txt
+```
+
 ```bash
 .venv/bin/python run.py harvest            # all sources (or: harvest openalex bis ...)
 .venv/bin/python run.py fulltext           # download & extract PDFs / articles (resumable)
@@ -43,8 +50,8 @@ then attach the file to a new release.
 
 `scripts/harvest_max.sh` chains everything (all sources, full text, GDELT) and rebuilds after each stage.
 `.venv/bin/python scripts/make_slides.py` regenerates the presentation from the CSV (it overwrites hand edits to the `.tex`).
-It needs `torch sentence-transformers bertopic scikit-learn transformers statsmodels mlx-lm networkx` in the venv
-(Apple Silicon for `mlx-lm`). Models are downloaded on first use; heavy results are cached in `data/cache/`
+It needs `mlx-lm` (the local LLM that codes stance), which installs only on Apple Silicon, so this script
+runs only on such a Mac. Models are downloaded on first use; heavy results are cached in `data/cache/`
 (`embeddings.npz`, `tone.csv`, `stance_sample.csv`, the last one resumable).
 `.venv/bin/python scripts/tag_economists.py` fetches each paper's OpenAlex field and author institutions
 (`data/cache/openalex_fields.csv`): the talk keeps only texts by economists (research in economics or finance, or with a
