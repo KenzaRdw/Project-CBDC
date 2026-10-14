@@ -381,23 +381,25 @@ def main():
     act = {k: e["actor"] for k, e in adj.items()}
     v["MOTIVE_GAP"] = (f"central banks stress \\emph{{{tex(max(act, key=lambda k: act[k][0]))}}}, academics "
                        f"\\emph{{{tex(min(act, key=lambda k: act[k][0]))}}}")
-    val_p = OUT / "validation_results.csv"  # held-out test set: see presentation/validation_motivations_test.csv
-    val = pd.read_csv(val_p, index_col=0) if val_p.exists() else None
-    if val is not None:
-        a = val.loc["All (micro)"]
-        v["VAL_LINE"] = (f"Validated on {int(len(pd.read_csv(OUT / 'validation_motivations_test.csv')))} held-out texts "
-                         f"(reading-based coding, AI-assisted): precision {a.precision:.2f}, recall {a.recall:.2f}, "
-                         f"$\\kappa = {a.kappa:.2f}$.")
-        v["VAL_CAVEAT"] = (f"Recall $\\approx {a.recall:.2f}$: shares are \\alert{{lower bounds}}; "
-                           "compare motivations and periods rather than read levels.")
-        v["VAL_ROWS"] = "\n".join(
-            f"{tex(k)} & {int(r.manual)} & {int(r.auto)} & {r.precision:.2f} & {r.recall:.2f} & {r.kappa:.2f} \\\\"
-            for k, r in val.drop(index="All (micro)").sort_values("kappa", ascending=False).iterrows())
-        v["VAL_ALL"] = (f"\\textbf{{All}} & {int(a.manual)} & {int(a.auto)} & {a.precision:.2f} & {a.recall:.2f} & "
-                        f"{a.kappa:.2f} \\\\")
-    else:
-        v["VAL_LINE"] = "Validation pending."
-        v["VAL_CAVEAT"] = v["VAL_ROWS"] = v["VAL_ALL"] = ""
+    # codebook on the held-out texts written by economists (the corpus of the talk); "all" = the whole test set
+    test_all = pd.read_csv(OUT / "validation_motivations_test.csv")
+    test_e = test_all[test_all.record_id.isin(d.record_id)].reset_index(drop=True)
+    cbk = nlp._codebook(test_e.text)
+    ym = {k: test_e[f"manual: {k}"].values.astype(bool) for k in A.MOTIVES}
+    per = {k: {**nlp._prf(ym[k], cbk[k]), "manual": int(ym[k].sum()), "auto": int(cbk[k].sum())} for k in A.MOTIVES}
+    a = {**nlp._prf(np.concatenate(list(ym.values())), np.concatenate([cbk[k] for k in A.MOTIVES])),
+         "manual": sum(r["manual"] for r in per.values()), "auto": sum(r["auto"] for r in per.values())}
+    num = lambda x: "--" if x != x else f"{x:.2f}"
+    v["VAL_N"], v["VAL_N_ALL"] = str(len(test_e)), str(len(test_all))
+    v["VAL_LINE"] = (f"Validated on the {len(test_e)} held-out texts by economists (of {len(test_all)}; reading-based "
+                     f"coding, AI-assisted): precision {num(a['precision'])}, recall {num(a['recall'])}, $\\kappa = {num(a['kappa'])}$.")
+    v["VAL_CAVEAT"] = (f"Recall $\\approx {num(a['recall'])}$: shares are \\alert{{lower bounds}}; "
+                       "compare motivations and periods rather than read levels.")
+    v["VAL_ROWS"] = "\n".join(
+        f"{tex(k)} & {r['manual']} & {r['auto']} & {num(r['precision'])} & {num(r['recall'])} & {num(r['kappa'])} \\\\"
+        for k, r in sorted(per.items(), key=lambda kv: -(kv[1]["kappa"] if kv[1]["kappa"] == kv[1]["kappa"] else -9)))
+    v["VAL_ALL"] = (f"\\textbf{{All}} & {a['manual']} & {a['auto']} & {num(a['precision'])} & {num(a['recall'])} & "
+                    f"{num(a['kappa'])} \\\\")
 
     ev, weekly = A.event_study(d)
     pl = A.placebo(d)
@@ -524,11 +526,19 @@ def main():
 
     # --- why: the codebook against SBERT, and robustness of the trends
     dev, test = pd.read_csv(OUT / "validation_motivations_dev.csv"), pd.read_csv(OUT / "validation_motivations_test.csv")
-    vc = pd.read_csv(OUT / "validation_coders.csv", index_col=0)  # written by scripts/validate_coders.py
-    vmot, vst = vc[vc.task == "motivations"], vc[vc.task == "stance"]
+    vc = pd.read_csv(OUT / "validation_coders.csv")  # written by scripts/validate_coders.py
+    by_scope = lambda sc, task: vc[(vc.scope == sc) & (vc.task == task)].set_index("coder")
+    vmot, vst = by_scope("economists", "motivations"), by_scope("economists", "stance")
+    vmot_all, vst_all = by_scope("all", "motivations"), by_scope("all", "stance")
+    v["MVAL_N"], v["MVAL_N_ALL"] = str(int(vmot.n_texts.iloc[0])), str(int(vmot_all.n_texts.iloc[0]))
+    v["ST_N"], v["ST_N_ALL"] = str(int(vst.n_texts.iloc[0])), str(int(vst_all.n_texts.iloc[0]))
     v["MVAL_ROWS"] = "\n".join(("\\rowcolor{c4!12}" if k.startswith("Codebook (") else "")
-                               + f"{k} & {r.precision:.2f} & {r.recall:.2f} & {r.f1:.2f} & {r.kappa:.2f} \\\\"
+                               + f"{k} & {r.precision:.2f} & {r.recall:.2f} & {r.f1:.2f} & {r.kappa:.2f} & "
+                               + f"{vmot_all.loc[k, 'kappa']:.2f} \\\\"
                                for k, r in vmot.sort_values("kappa", ascending=False).iterrows())
+    v["ST_ROWS"] = "\n".join(("\\rowcolor{c4!12}" if k.startswith("Local LLM") else "")
+                             + f"{k} & {r.accuracy:.2f} & {r.kappa:.2f} & {vst_all.loc[k, 'kappa']:.2f} \\\\"
+                             for k, r in vst.sort_values("kappa", ascending=False).iterrows())
     k_cb = vmot.loc["Codebook (regex)", "kappa"]
     k_alt = vmot.drop(index=[i for i in vmot.index if i.startswith("Codebook")]).kappa
     v["MVAL_BEST_ALT"] = f"{k_alt.max():.2f}"
@@ -562,11 +572,15 @@ def main():
         trow.append(f"{lbl} & {len(x):,} & {len(ss):,} & {100 * (ss.label == 'positive').mean():.0f} & "
                     f"{100 * (ss.label == 'negative').mean():.0f} & ${x.mean():.2f} \\pm {1.96 * x.std() / math.sqrt(len(x)):.2f}$ \\\\")
     v["TONE_ROWS"] = "\n".join(trow)
-    tv = pd.read_csv(OUT / "validation_tone.csv")
+    tv_all = pd.read_csv(OUT / "validation_tone.csv")
+    tv = tv_all[tv_all.record_id.isin(d.record_id)]  # sentences from economists' texts
     labs = ["negative", "neutral", "positive"]
+    kap = lambda t: (lambda po, pe: (po - pe) / (1 - pe))((t.label == t.manual).mean(),
+                                                         sum((t.label == l).mean() * (t.manual == l).mean() for l in labs))
     po = (tv.label == tv.manual).mean()
     pe = sum((tv.label == l).mean() * (tv.manual == l).mean() for l in labs)
-    v["TONE_VAL"] = (f"{len(tv)} sentences read (30 per predicted label): agreement {100 * po:.0f}\\%, "
+    v["TONE_N"], v["TONE_KAPPA_ALL"] = str(len(tv)), f"{kap(tv_all):.2f}"
+    v["TONE_VAL"] = (f"{len(tv)} sentences from economists' texts read blind (of {len(tv_all)}): agreement {100 * po:.0f}\\%, "
                      f"$\\kappa = {(po - pe) / (1 - pe):.2f}$; positive and negative confused "
                      f"{int(((tv.label == 'positive') & (tv.manual == 'negative')).sum() + ((tv.label == 'negative') & (tv.manual == 'positive')).sum())} times.")
     v["TONE_XTAB"] = "\n".join(f"{l} & " + " & ".join(str(int(((tv.label == l) & (tv.manual == m)).sum())) for m in labs)
@@ -1203,7 +1217,7 @@ Tone \alert{drifts}, it does not \alert{jump}: no single event explains the rise
  & <<PERIOD_HEAD>> & \textbf{Change, pts}\\\midrule
 <<STANCE_TREND>>
 \bottomrule\end{tabular}\\[4pt]
-The LLM ($\kappa = <<STANCE_K>>$, best of five coders) calls <<STANCE_RAWFAV>>\% of the hand-coded texts favourable against <<STANCE_TRUEFAV>>\% by reading: its levels are inflated, so only its \emph{changes} are used. \textbf{Bold}: CI excludes 0.\\[4pt]
+The LLM ($\kappa = <<STANCE_K>>$ on <<ST_N>> economists' texts, best of four coders, \usedon{b:stance}) calls <<STANCE_RAWFAV>>\% of the hand-coded texts favourable against <<STANCE_TRUEFAV>>\% by reading: its levels are inflated, so only its \emph{changes} are used. \textbf{Bold}: CI excludes 0.\\[4pt]
 \small \alert{Reading}: both groups become more favourable; central banks much more, as their own projects advance.
 \end{column}
 \end{columns}
@@ -1269,11 +1283,11 @@ Logit of each motivation on period, actor and English; average marginal effects,
 \slabel{r:coders}
 \begin{columns}[T]
 \begin{column}{0.58\textwidth}\scriptsize
-\begin{tabular}{@{}lrrrr@{}}\toprule
-\textbf{Coder} & \textbf{P} & \textbf{R} & $F_1$ & $\kappa$\\\midrule
+\begin{tabular}{@{}lrrrrr@{}}\toprule
+\textbf{Coder} & \textbf{P} & \textbf{R} & $F_1$ & $\kappa$ & $\kappa$\textbf{, all}\\\midrule
 <<MVAL_ROWS>>
 \bottomrule\end{tabular}\\[3pt]
-50 held-out texts $\times$ 10 motivations; thresholds and classifiers set on 100 development texts.
+The <<MVAL_N>> held-out texts written by economists $\times$ 10 motivations; last column: $\kappa$ on all <<MVAL_N_ALL>> held-out texts. Thresholds and classifiers set on 100 development texts.
 \end{column}
 \begin{column}{0.4\textwidth}\small
 \begin{itemize}\setlength\itemsep{2pt}
@@ -1687,7 +1701,7 @@ Write down, for each of 10 motivations, the phrases authors use to state it; fla
 \mhead{How}
 \begin{enumerate}\setlength\itemsep{1pt}
 \item Read 100 introductions (\textbf{development set}); write regular expressions in 7 languages.
-\item Code 50 \emph{other} texts by reading (\textbf{test set}), never used for tuning.
+\item Code <<VAL_N_ALL>> \emph{other} texts by reading (\textbf{test set}), never used for tuning; scores on the <<VAL_N>> written by economists.
 \item Compare: precision $=\frac{TP}{TP+FP}$, recall $=\frac{TP}{TP+FN}$, Cohen's
 $\kappa = \frac{p_o-p_e}{1-p_e}$ (agreement beyond chance).
 \end{enumerate}
@@ -1695,7 +1709,7 @@ $\kappa = \frac{p_o-p_e}{1-p_e}$ (agreement beyond chance).
 \begin{column}{0.44\textwidth}\footnotesize
 \mhead{Why this tool}
 Motivations need reading; a codebook makes the reading explicit, reproducible and checkable.\\[3pt]
-Five machine coders were tested on the same texts (SBERT $\times$ 2, NLI mDeBERTa, Qwen2.5 3B and 7B): all lower $\kappa$.\\[3pt]
+Five machine coders were tested on the same texts (SBERT $\times$ 2, NLI mDeBERTa, Qwen2.5 3B and 7B): see \usedon{r:coders}.\\[3pt]
 High precision, recall $\approx 0.5$: shares are lower bounds; changes are robust (\usedon{r:coders}).\\[6pt]
 \mhead{Used on}
 \usedon{r:codebook}, \usedon{r:motives}, \usedon{r:coders}.
@@ -1714,7 +1728,7 @@ Measure how positive or negative the sentences \emph{about CBDCs} are.\\[4pt]
 \item Keep the English sentences that name a CBDC (same term list as the filter).
 \item FinBERT (a BERT model trained on financial news) gives $P(+), P(0), P(-)$ for each sentence.
 \item Sentence tone $= P(+) - P(-) \in[-1,1]$; averaged per text, then per group and year.
-\item Validation: 90 sentences read blind (30 per label); $\kappa = <<TONE_KAPPA>>$.
+\item Validation: <<TONE_N>> sentences from economists' texts read blind; $\kappa = <<TONE_KAPPA>>$ (all <<TONE_KAPPA_ALL>>).
 \end{enumerate}
 \end{column}
 \begin{column}{0.44\textwidth}\footnotesize
@@ -1742,7 +1756,7 @@ Tone is about words; stance is about the \emph{author's position}: favourable, n
 \end{column}
 \begin{column}{0.44\textwidth}\footnotesize
 \mhead{Why this tool}
-Stance needs understanding of the argument: only a language model can do it at scale. Five coders were tested; the LLM is best ($\kappa = <<STANCE_K>>$) but over-calls ``favourable''.\\[3pt]
+Stance needs understanding of the argument: only a language model can do it at scale. Four coders were tested (\usedon{b:stance}); the LLM is best ($\kappa = <<STANCE_K>>$) but over-calls ``favourable''.\\[3pt]
 A constant bias cancels in a difference: so the LLM gives \emph{changes}, reading gives \emph{levels}.\\[6pt]
 \mhead{Used on}
 \usedon{r:stance}, \usedon{r:syn}.
@@ -1869,7 +1883,7 @@ Each measure has a known weakness; a result that holds whichever way the sample 
 
 \begin{frame}{Backup: validation of the motivation coding}
 \footnotesize
-Codebook tuned on 100 texts (development set), then evaluated on 50 \alert{held-out} texts; unit = first 1{,}500 characters of the introduction / abstract.\\[3pt]
+Codebook tuned on 100 texts (development set), then evaluated on the <<VAL_N>> \alert{held-out} texts written by economists (of <<VAL_N_ALL>>); unit = first 1{,}500 characters of the introduction / abstract.\\[3pt]
 \begin{tabular}{@{}lrrrrr@{}}\toprule
 \textbf{Motivation} & \textbf{Read} & \textbf{Coded} & \textbf{Precision} & \textbf{Recall} & $\kappa$\\\midrule
 <<VAL_ROWS>>
@@ -1879,9 +1893,21 @@ Codebook tuned on 100 texts (development set), then evaluated on 50 \alert{held-
 \scriptsize Read = texts where the reading found the motivation; Coded = texts flagged by the codebook. Files: \texttt{presentation/validation\_motivations\_dev.csv}, \texttt{\_test.csv}.
 \end{frame}
 
+\begin{frame}{Backup: validation of the stance coders}
+\slabel{b:stance}
+\footnotesize
+Each coder against the stance read by hand (favourable / neutral / critical); thresholds and classifiers by 5-fold cross-validation.\\[4pt]
+\begin{tabular}{@{}lrrr@{}}\toprule
+\textbf{Coder} & \textbf{Accuracy} & $\kappa$ & $\kappa$\textbf{, all}\\\midrule
+<<ST_ROWS>>
+\bottomrule\end{tabular}\\[4pt]
+Scores on the <<ST_N>> texts written by economists; last column: all <<ST_N_ALL>> hand-coded texts (including the press).\\[3pt]
+\scriptsize Files: \texttt{presentation/validation\_stance.csv}, \texttt{validation\_predictions\_stance.csv}.
+\end{frame}
+
 \begin{frame}{Backup: validation of the tone measure}
 \footnotesize
-30 sentences sampled per FinBERT label, read blind to the label.\\[4pt]
+Sentences sampled per FinBERT label, read blind to the label; table: the <<TONE_N>> from economists' texts (30 per label).\\[4pt]
 \begin{tabular}{@{}lrrrr@{}}\toprule
 \textbf{FinBERT $\downarrow$ / reading $\rightarrow$} & \textbf{negative} & \textbf{neutral} & \textbf{positive} & \textbf{Precision}\\\midrule
 <<TONE_XTAB>>

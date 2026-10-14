@@ -243,12 +243,13 @@ def validate_motives(dev, test):
     clf = _classifiers(dev, model)
     x_test = model.encode(list(test.text), normalize_embeddings=True)
     cb = _codebook(test.text)
-    learned = {k: clf[k].predict(x_test) for k in names}
-    res = {"Codebook (regex)": _prf(y, flat(cb)),
-           "SBERT, definitions (zero-shot)": _prf(y, flat({k: s_test[k] >= tau for k in names})),
-           "SBERT, classifier (100 labels)": _prf(y, flat(learned)),
-           "Codebook OR classifier": _prf(y, flat({k: cb[k] | learned[k] for k in names}))}
-    return {"tau": float(tau), "overall": pd.DataFrame(res).T}
+    learned = {k: clf[k].predict(x_test).astype(bool) for k in names}
+    preds = {"Codebook (regex)": cb,
+             "SBERT, definitions (zero-shot)": {k: np.asarray(s_test[k] >= tau) for k in names},
+             "SBERT, classifier (100 labels)": learned,
+             "Codebook OR classifier": {k: cb[k] | learned[k] for k in names}}
+    res = {c: _prf(y, flat(p)) for c, p in preds.items()}
+    return {"tau": float(tau), "overall": pd.DataFrame(res).T, "preds": preds}
 
 
 def motivations_union(d, root, dev):
@@ -339,7 +340,6 @@ def stance_unit(r, root):
 
 def stance_sample(d, root, cache, per_cell=100, seed=5):
     """Stratified random sample (actor x period), coded by a local LLM; resumable (one CSV line per text)."""
-    from mlx_lm import generate, load
     f = d.copy()
     f["actor"] = f.source_type.replace({"official": "speech"})
     f["period"] = None
@@ -354,6 +354,7 @@ def stance_sample(d, root, cache, per_cell=100, seed=5):
     sample = f.groupby(["actor", "period"], group_keys=False).head(per_cell)
     todo = sample[~sample.record_id.isin(done.record_id)]
     if len(todo):
+        from mlx_lm import generate, load  # Apple Silicon only; not needed when every text is already coded
         model, tok = load(LLM)
         with open(cache, "a", encoding="utf-8") as out:
             if not len(done):

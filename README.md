@@ -50,8 +50,8 @@ python -m venv .venv
 
 `scripts/harvest_max.sh` chains everything (all sources, full text, GDELT) and rebuilds after each stage.
 `.venv/bin/python scripts/make_slides.py` regenerates the presentation from the CSV (it overwrites hand edits to the `.tex`).
-It needs `mlx-lm` (the local LLM that codes stance), which installs only on Apple Silicon, so this script
-runs only on such a Mac. Models are downloaded on first use; heavy results are cached in `data/cache/`
+It runs on any machine once `data/` is unpacked: the stance codings of the local LLM are cached in
+`data/cache/stance_sample.csv`. Only coding new texts needs `mlx-lm`, which installs on Apple Silicon only. Models are downloaded on first use; heavy results are cached in `data/cache/`
 (`embeddings.npz`, `tone.csv`, `stance_sample.csv`, the last one resumable).
 `.venv/bin/python scripts/tag_economists.py` fetches each paper's OpenAlex field and author institutions
 (`data/cache/openalex_fields.csv`): the talk keeps only texts by economists (research in economics or finance, or with a

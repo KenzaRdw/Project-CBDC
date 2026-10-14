@@ -1,10 +1,13 @@
 """Score every candidate coder against the hand-coded samples; writes presentation/validation_coders.csv.
 
+Every coder is scored twice: on the whole sample ("all") and on the texts written by economists ("economists",
+the corpus of the talk). Per-text predictions are saved in presentation/validation_predictions_*.csv.
+
     .venv/bin/python scripts/validate_coders.py        # about 1.5 hours on an M1 (the local LLMs dominate)
 
-Motivations (multi-label, 50 held-out texts x 10 motivations; tuned on the 100 development texts):
+Motivations (multi-label, 74 held-out texts x 10 motivations, 50 by economists; tuned on the 100 development texts):
   codebook, SBERT zero-shot, SBERT classifier, NLI zero-shot, local LLMs (Qwen2.5 3B and 7B, 4-bit).
-Stance (favourable / neutral / critical, 150 texts; thresholds and classifiers by 5-fold cross-validation):
+Stance (favourable / neutral / critical, 177 texts, 100 by economists; thresholds and classifiers by 5-fold cross-validation):
   FinBERT tone, SBERT classifier, NLI zero-shot, local LLM 7B.
 """
 import re
@@ -20,6 +23,7 @@ from sklearn.model_selection import StratifiedKFold
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+from cbdc_biblio import analysis as A  # noqa: E402
 from cbdc_biblio import nlp  # noqa: E402
 from cbdc_biblio.analysis import MOTIVES, MOTIVE_RE  # noqa: E402
 
@@ -85,15 +89,25 @@ def free():
         torch.mps.empty_cache()
 
 
+def economist_ids():
+    d = A.load(ROOT / "data/cbdc_corpus.csv")
+    d = d[d.relevance.isin(A.THEME)]
+    return set(d[A.economists(d, pd.read_csv(ROOT / "data/cache/openalex_fields.csv"))].record_id)
+
+
+ECON = economist_ids()
+
+
 def motivations():
     dev, test = (pd.read_csv(OUT / f"validation_motivations_{s}.csv") for s in ("dev", "test"))
     y = lambda df: np.concatenate([df[f"manual: {k}"].values.astype(bool) for k in NAMES])
-    flat = lambda pred: np.concatenate([np.asarray(pred[k], bool) for k in NAMES])
-    rows = nlp.validate_motives(dev, test)["overall"].to_dict("index")
+    flat = lambda pred, m=None: np.concatenate([np.asarray(pred[k], bool)[m] if m is not None else np.asarray(pred[k], bool)
+                                                for k in NAMES])
+    preds = nlp.validate_motives(dev, test)["preds"]
     sd, st = nli_scores(list(dev.text), list(HYP.values())), nli_scores(list(test.text), list(HYP.values()))
     tau = max(np.arange(0.05, 0.96, 0.05),
               key=lambda t: nlp._prf(y(dev), flat({k: sd[:, i] >= t for i, k in enumerate(NAMES)}))["f1"])
-    rows["NLI zero-shot (mDeBERTa)"] = nlp._prf(y(test), flat({k: st[:, i] >= tau for i, k in enumerate(NAMES)}))
+    preds["NLI zero-shot (mDeBERTa)"] = {k: st[:, i] >= tau for i, k in enumerate(NAMES)}
     system = ("You code research texts about central bank digital currencies (CBDC). List which motivations or issues "
               "the text raises as reasons to study, issue or worry about a CBDC. Motivations:\n"
               + "\n".join(f"{i + 1}. {k}: {DEFS[k]}" for i, k in enumerate(NAMES))
@@ -101,8 +115,17 @@ def motivations():
     for name, mid in LLMS.items():
         ans = llm(mid, system, list(test.text))
         nums = [{int(x) for x in re.findall(r"\d+", a) if 1 <= int(x) <= 10} for a in ans]
-        rows[name] = nlp._prf(y(test), flat({k: [(i + 1) in n for n in nums] for i, k in enumerate(NAMES)}))
-    return pd.DataFrame(rows).T.assign(task="motivations")
+        preds[name] = {k: np.array([(i + 1) in n for n in nums]) for i, k in enumerate(NAMES)}
+    pd.DataFrame([{"record_id": r, "coder": c, "motivation": k, "pred": bool(p[k][j])}
+                  for c, p in preds.items() for k in NAMES for j, r in enumerate(test.record_id)]).to_csv(
+        OUT / "validation_predictions_motivations.csv", index=False)
+    yt = test.set_index("record_id")
+    rows = []
+    for scope, m in [("all", np.ones(len(test), bool)), ("economists", test.record_id.isin(ECON).values)]:
+        ys = np.concatenate([yt[f"manual: {k}"].values.astype(bool)[m] for k in NAMES])
+        for c, p in preds.items():
+            rows.append({"coder": c, "scope": scope, "n_texts": int(m.sum()), **nlp._prf(ys, flat(p, m))})
+    return pd.DataFrame(rows).assign(task="motivations")
 
 
 def stance():
@@ -137,15 +160,18 @@ def stance():
     ans = llm(LLMS["Local LLM, Qwen2.5 7B"], nlp.STANCE_SYSTEM, texts, max_tokens=5)
     rows["Local LLM, Qwen2.5 7B"] = np.array(["favourable" if "favour" in a.lower() else "critical" if "critic" in a.lower()
                                               else "neutral" for a in ans])
-    # kept: the confusion matrix of this coder corrects the stance shares (nlp.corrected_shares)
     pd.DataFrame({"record_id": s.record_id, "llm": rows["Local LLM, Qwen2.5 7B"]}).to_csv(
         OUT / "validation_stance_llm.csv", index=False)
-    return pd.DataFrame({k: {"accuracy": accuracy_score(y, p), "kappa": cohen_kappa_score(y, p), "n": len(y)}
-                         for k, p in rows.items()}).T.assign(task="stance")
+    pd.DataFrame({"record_id": s.record_id, **rows}).to_csv(OUT / "validation_predictions_stance.csv", index=False)
+    out = []
+    for scope, m in [("all", np.ones(len(y), bool)), ("economists", s.record_id.isin(ECON).values)]:
+        for k, p in rows.items():
+            out.append({"coder": k, "scope": scope, "n_texts": int(m.sum()), "accuracy": accuracy_score(y[m], p[m]),
+                        "kappa": cohen_kappa_score(y[m], p[m])})
+    return pd.DataFrame(out).assign(task="stance")
 
 
 if __name__ == "__main__":
     out = pd.concat([motivations(), stance()])
-    out.index.name = "coder"
-    out.to_csv(OUT / "validation_coders.csv")
+    out.to_csv(OUT / "validation_coders.csv", index=False)
     print(out.round(2))
