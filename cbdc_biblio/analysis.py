@@ -95,6 +95,16 @@ def _network(docs_items, top, min_edge=1, min_component=2):
     return g, comms, q
 
 
+def _sorted_subgraph(g, nodes):
+    """Copy of the subgraph with nodes and edges in sorted order: a subgraph view iterates in set order,
+    which changes between runs and would change the force-directed layout."""
+    h = nx.Graph()
+    h.add_nodes_from((n, g.nodes[n]) for n in sorted(nodes))
+    edges = sorted(tuple(sorted(e)) for e in g.subgraph(nodes).edges())
+    h.add_edges_from((u, v, g.edges[u, v]) for u, v in edges)
+    return h
+
+
 def layout(g, w=11.0, h=5.6):
     """Force-directed (Fruchterman-Reingold) positions scaled to a w x h cm box.
 
@@ -110,7 +120,7 @@ def layout(g, w=11.0, h=5.6):
         cols = math.ceil(math.sqrt(len(comps) * w / h))
         rows = math.ceil(len(comps) / cols)
         cw, ch = w / cols, h / rows
-        cells = [(g.subgraph(c), (i % cols) * cw, (rows - 1 - i // cols) * ch, cw * 0.8, ch * 0.75)
+        cells = [(_sorted_subgraph(g, c), (i % cols) * cw, (rows - 1 - i // cols) * ch, cw * 0.8, ch * 0.75)
                  for i, c in enumerate(comps)]
     out = {}
     for sub, x0, y0, cw, ch in cells:

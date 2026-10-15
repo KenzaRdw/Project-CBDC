@@ -751,7 +751,7 @@ TEMPLATE = r"""\PassOptionsToPackage{table}{xcolor}
 
 \title{How Economists Discuss Central Bank Digital Currencies}
 \subtitle{Themes, tone and stance, 2014--<<Y1>>: a bibliometric and text-as-data study}
-\author{Adriel Mazere}
+\author{Louis Drogo, Kenza Redwane and Adriel Mazere}
 \institute{M2 -- Private crypto}
 \date{<<DATE>>}
 \begin{document}
@@ -761,7 +761,7 @@ TEMPLATE = r"""\PassOptionsToPackage{table}{xcolor}
 \end{frame}
 
 \begin{frame}{The paper in one slide}
-\textbf{Research question.} How did economists' discussion of central bank digital currencies (its themes, tone and stance) evolve between 2014 and <<Y1>>, and how did it move with changes in the policy environment?\\[5pt]
+\textbf{Research question.} How has economists and institutional discourse on CBDCs evolved between 2014 and <<Y1>>, and to what extent does this evolution align with changes in the policy environment?\\[5pt]
 \small
 \begin{tabular}{@{}ll@{}}
 \alert{Who} writes? & research economists, central banks and institutions\\
