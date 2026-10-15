@@ -72,16 +72,17 @@ def load(path):
 
 def _network(docs_items, top, min_edge=1, min_component=2):
     """docs_items: list of item lists (one per document). Keeps the `top` most frequent items."""
-    occ = Counter(i for items in docs_items for i in set(items))
+    # sorted everywhere: set order changes between runs (hash randomisation) and Louvain depends on node order
+    occ = Counter(i for items in docs_items for i in sorted(set(items)))
     keep = {i for i, _ in occ.most_common(top)}
     co = Counter()
     for items in docs_items:
         for a, b in combinations(sorted(set(items) & keep), 2):
             co[a, b] += 1
     g = nx.Graph()
-    for i in keep:
+    for i in sorted(keep):
         g.add_node(i, occ=occ[i])
-    for (a, b), c in co.items():
+    for (a, b), c in sorted(co.items()):
         if c >= min_edge:
             g.add_edge(a, b, count=c, strength=c / (occ[a] * occ[b]))
     g.remove_nodes_from([n for c in list(nx.connected_components(g)) if len(c) < min_component for n in c])

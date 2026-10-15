@@ -14,6 +14,9 @@ sys.path.insert(0, str(ROOT))
 from cbdc_biblio import analysis as A  # noqa: E402
 from cbdc_biblio import nlp  # noqa: E402
 
+sys.path.insert(0, str(ROOT / "scripts"))
+from make_slides import quadrant, thematic_tikz  # noqa: E402
+
 P = ROOT / "presentation"
 OUT = ROOT / "paper" / "tables"
 LABELS = ["main theme", "secondary theme", "mentioned only", "unverified (no text)", "ambiguous terms only",
@@ -101,6 +104,53 @@ def main():
                                          ("Reference list (research)", pct(econ[econ.source_type == "academic"].references.notna()))]))
     rows.append(f"\\midrule Total & {len(econ):,} \\\\")
     table("descriptive", "@{}lr@{}", r"& \textbf{Texts}", rows, "The economists' corpus", "tab:descriptive")
+
+    # --- what is written: thematic map, keyword shares by period, adjusted topic changes (section 5)
+    themes = A.thematic_map(econ)
+    tz, mx, my = thematic_tikz(themes, w=8.5, h=5.5)
+    legend = "\\\\[2pt]\n".join(f"\\textbf{{{i + 1}}} ({quadrant(t, mx, my)}): {tex(', '.join(t['members'][:4]))}"
+                               for i, t in enumerate(themes))
+    (OUT / "fig_thematic.tex").write_text(
+        "\\begin{figure}[htbp]\n\\centering\n" + tz + "\n\\par\\medskip\n\\parbox{0.9\\linewidth}{\\footnotesize " + legend + "}\n"
+        "\\caption{Thematic map of the keywords of research by economists}\\label{fig:thematic}\n\\end{figure}\n",
+        encoding="utf-8")
+    kw = A.keyword_network(econ)
+    ev = kw["evolution"]
+    periods = [p_ for p_, _, _ in A.PERIODS]
+    shown = [("monetary policy and economic impact", "c1", "*"), ("cryptocurrency", "c5", "diamond*"),
+             ("financial inclusion", "c4", "square*"), ("digital ruble", "c2", "triangle*"), ("digital euro", "c3", "otimes*")]
+    lines = [f"\\addplot[{c}, thick, mark={m}] coordinates {{" + " ".join(f"({p_},{ev.loc[k, p_]:.1f})" for p_ in periods)
+             + f"}};\n\\addlegendentry{{{tex(k)}}}" for k, c, m in shown if k in ev.index]
+    (OUT / "fig_keywords.tex").write_text(
+        "\\begin{figure}[htbp]\n\\centering\n\\begin{tikzpicture}\n"
+        "\\begin{axis}[width=0.8\\linewidth, height=6cm, symbolic x coords={" + ",".join(periods) + "}, xtick=data,\n"
+        "  ylabel={\\% of the period's papers}, ymin=0, axis lines*=left, ymajorgrids, enlarge x limits=0.15,\n"
+        "  legend pos=outer north east, legend cell align=left, legend style={draw=none, font=\\footnotesize}, tick label style={font=\\footnotesize}]\n"
+        + "\n".join(lines) + "\n\\end{axis}\n\\end{tikzpicture}\n"
+        "\\caption{Share of research papers carrying each keyword, by period ("
+        + ", ".join(f"{kw['period_n'][p_]:,} papers in {p_}" for p_ in periods) + ")}\\label{fig:keywords}\n\\end{figure}\n",
+        encoding="utf-8")
+    tp = nlp.topics(econ, ROOT, ROOT / "data/cache/embeddings.npz", min_size=40, selection="leaf")
+    tf = A.with_covariates(econ[econ.source_type.isin(nlp.NON_PRESS)].merge(tp["assign"], on="record_id"))
+    pts, labels = [], []
+    for i, (_, r) in enumerate(tp["table"].head(12).iterrows(), 1):
+        tf["is_k"] = tf.topic == r["topic"]
+        e_ = A.adjusted(tf, "is_k").get("period")
+        if not e_:
+            continue
+        lab = f"{i}: {', '.join(r['terms'][:3])}"
+        labels.append(tex(lab))
+        pts.append(f"({e_[0]:.2f},{{{tex(lab)}}}) += ({e_[2] - e_[0]:.2f},0) -= ({e_[0] - e_[1]:.2f},0)")
+    (OUT / "fig_topics.tex").write_text(
+        "\\begin{figure}[htbp]\n\\centering\n\\begin{tikzpicture}\n"
+        "\\begin{axis}[width=0.62\\linewidth, height=8cm, symbolic y coords={" + ",".join("{" + l + "}" for l in labels[::-1]) + "},\n"
+        "  ytick=data, y dir=normal, xmin=-30, xmax=30, xlabel={adjusted change, points (2023--2026 vs 2014--2019)}, axis lines*=left, xmajorgrids,\n"
+        "  tick label style={font=\\footnotesize}, label style={font=\\footnotesize}, enlarge y limits=0.05]\n"
+        "\\addplot[c1, only marks, mark=*, error bars/.cd, x dir=both, x explicit] coordinates {" + " ".join(pts) + "};\n"
+        "\\draw[c2, dashed] (axis cs:0,{" + labels[0] + "}) -- (axis cs:0,{" + labels[-1] + "});\n"
+        "\\end{axis}\n\\end{tikzpicture}\n"
+        "\\caption{Change in the share of the twelve largest topics, adjusted for the type of author and the language, "
+        "with 95\\% confidence intervals (axis cut at $\\pm 30$ points: topics almost absent in 2014--2019 have very wide intervals)}\\label{fig:topics}\n\\end{figure}\n", encoding="utf-8")
 
     # --- relevance labels and their validation
     rel = full.relevance.value_counts()

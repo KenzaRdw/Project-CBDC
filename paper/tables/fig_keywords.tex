@@ -1,0 +1,20 @@
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[width=0.8\linewidth, height=6cm, symbolic x coords={2014--2019,2020--2022,2023--2026}, xtick=data,
+  ylabel={\% of the period's papers}, ymin=0, axis lines*=left, ymajorgrids, enlarge x limits=0.15,
+  legend pos=outer north east, legend cell align=left, legend style={draw=none, font=\footnotesize}, tick label style={font=\footnotesize}]
+\addplot[c1, thick, mark=*] coordinates {(2014--2019,51.5) (2020--2022,23.0) (2023--2026,20.7)};
+\addlegendentry{monetary policy and economic impact}
+\addplot[c5, thick, mark=diamond*] coordinates {(2014--2019,18.4) (2020--2022,17.5) (2023--2026,12.2)};
+\addlegendentry{cryptocurrency}
+\addplot[c4, thick, mark=square*] coordinates {(2014--2019,5.9) (2020--2022,8.2) (2023--2026,15.8)};
+\addlegendentry{financial inclusion}
+\addplot[c2, thick, mark=triangle*] coordinates {(2014--2019,0.0) (2020--2022,13.9) (2023--2026,14.8)};
+\addlegendentry{digital ruble}
+\addplot[c3, thick, mark=otimes*] coordinates {(2014--2019,2.9) (2020--2022,7.8) (2023--2026,11.4)};
+\addlegendentry{digital euro}
+\end{axis}
+\end{tikzpicture}
+\caption{Share of research papers carrying each keyword, by period (136 papers in 2014--2019, 755 papers in 2020--2022, 2,919 papers in 2023--2026)}\label{fig:keywords}
+\end{figure}

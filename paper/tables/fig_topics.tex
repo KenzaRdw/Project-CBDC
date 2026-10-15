@@ -1,0 +1,12 @@
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[width=0.62\linewidth, height=8cm, symbolic y coords={{12: cryptocurrencies, crypto, bitcoin},{11: euro, european, ecb},{10: fintech, technologies, services},{9: cashless, evolution, riksbank},{8: china, rmb, e-cny},{7: russian, russia, ruble},{6: governor, innovation, fintech},{5: deposits, interest, deposit},{4: dollar, trade, debt},{3: uncertainty, rates, design},{2: design, retail, legal},{1: cryptocurrencies, implementation, private}},
+  ytick=data, y dir=normal, xmin=-30, xmax=30, xlabel={adjusted change, points (2023--2026 vs 2014--2019)}, axis lines*=left, xmajorgrids,
+  tick label style={font=\footnotesize}, label style={font=\footnotesize}, enlarge y limits=0.05]
+\addplot[c1, only marks, mark=*, error bars/.cd, x dir=both, x explicit] coordinates {(-13.21,{1: cryptocurrencies, implementation, private}) += (5.53,0) -= (5.96,0) (-4.04,{2: design, retail, legal}) += (4.11,0) -= (5.27,0) (-9.57,{3: uncertainty, rates, design}) += (4.97,0) -= (6.10,0) (0.83,{4: dollar, trade, debt}) += (2.96,0) -= (4.53,0) (3.61,{5: deposits, interest, deposit}) += (2.07,0) -= (3.62,0) (-1.24,{6: governor, innovation, fintech}) += (2.00,0) -= (2.11,0) (4.69,{7: russian, russia, ruble}) += (95.16,0) -= (4.69,0) (2.74,{8: china, rmb, e-cny}) += (1.46,0) -= (3.05,0) (-3.78,{9: cashless, evolution, riksbank}) += (3.24,0) -= (5.00,0) (-3.03,{10: fintech, technologies, services}) += (2.93,0) -= (4.21,0) (3.73,{11: euro, european, ecb}) += (0.87,0) -= (2.58,0) (-5.77,{12: cryptocurrencies, crypto, bitcoin}) += (3.30,0) -= (4.74,0)};
+\draw[c2, dashed] (axis cs:0,{1: cryptocurrencies, implementation, private}) -- (axis cs:0,{12: cryptocurrencies, crypto, bitcoin});
+\end{axis}
+\end{tikzpicture}
+\caption{Change in the share of the twelve largest topics, adjusted for the type of author and the language, with 95\% confidence intervals (axis cut at $\pm 30$ points: topics almost absent in 2014--2019 have very wide intervals)}\label{fig:topics}
+\end{figure}
