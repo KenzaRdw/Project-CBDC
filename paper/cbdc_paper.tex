@@ -81,6 +81,8 @@
 \newcommand{\contentend}{\label{content-end}\global\cbdc@contentfalse
   \immediate\write\@auxout{\gdef\string\cbdcfigpages{\fpeval{round(\number\cbdc@figheight/\number\textheight,1)}}}}
 \providecommand{\cbdcfigpages}{0}
+\newcommand{\appendixpages}{%
+  \fpeval{\getpagerefnumber{appendix-end} - \getpagerefnumber{appendix-start} + 1}}
 \newcommand{\contentpages}{%
   \fpeval{round(\getpagerefnumber{content-end} - \getpagerefnumber{content-start} + 1 - \cbdcfigpages, 1)}}
 \makeatother
@@ -99,7 +101,8 @@
 \end{abstract}
 
 \noindent\textbf{Keywords:} \\
-\noindent\textbf{Number of pages:} \contentpages{} (main text, Introduction to Conclusion, figures excluded)
+\noindent\textbf{Number of pages:} \contentpages{} (main text, Introduction to Conclusion, figures excluded)\\
+\noindent\textbf{Appendix:} \appendixpages{} pages
 
 \newpage
 \tableofcontents
@@ -244,7 +247,9 @@ specific national projects and on who they are meant for.
 \printbibliography[heading=bibintoc,title={References}]
 
 % =====================================================================
+\newpage
 \appendix
+\label{appendix-start}
 \renewcommand{\thesection}{\Alph{section}}
 % Tables in this appendix are generated from the data by scripts/make_appendix.py (paper/tables/*.tex).
 
@@ -369,4 +374,5 @@ The motivation codebook was written on the 100 development texts only and evalua
 \input{tables/events}
 \input{tables/topics}
 
+\label{appendix-end}
 \end{document}
