@@ -1,0 +1,15 @@
+\begin{table}[htbp]
+\centering\small
+\caption{Candidate coders for stance}\label{tab:coders-stance}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Coder} & \textbf{Accuracy} & $\kappa$ & $\kappa$\textbf{, all} \\
+\midrule
+Local LLM, Qwen2.5 7B & 0.70 & 0.45 & 0.41 \\
+FinBERT tone & 0.65 & 0.31 & 0.20 \\
+NLI zero-shot (mDeBERTa) & 0.63 & 0.29 & 0.18 \\
+SBERT classifier & 0.61 & 0.21 & 0.17 \\
+\bottomrule
+\end{tabular}
+\par\smallskip\parbox{0.92\linewidth}{\footnotesize Scores on the 100 texts written by economists; last column: $\kappa$ on all 177 hand-coded texts. Thresholds and classifiers by 5-fold cross-validation.}
+\end{table}

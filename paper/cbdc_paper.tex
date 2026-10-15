@@ -215,9 +215,127 @@ specific national projects and on who they are meant for.
 % =====================================================================
 \appendix
 \renewcommand{\thesection}{\Alph{section}}
+% Tables in this appendix are generated from the data by scripts/make_appendix.py (paper/tables/*.tex).
+
 \section{Search vocabulary}\label{app:vocabulary}
+
+A single vocabulary drives both the searches and the relevance score (\cref{sec:data}). It has 31 concepts, each written as a case-insensitive regular expression, and 115 search phrases derived from them, in 12 languages. Three principles guided it.
+
+\begin{enumerate}
+\item \textbf{Recall first.} The vocabulary covers the generic term in every major language, the names of national projects, the BIS Innovation Hub experiments, and the older names used before ``CBDC'' became standard (\emph{digital fiat currency}, \emph{central bank cryptocurrency}, \emph{Fedcoin}, \emph{RSCoin}, \emph{CADcoin}, \emph{digital base money}).
+\item \textbf{Strong and ambiguous terms.} A \emph{strong} term identifies a central bank digital currency on its own (\emph{central bank digital currency}, \emph{digital euro}, \emph{e-CNY}). An \emph{ambiguous} term does not: ``CBDC'' is also \emph{chronic bullous dermatosis of childhood}, ``DCEP'' a chemical compound, ``Project Stella'' a satellite. Ambiguous terms count only when the document also contains monetary context: \emph{currency, monetary, payment, central bank, banking, ledger, stablecoin}, and their equivalents in French, Spanish, Portuguese, German, Italian, Russian, Chinese, Japanese and Korean. When the only evidence is in the body of the text, a stricter context list is required (\emph{central bank, digital currency, monetary, payments}).
+\item \textbf{Never-scoring terms.} \emph{Digital dollar} and \emph{Sand Dollar} are reported but never scored: they are too often used for private tokens or unrelated products.
+\end{enumerate}
+
+\begin{table}[htbp]
+\centering\small
+\caption{Concepts of the search vocabulary (selection)}\label{tab:vocabulary}
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+\toprule
+\textbf{Concept} & \textbf{Forms matched}\\
+\midrule
+Generic & CBDC, wCBDC, rCBDC, mCBDC; central bank(s) digital currency/currencies; digital central bank money; tokenised central bank money or reserves\\
+Other languages & monnaie numérique de banque centrale (MNBC); moneda / moeda digital de banco central; digitales Zentralbankgeld; valuta / moneta digitale di banca centrale; Japanese, Korean and Russian equivalents (\emph{tsifrovaya valyuta tsentral'nogo banka})\\
+Euro area & digital euro, euro numérique, digitaler Euro, euro digitale, euro digital\\
+China & e-CNY, digital yuan / renminbi, DC/EP (Digital Currency Electronic Payment), Chinese forms\\
+Other projects & digital pound (Britcoin), e-krona, digital / e-rupee, eNaira, DCash, JAM-DEX, digital ruble (\emph{tsifrovoy rubl'}), Drex / real digital, e-hryvnia, digital yen, e-HKD, e-peso, Bakong, e-Cedi, digital shekel, lira, won, rial, e-dirham\\
+Early names & digital fiat currency, central bank cryptocurrency, central bank e-money / electronic money / digital cash, sovereign or national digital currency, digital legal tender, Fedcoin, RSCoin, CADcoin\\
+BIS projects & mBridge; Projects Helvetia, Jura, Dunbar, Icebreaker, Aurum, Rosalind, Tourbillon, Mariana, Hamilton, Stella, Ubin, Inthanon, Khokha, Jasper, Agorá, Orchid, Polaris, Sela, Mandala, Ensemble\\
+Adjacent & tokenised deposits, unified ledger (ambiguous: counted only with monetary context)\\
+\bottomrule
+\end{tabularx}
+\par\smallskip\parbox{0.92\linewidth}{\footnotesize The full list of regular expressions and search phrases is in \texttt{cbdc\_biblio/config.py}.}
+\end{table}
+
 \section{Harvesting algorithms}\label{app:harvest}
+
+\subsection{Sources}
+Records come from four families of sources (\cref{tab:sources}). Nothing is filtered at harvest time: every record found by a search is kept, and relevance is decided afterwards on the merged corpus. Every step writes a checkpoint, so an interrupted harvest resumes where it stopped.
+
+\begin{description}
+\item[Academic databases.] OpenAlex (journal articles, working papers, books, chapters, preprints, reports), Semantic Scholar, arXiv, HAL and DOAJ. Each search phrase is queried in titles and abstracts; results are merged on the source's identifier. OpenAlex reference lists are resolved into citation strings, which the co-citation analysis uses.
+\item[Central bankers' speeches.] The BIS bulk archive (all central banks, 1996 onwards, full text), the ECB's speech dataset (full text, including non-English originals), and the BIS RSS feed for speeches published after the bulk archive.
+\item[Authorities.] A crawl starting from 26 CBDC pages of central banks, EU institutions and international organisations, following links one level deep within the same site, PDFs included.
+\item[Press.] Google News, searched through its RSS interface in 55 combinations of country edition, language and query. GDELT was also queried but throttled the connection for hours after a few requests, so it contributed nothing to the final corpus.
+\end{description}
+
+\input{tables/sources}
+
+\subsection{Pagination and rate limits}
+Academic APIs return results page by page; the harvester follows the API's cursor (200 records per page for OpenAlex) until no page is left. Requests are spaced by a minimum interval $\Delta$,
+\[ t_{k+1} - t_k \ge \Delta, \]
+with $\Delta = 0.12$\,s for OpenAlex, 3.5\,s for arXiv and 1.2\,s for Google News. After the $j$-th consecutive refusal (HTTP 429 or 5xx), the harvester waits $w_j = \min(60j, 900)$ seconds before retrying.
+
+\subsection{Press: recursive bisection of time windows}
+A Google News search returns at most about 100 items, whereas a single month can hold thousands of articles. Each search is therefore run on time windows that are split until every window falls below the cap:
+\begin{enumerate}
+\item Start from monthly windows $W = [a, b)$ covering January 2000 to the harvest date, on a stack.
+\item Pop a window and fetch the items published in it.
+\item If it returns $N(W) \ge 95$ items and lasts more than one day, split it at $m = a + (b-a)/2$, push $[m, b)$ and $[a, m)$, and go back to step 2.
+\item Otherwise save the items and checkpoint the window.
+\end{enumerate}
+A month is split at most $\lceil \log_2 31 \rceil = 5$ times, and keeping $L$ windows costs $2L - 1$ requests. Google News limits requests over time, and the harvest was stopped with about 15 of the 55 searches unfinished; press counts are therefore incomplete, and skewed towards recent years.
+
+\subsection{Full text, enrichment and de-duplication}
+\begin{description}
+\item[Full text.] PDFs are extracted with PyMuPDF and web pages with trafilatura, which also recovers the page's date, author and outlet when the record lacks them. Texts are split into introduction, conclusion and section headings; for speeches and press, the opening and closing paragraphs play these roles.
+\item[Enrichment.] Language is detected with \texttt{langdetect}; keywords are extracted with YAKE (one to three words) when a record has no author or indexed keywords. Dates are kept with their precision (day, month, year), and 1 January dates are flagged, since they often stand for a year only.
+\item[De-duplication.] Records are matched on a key: the DOI for academic records, else their normalised title and year; the date and normalised title for speeches; the URL for other records. A second pass merges academic records with the same normalised title and year but different DOIs (a preprint and its published version, for instance). Merged records keep the most precise date, the longest abstract and the union of keywords and sources.
+\end{description}
+
+\subsection{Relevance score}
+Each available field $f$ of a record receives a centrality $c_f\in[0,1]$: 1 for a title containing a strong term; 0.4 for a keyword list containing one (keywords are partly machine-assigned); for the abstract, the share of its sentences that contain one; for the body, half the density of mentions (per 1{,}000 words, saturating at 3) and half their spread (the share of ten equal slices of the text that contain one). The score is
+\[ \text{score} = 100\Big(0.6\,\max_{f\in F} c_f + 0.4\,\frac{1}{|F|}\sum_{f\in F} c_f\Big), \]
+where $F$ is the set of fields available, so a missing abstract or full text is not penalised. Records scoring at least 50 are labelled \emph{main theme}, from 25 to 49 \emph{secondary theme}, and below 25 \emph{mentioned only}. Records whose only matches are ambiguous terms without monetary context are \emph{ambiguous terms only}; records without any match are \emph{off-topic}; press items whose text could not be retrieved are \emph{unverified}. Records with CBDC as a theme but dated before 2014 were all homonyms or misdated, and are labelled \emph{dated before 2014}. \Cref{tab:relevance} gives the labels and their validation.
+
+\input{tables/relevance}
+
+\subsection{Who counts as an economist}
+For each academic record with CBDC as a theme, the OpenAlex field of its primary topic and the institutions of its authors were retrieved (\texttt{scripts/tag\_economists.py}). A text is attributed to economists when it is research classified in \emph{Economics, Econometrics and Finance}, or research with an author at a central bank, the IMF or the BIS, or, for records absent from OpenAlex, research published in an economics venue; when it is a central bank speech; or when it is a document of a central bank or an international financial institution. \Cref{tab:economists,tab:dropped} show the result.
+
+\input{tables/economists}
+\input{tables/dropped_fields}
+
 \section{Validation samples and coding guide}\label{app:validation}
+
+Every measure used in the paper was compared with a reading of the texts. The samples were drawn at random; the motivation, stance and tone samples were topped up with texts written by economists so that each holds at least 50 of them (\cref{tab:samples}). Coding was done blind to the machine labels, by one coder assisted by a language model; a 200-item sheet for a second, independent human coder is provided with the data (\texttt{presentation/second\_coder\_sheet.csv}).
+
+\input{tables/samples}
+
+\subsection{Coding guide}
+\begin{description}
+\item[Relevance.] Is a central bank digital currency the theme of the text, or one of its main themes? A passing mention, a homonym, or a text about cryptocurrencies or stablecoins only is coded \emph{no}.
+\item[Motivations.] Unit: the first 1{,}500 characters of the introduction, else of the abstract, else of the text. A motivation is coded when the text raises it as a reason to study, issue or worry about a CBDC; a text can have several. The ten motivations are defined as follows.
+\begin{itemize}
+\item \emph{Decline of cash}: cash use is falling, or access to cash or public money is at risk.
+\item \emph{Financial inclusion}: reaching unbanked or underbanked people; access to financial services.
+\item \emph{Monetary sovereignty}: a threat from private money, stablecoins, Big Tech, cryptocurrencies or foreign currencies to the central bank's control of money.
+\item \emph{Payment efficiency}: cheaper, faster, more efficient, resilient or innovative domestic payments.
+\item \emph{Cross-border payments}: international payments, remittances, cross-border settlement.
+\item \emph{Monetary policy}: monetary policy, interest rates, transmission, money supply.
+\item \emph{Financial stability}: bank disintermediation, bank runs, deposit outflows, risks to financial stability.
+\item \emph{Privacy and surveillance}: privacy, anonymity, data protection, surveillance or control of users.
+\item \emph{Geopolitics and sanctions}: geopolitics, sanctions, dollar dominance, internationalisation of a currency.
+\item \emph{Technology}: blockchain, distributed ledgers, tokenisation, smart contracts, programmable money.
+\end{itemize}
+\item[Stance.] Unit: the title and abstract (research), or the title and the first five sentences that name a CBDC (speeches, documents). \emph{Favourable}: supports CBDCs or presents them positively; \emph{critical}: opposes them or stresses their risks and problems; \emph{neutral}: descriptive or balanced. Analysing risks is neutral; arguing that they can be solved so that a CBDC can be issued, or recommending issuance, is favourable.
+\item[Tone.] Unit: one English sentence that names a CBDC. \emph{Positive} or \emph{negative} when the sentence presents CBDCs or their effects favourably or unfavourably; \emph{neutral} when it describes, defines or reports.
+\end{description}
+
+\subsection{Results}
+The motivation codebook was written on the 100 development texts only and evaluated on the held-out test texts (\cref{tab:codebook}). Each alternative coder was tested on the same texts (\cref{tab:coders-mot,tab:coders-stance}); thresholds and classifiers were set on the development texts (motivations) or by 5-fold cross-validation (stance). Agreement is measured by Cohen's $\kappa = (p_o - p_e)/(1 - p_e)$, where $p_o$ is the observed and $p_e$ the chance agreement. The language model's stance labels are used only for changes over time: it labels too many texts favourable, a bias that cancels in a difference if it is stable. Stance levels come from reading (\cref{tab:stance}).
+
+\input{tables/codebook}
+\input{tables/coders_motivations}
+\input{tables/coders_stance}
+\input{tables/tone}
+\input{tables/stance}
+
 \section{Additional tables and figures}\label{app:additional}
+
+\Cref{tab:events} lists the policy events used in the event study and the test of tone (\cref{sec:when,sec:how}), with the attention each one received. \Cref{tab:topics} lists every topic found by the topic model (\cref{sec:what}).
+
+\input{tables/events}
+\input{tables/topics}
 
 \end{document}

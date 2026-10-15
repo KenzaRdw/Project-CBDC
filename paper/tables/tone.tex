@@ -1,0 +1,14 @@
+\begin{table}[htbp]
+\centering\small
+\caption{FinBERT tone against reading}\label{tab:tone}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+\textbf{FinBERT $\downarrow$ / reading $\rightarrow$} & \textbf{negative} & \textbf{neutral} & \textbf{positive} & \textbf{Precision} \\
+\midrule
+negative & 17 & 11 & 2 & 0.57 \\
+neutral & 2 & 25 & 3 & 0.83 \\
+positive & 1 & 10 & 19 & 0.63 \\
+\bottomrule
+\end{tabular}
+\par\smallskip\parbox{0.92\linewidth}{\footnotesize 90 sentences from economists' texts, 30 per FinBERT label, read blind to the label: agreement 68\%, $\kappa = 0.52$.}
+\end{table}

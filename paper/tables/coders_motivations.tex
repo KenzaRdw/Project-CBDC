@@ -1,0 +1,18 @@
+\begin{table}[htbp]
+\centering\small
+\caption{Candidate coders for motivations}\label{tab:coders-mot}
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+\textbf{Coder} & \textbf{P} & \textbf{R} & $F_1$ & $\kappa$ & $\kappa$\textbf{, all} \\
+\midrule
+Codebook (regex) & 0.70 & 0.41 & 0.52 & 0.46 & 0.50 \\
+Codebook OR classifier & 0.42 & 0.60 & 0.50 & 0.39 & 0.42 \\
+SBERT, classifier (100 labels) & 0.36 & 0.37 & 0.37 & 0.25 & 0.28 \\
+Local LLM, Qwen2.5 7B & 0.30 & 0.61 & 0.40 & 0.25 & 0.28 \\
+Local LLM, Qwen2.5 3B & 0.31 & 0.23 & 0.26 & 0.15 & 0.16 \\
+SBERT, definitions (zero-shot) & 0.21 & 0.71 & 0.32 & 0.12 & 0.15 \\
+NLI zero-shot (mDeBERTa) & 0.22 & 0.39 & 0.28 & 0.11 & 0.14 \\
+\bottomrule
+\end{tabular}
+\par\smallskip\parbox{0.92\linewidth}{\footnotesize Scores on the 50 texts written by economists; last column: $\kappa$ on all 74 hand-coded texts. Thresholds and classifiers set on the 100 development texts.}
+\end{table}
