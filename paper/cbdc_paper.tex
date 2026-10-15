@@ -489,6 +489,12 @@ specific national projects and on who they are meant for.
 % =====================================================================
 \section{How economists discuss CBDCs: tone and stance}\label{sec:how}
 \subsection{Method: tone (FinBERT) and stance (reading and a local language model)}
+We analyze both tone and stance, as they capture two different aspects of the discussion around CBDCs. 
+Tone measures whether the language used to discuss CBDCs is positive or negative, whereas stance captures 
+the author’s overall position toward CBDCs for instance whether the text is favorable, neutral, or critical.
+For the tone analysis, we keep the English sentences that explicitly mention a CBDC and apply \textit{FinBERT}, 
+a model trained on financial text. For each sentence, the model gives three probabilities: \(P(+)\), \(P(0)\) and \(P(-)\) . 
+We define the tone score as :
 \subsection{Findings}
 \subsection{Do policy events move the tone?}
 
