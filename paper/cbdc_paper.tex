@@ -32,10 +32,20 @@
 \colorlet{c1}{accent}\definecolor{c2}{HTML}{D1495B}\definecolor{c3}{HTML}{EDAE49}
 \definecolor{c4}{HTML}{00798C}\definecolor{c5}{HTML}{8F6593}\definecolor{c6}{HTML}{6A994E}
 \definecolor{c7}{HTML}{E07A5F}\definecolor{c8}{HTML}{3D5A80}
+% \bbcaps{...}: every capital letter A-Z in blackboard bold (\mathbb), the rest unchanged
+\ExplSyntaxOn
+\tl_new:N \l__cbdc_bb_tl
+\NewDocumentCommand{\bbcaps}{m}
+  {
+    \tl_set:Nn \l__cbdc_bb_tl {#1}
+    \regex_replace_all:nnN { ([A-Z]) } { \c{ensuremath} \cB\{ \c{mathbb} \cB\{ \1 \cE\} \cE\} } \l__cbdc_bb_tl
+    \tl_use:N \l__cbdc_bb_tl
+  }
+\ExplSyntaxOff
 \usepackage[explicit]{titlesec}
-\titleformat{\section}{\normalfont\sffamily\Large\bfseries\color{accent}}{\thesection}{0.8em}{#1}
-\titleformat{\subsection}{\normalfont\sffamily\large\bfseries}{\thesubsection}{0.8em}{#1}
-\titleformat{\subsubsection}{\normalfont\sffamily\normalsize\bfseries}{\thesubsubsection}{0.8em}{#1}
+\titleformat{\section}{\normalfont\sffamily\Large\bfseries\color{accent}}{\thesection}{0.8em}{\bbcaps{#1}}
+\titleformat{\subsection}{\normalfont\sffamily\large\bfseries}{\thesubsection}{0.8em}{\bbcaps{#1}}
+\titleformat{\subsubsection}{\normalfont\sffamily\normalsize\bfseries}{\thesubsubsection}{0.8em}{\bbcaps{#1}}
 \titlespacing*{\section}{0pt}{2.2ex plus 1ex minus .2ex}{1.1ex}
 \titlespacing*{\subsection}{0pt}{1.8ex plus 1ex minus .2ex}{0.8ex}
 \usepackage[font=small,labelfont={sf,bf},labelsep=period,skip=6pt]{caption}
@@ -66,8 +76,9 @@
 
 % ---------------------------------------------------------------- title block
 \newcommand{\shorttitle}{How economists discuss central bank digital currencies}
-\title{\sffamily\bfseries\color{accent} How Economists Discuss Central Bank Digital Currencies\\[4pt]
-       \large\mdseries Themes, Tone and Stance, 2014--2026}
+\title{\sffamily\bfseries\color{accent} \bbcaps{How Economists Discuss Central Bank Digital Currencies}\\[4pt]
+       \large\mdseries \bbcaps{Themes, Tone and Stance, 2014--2026}}
+\newcommand{\researchquestion}{How has economists and institutional discourse on CBDCs evolved between 2014 and 2026, and to what extent does this evolution align with changes in the policy environment?}
 \author{Louis Drogo \and Kenza Redwane \and Adriel Mazere}
 \date{M2 -- Private crypto\\[2pt]\today}
 
@@ -106,6 +117,16 @@
 \maketitle
 \thispagestyle{empty}
 
+\vfill
+\begin{center}
+\begin{minipage}{0.82\linewidth}
+\centering
+{\sffamily\normalsize\color{accent}\textsc{Research question}}\\[10pt]
+{\Large\itshape\color{accent} \enquote{\bbcaps{\researchquestion}}}
+\end{minipage}
+\end{center}
+\vfill
+
 \begin{abstract}
 \noindent
 \end{abstract}
@@ -113,6 +134,7 @@
 \noindent\textbf{Keywords:} \\
 \noindent\textbf{Number of pages:} \contentpages{} (main text, Introduction to Conclusion, figures excluded)\\
 \noindent\textbf{Appendix:} \appendixpages{} pages
+\vfill
 
 \newpage
 \tableofcontents
@@ -629,6 +651,20 @@ Python 3.10 or later; the packages and their versions are listed in \texttt{requ
 \item stance: Qwen2.5 7B Instruct, 4-bit, run with \texttt{mlx-lm} (Apple Silicon); Qwen2.5 3B was tested.
 \end{itemize}
 Everything ran on a laptop (Apple M1, 8\,GB of memory). Coding new texts with the language model requires Apple Silicon; every other step runs on any machine once the caches are present.
+
+\section{Use of artificial intelligence and statement of originality}\label{app:ai}
+
+\subsection{Use of artificial intelligence}
+Artificial intelligence was used in two distinct ways in this work.
+
+\paragraph{As research instruments.} Several language models are part of the method and are described with it: multilingual sentence embeddings (topics), FinBERT (tone), a natural language inference model and two local Qwen2.5 models (tested as coders; the 7B model codes stance). Each of them was evaluated against a reading of the texts before being used, and their scores are reported in \cref{app:validation}. They run locally; no text of the corpus was sent to an external service for coding.
+
+\paragraph{As assistants.} A general-purpose AI assistant (Claude, Anthropic, used through Claude Code) helped to write and debug the code that collects, cleans and analyses the corpus, to produce tables and figures, and to draft parts of the technical description in the appendices. The hand coding of the validation samples was AI-assisted: texts were read and coded blind to the machine labels, with the help of the assistant. For this reason, the validation scores measure agreement with an AI-assisted reading; an independent human coder remains to be added (\cref{app:validation}).
+
+The research question, the choice and interpretation of the methods, the reading of the results and the conclusions are the authors'. Every number reported in the paper is computed by the code from the data, and the authors checked the text, the code and the results; they take full responsibility for the content of the paper.
+
+\subsection{Statement of originality}
+The authors declare that this paper is their own work. It does not reproduce, in whole or in part, text written by others without quotation marks and a reference; every idea, result, data source and software taken from other works is cited. The corpus consists of documents published by their authors; it is used for analysis only, and no full text from it is reproduced in the paper. The text produced with the help of an AI assistant was read, checked and edited by the authors, and was not copied from any other source.
 
 \appendixend
 \end{document}
