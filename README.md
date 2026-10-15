@@ -30,7 +30,7 @@ tar -xf cbdc_data.tar.xz      # recreates data/cbdc_corpus.csv, data/cache/ and 
 ```
 
 That is enough to run `scripts/make_slides.py`. Only a full re-harvest needs `data/raw/`.
-To publish a new version: `tar -cf - data/cbdc_corpus.csv data/cache data/fulltext | xz -T0 > cbdc_data.tar.xz`,
+To publish a new version: `tar -cJf cbdc_data.tar.xz data/cbdc_corpus.csv data/cache data/fulltext`,
 then attach the file to a new release.
 
 ## Run
