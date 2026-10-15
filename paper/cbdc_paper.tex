@@ -584,7 +584,57 @@ to build up over time rather than appear as an immediate jump in tone.
 % =====================================================================
 \section{Why: stated motivations}\label{sec:why}
 \subsection{Method: a validated codebook}
+To identify the main motivations used for study and develop CBDCs, we construct a rule-based codebook covering ten motivations. 
+The objective is to capture motivations that are explicitly stated by the authors, rather than simply detecting whether a topic 
+appears somewhere in the text.
+
+The codebook was built from a development set of 100 introductions. For each motivation, we  identified the expressions authors 
+use to state it and translated these expressions into regular-expression in seven languages. The resulting rules include, 
+for example, expressions related to \textit{financial inclusion}, such as “\textit{unbanked}” or “\textit{access to financial services}”, 
+and to \textit{monetary sovereignty}, such as “\textit{global stablecoin}”, “\textit{Libra}”, or “\textit{dollarization}”. 
+The final codebook was then applied to 4,110 texts. 
+
+The codebook was then evaluated on a separate test set of 74 texts, which was not used during its construction. These texts were coded 
+manually, and performance was assessed on the 50 documents written by economists. We use three main validation measures. Precision captures 
+the share of detected motivations that are correctly identified:
+\[
+\text{Precision} = \frac{TP}{TP + FP}
+\]
+while recall measures how many of the motivations identified by human reading are recovered by the codebook:
+\[
+\text{Recall} = \frac{TP}{TP + FN}
+\]
+Finally, Cohen’s  \(\kappa\) measures agreement between the codebook and manual coding beyond what would be expected by chance:
+
+\[
+\kappa = \frac{p_o - p_e}{1 - p_e}
+\]
+
+where \(p_0\) is the observed agreement and pe the agreement expected by chance
+
+On the held-out economists’ sample, the codebook reaches a precision of 0.70, a recall of 0.41, and a Cohen’s \(\kappa\) of 0.46. 
+We also compare its performance with several machine-based alternatives, including \textit{SBERT classifiers}, an \textit{NLI model} 
+and local \textit{Qwen2.5} language models, using the same validation texts.
+
 \subsection{Findings}
+The results show that the reasons given for discussing CBDCs have changed over time. In the first period, monetary policy was one 
+of the main motivations, appearing in 36.8\% of texts in 2014–2019. This share falls to 24.4\% in 2023–2026, which corresponds 
+to an adjusted decrease of 15.1 percentage points. The decline of cash also becomes less important over time, with an estimated decrease of 6.5 points.
+
+By contrast, several motivations become more prominent. Financial inclusion rises from 3.8\% of texts in 2014–2019 to 16.8\% 
+in 2023–2026, corresponding to an adjusted increase of 12.3 points.  Geopolitics and sanctions show a similarly strong increase 
+of 12.4 points, while cross-border payments increase by 8.7 points. In addition to that, payment efficiency and privacy and surveillance 
+become more frequent motivations. 
+
+Overall, these results suggest that the way CBDCs are justified has gradually changed. Earlier discussions were more focused on monetary 
+policy and the decline of cash, while recent texts place more emphasis on financial inclusion, payments and geopolitical issues.
+
+There are also some differences between research economists and central banks. Central-bank and institutional texts are less likely 
+than research papers to frame CBDCs through monetary policy, technology, financial inclusion or cross-border payments, while the difference 
+for geopolitics and sanctions is close to zero.
+
+Given the relatively low recall of the codebook, these percentages should not be read as exact measures of prevalence. The main interest 
+lies in the direction and relative magnitude of the changes across periods rather than in the absolute levels themselves.
 
 % =====================================================================
 \section{When: the policy environment}\label{sec:when}
