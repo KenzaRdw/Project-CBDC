@@ -4,6 +4,7 @@
 """
 import math
 import sys
+from itertools import zip_longest
 from pathlib import Path
 
 import numpy as np
@@ -88,22 +89,29 @@ def main():
              "pt": "Portuguese", "it": "Italian"}
     doc = econ.document_type.value_counts()
     pct = lambda m: f"{100 * m.mean():.0f}\\%"
-    panel = lambda title, items: [f"\\multicolumn{{2}}{{@{{}}l}}{{\\textit{{{title}}}}} \\\\"] + [f"\\quad {a} & {b} \\\\" for a, b in items]
-    rows = (panel("Type of text", [("Research", f"{(econ.source_type == 'academic').sum():,}"),
+    # two panels side by side, so the table fits in the flow of the text
+    panel = lambda title, items: [(f"\\textit{{{title}}}", None)] + [(f"\\quad {a}", b) for a, b in items]
+    left = (panel("Type of text", [("Research", f"{(econ.source_type == 'academic').sum():,}"),
                                    ("Central bank speeches", f"{(econ.source_type == 'speech').sum():,}"),
-                                   ("Documents of central banks and institutions", f"{(econ.source_type == 'official').sum():,}")])
+                                   ("Documents of institutions", f"{(econ.source_type == 'official').sum():,}"),
+                                   ("Total", f"{len(econ):,}")])
             + panel("Relevance", [("CBDC the main theme", f"{(econ.relevance == 'main theme').sum():,}"),
                                   ("CBDC a secondary theme", f"{(econ.relevance == 'secondary theme').sum():,}")])
             + panel("Research, by document type", [(tex(k.capitalize().replace("-", " ")), f"{doc.get(k, 0):,}")
-                                                   for k in ("article", "preprint", "book-chapter", "conference-paper", "dissertation")])
-            + panel(f"Language ({econ.language.nunique()} in all)", [(names.get(k, k), f"{c:,}") for k, c in lang.head(6).items()])
-            + panel("Fields available", [("Exact day of publication", pct(dp.str.startswith("day") & ~dp.str.contains("Jan 1"))),
-                                         ("Abstract", pct(econ.abstract.notna())), ("Introduction", pct(econ.introduction.notna())),
-                                         ("Full text", pct(econ.full_text_path.notna())),
-                                         ("Keywords", pct(econ.keywords_author.notna() | econ.keywords_indexed.notna())),
-                                         ("Reference list (research)", pct(econ[econ.source_type == "academic"].references.notna()))]))
-    rows.append(f"\\midrule Total & {len(econ):,} \\\\")
-    table("descriptive", "@{}lr@{}", r"& \textbf{Texts}", rows, "The economists' corpus", "tab:descriptive")
+                                                   for k in ("article", "preprint", "book-chapter", "conference-paper", "dissertation")]))
+    right = (panel(f"Language ({econ.language.nunique()} in all)", [(names.get(k, k), f"{c:,}") for k, c in lang.head(6).items()])
+             + panel("Fields available", [("Exact day of publication", pct(dp.str.startswith("day") & ~dp.str.contains("Jan 1"))),
+                                          ("Abstract", pct(econ.abstract.notna())), ("Introduction", pct(econ.introduction.notna())),
+                                          ("Full text", pct(econ.full_text_path.notna())),
+                                          ("Keywords", pct(econ.keywords_author.notna() | econ.keywords_indexed.notna())),
+                                          ("Reference list (research)", pct(econ[econ.source_type == "academic"].references.notna()))]))
+    cell = lambda c: "&" if c is None else (f"\\multicolumn{{2}}{{@{{}}l}}{{{c[0]}}}" if c[1] is None else f"{c[0]} & {c[1]}")
+    rows = [f"{cell(l)} & {cell(r)} \\\\" for l, r in zip_longest(left, right)]
+    (OUT / "descriptive.tex").write_text(
+        "\\begin{table}[!htbp]\n\\centering\\small\n\\caption{The economists' corpus}\\label{tab:descriptive}\n"
+        "\\begin{tabular}{@{}lr@{\\hspace{2.5em}}lr@{}}\n\\toprule\n"
+        "& \\textbf{Texts} && \\textbf{Texts} \\\\\n\\midrule\n" + "\n".join(rows)
+        + "\n\\bottomrule\n\\end{tabular}\n\\end{table}\n", encoding="utf-8")
 
     # --- what is written: thematic map, keyword shares by period, adjusted topic changes (section 5)
     themes = A.thematic_map(econ)
