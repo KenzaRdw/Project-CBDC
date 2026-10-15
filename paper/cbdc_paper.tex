@@ -639,6 +639,41 @@ lies in the direction and relative magnitude of the changes across periods rathe
 % =====================================================================
 \section{When: the policy environment}\label{sec:when}
 \subsection{Method: bursts, event study with placebo dates, difference-in-differences}
+To examine how the CBDC discussion evolves alongside its policy environment, we use three complementary methods.
+First, we use \textit{Kleinberg's burst detection algorithm} to identify periods in which some keywords become much more frequent. 
+For keyword \(w\) in quarter \(t\), \(r_t\) is the number of papers using the keyword among \(d_t\) papers. The model compares a normal 
+state, with rate \(p_0 = R/D\), to a burst state, with a higher rate \(p_1 = 2p_0\). Since entering a burst has a cost, short random 
+fluctuations are less likely to be selected. The final sequence of normal and burst periods is chosen using the \textit{Viterbi algorithm}.
+
+Second, we run an event study with placebo dates to see whether attention to CBDCs increases immediately after major policy events. 
+We estimate a baseline publication rate over the period from 90 to 15 days before each event. The expected number of texts in 
+the following 15 days is then:
+\[
+E = 15\lambda
+\]
+and the observed increase is measured using:
+\[
+z = \frac{N-E}{\sqrt{E}}
+\]
+Because publication activity is not stable over time, each event is compared with 500 random placebo dates. 
+The \(p\)-value is the share of placebo dates with a larger \(z\)-score than the actual event.
+
+Finally, we use a difference-in-differences approach to examine whether geopolitical motivations became more important after 2021, 
+especially in texts related to Russia. The outcome variable indicates whether a motivation is stated, while the treatment group 
+includes texts about Russia or written in Russian:
+\[
+y_{it}
+=
+a_T + b_t
++
+\sum_{k \neq 2021}
+\gamma_k T_i \mathbf{1}[t = k]
++
+\varepsilon_{it}
+\]
+The coefficients \(\gamma_k\) measure how the gap between Russia-related texts and the rest of the corpus changes in each year relative to 2021. 
+This allows us to see whether the post-2021 shift is stronger in Russia-related discourse than in the broader CBDC literature.
+
 \subsection{Findings}
 
 % =====================================================================
