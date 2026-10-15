@@ -495,6 +495,49 @@ the author’s overall position toward CBDCs for instance whether the text is fa
 For the tone analysis, we keep the English sentences that explicitly mention a CBDC and apply \textit{FinBERT}, 
 a model trained on financial text. For each sentence, the model gives three probabilities: \(P(+)\), \(P(0)\) and \(P(-)\) . 
 We define the tone score as :
+\[
+\text{Net Tone} = P(+) - P(-), \qquad \text{Tone} \in [-1,1]
+\]
+The scores are first averaged within each document and then across groups and years. This avoids giving too much 
+weight to longer texts. In order to check the quality of the measure, 90 sentences from economists’ texts were also 
+coded by hand. The agreement between FinBERT and manual coding gives a Cohen’s \(\kappa\) of 0.52.
+
+For stance, we use two approaches. First, texts are read manually to estimate the level of favourable, neutral 
+and critical positions. The share of favourable texts is reported with a Wilson confidence interval:
+\[
+\frac{
+\hat{p} + \frac{z^2}{2n}
+\pm
+z \sqrt{
+\frac{\hat{p}(1-\hat{p})}{n}
++
+\frac{z^2}{4n^2}
+}
+}{
+1+\frac{z^2}{n}
+}
+\]
+
+Manual reading gives a more reliable measure of the level of support, however it cannot easily be applied to 
+the whole corpus. To study changes over time, we therefore use a local \textit{Qwen2.5 7B} model on random 
+samples of texts for each actor and period. The change in stance is measured as:
+\[
+\Delta \hat{p} = \hat{p}_{\text{late}} - \hat{p}_{\text{early}}
+\]
+with an approximate confidence interval given by:
+\[
+\Delta \hat{p}
+\pm
+1.96
+\sqrt{
+\frac{\hat{p}_{\text{late}}\left(1-\hat{p}_{\text{late}}\right)}{n_{\text{late}}}
++
+\frac{\hat{p}_{\text{early}}\left(1-\hat{p}_{\text{early}}\right)}{n_{\text{early}}}
+}
+\]
+The local LLM reaches a Cohen’s \(\kappa\) of 0.45 against manual coding, but it tends to classify too many texts as favourable. 
+For that reason, we use manual reading for the level of stance, and the LLM mainly to compare changes across periods
+
 \subsection{Findings}
 \subsection{Do policy events move the tone?}
 
