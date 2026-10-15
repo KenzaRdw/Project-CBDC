@@ -81,8 +81,12 @@
 \newcommand{\contentend}{\label{content-end}\global\cbdc@contentfalse
   \immediate\write\@auxout{\gdef\string\cbdcfigpages{\fpeval{round(\number\cbdc@figheight/\number\textheight,1)}}}}
 \providecommand{\cbdcfigpages}{0}
-\newcommand{\appendixpages}{%
-  \fpeval{\getpagerefnumber{appendix-end} - \getpagerefnumber{appendix-start} + 1}}
+% appendix pages are numbered A-1, A-2...: their count is the page counter on the last page
+\makeatletter
+\providecommand{\cbdcapppages}{?}
+\newcommand{\appendixend}{\write\@auxout{\gdef\string\cbdcapppages{\arabic{page}}}}
+\makeatother
+\newcommand{\appendixpages}{\cbdcapppages}
 \newcommand{\contentpages}{%
   \fpeval{round(\getpagerefnumber{content-end} - \getpagerefnumber{content-start} + 1 - \cbdcfigpages, 1)}}
 \makeatother
@@ -246,7 +250,8 @@ specific national projects and on who they are meant for.
 % =====================================================================
 \newpage
 \appendix
-\label{appendix-start}
+\pagenumbering{arabic}
+\renewcommand{\thepage}{A-\arabic{page}}
 \renewcommand{\thesection}{\Alph{section}}
 % Tables in this appendix are generated from the data by scripts/make_appendix.py (paper/tables/*.tex).
 
@@ -402,5 +407,5 @@ Python 3.10 or later; the packages and their versions are listed in \texttt{requ
 \end{itemize}
 Everything ran on a laptop (Apple M1, 8\,GB of memory). Coding new texts with the language model requires Apple Silicon; every other step runs on any machine once the caches are present.
 
-\label{appendix-end}
+\appendixend
 \end{document}
