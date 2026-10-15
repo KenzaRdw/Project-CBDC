@@ -241,9 +241,6 @@ specific national projects and on who they are meant for.
 
 % =====================================================================
 \contentend
-\section*{Data and code availability}
-\addcontentsline{toc}{section}{Data and code availability}
-
 \printbibliography[heading=bibintoc,title={References}]
 
 % =====================================================================
@@ -373,6 +370,37 @@ The motivation codebook was written on the 100 development texts only and evalua
 
 \input{tables/events}
 \input{tables/topics}
+
+\section{Data and code availability}\label{app:data}
+
+\subsection{Data}
+The corpus is a single file, \texttt{data/cbdc\_corpus.csv}: one row per document and 49 columns, in UTF-8. Every record keeps its issuer, its date with the precision of that date, its original language, its keywords (author, indexed and extracted), its abstract, introduction and conclusion when available, its full text, its relevance label and theme score, and the sources it was found in. The harvest ran from 8 to 11 October 2026; it covers 48{,}188 documents, of which 17{,}709 have CBDC as a theme and 4{,}710 were written by economists (\cref{app:harvest}). The build step can also export it in two formats read by bibliometric software: a Scopus-style CSV (for \texttt{bibliometrix} and VOSviewer) and RIS.
+
+Caches hold the results that are slow to recompute: sentence embeddings, sentence tones, the language model's stance labels, and the OpenAlex fields and institutions of each paper. The hand-coded validation samples and every coder's predictions are in \texttt{presentation/} (\cref{tab:samples}).
+
+Many full texts are under copyright. The data are therefore shared with the members of the project and on request, not published openly. The metadata, identifiers (DOI, OpenAlex and source identifiers, URLs) and the code that rebuilds the corpus from the public sources are not restricted.
+
+\subsection{Code}
+All code is in Python and kept in a version-controlled repository, available from the authors on request. One command per step rebuilds the corpus, and every step resumes where it stopped:
+\begin{enumerate}
+\item \texttt{run.py harvest}: query every source (\cref{app:harvest});
+\item \texttt{run.py fulltext}: download and extract the full texts;
+\item \texttt{run.py build}: merge, de-duplicate, enrich and score relevance;
+\item \texttt{scripts/tag\_economists.py}: retrieve the OpenAlex field and institutions of each paper;
+\item \texttt{scripts/validate\_coders.py}: score every candidate coder against the hand-coded samples;
+\item \texttt{scripts/make\_appendix.py}: write the tables of this appendix (\texttt{paper/tables/}).
+\end{enumerate}
+The analyses (networks, topics, motivations, tone, stance, event studies, robustness) are in \texttt{cbdc\_biblio/analysis.py} and \texttt{cbdc\_biblio/nlp.py}.
+
+\subsection{Software and models}
+Python 3.10 or later; the packages and their versions are listed in \texttt{requirements.txt}. The models are open and run locally:
+\begin{itemize}
+\item sentence embeddings: \texttt{paraphrase-multilingual-MiniLM-L12-v2} (Sentence-Transformers);
+\item tone: FinBERT (\texttt{ProsusAI/finbert});
+\item natural language inference (tested coder): \texttt{mDeBERTa-v3-base-xnli-multilingual-nli-2mil7};
+\item stance: Qwen2.5 7B Instruct, 4-bit, run with \texttt{mlx-lm} (Apple Silicon); Qwen2.5 3B was tested.
+\end{itemize}
+Everything ran on a laptop (Apple M1, 8\,GB of memory). Coding new texts with the language model requires Apple Silicon; every other step runs on any machine once the caches are present.
 
 \label{appendix-end}
 \end{document}
