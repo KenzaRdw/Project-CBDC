@@ -581,7 +581,7 @@ For each academic record with CBDC as a theme, the OpenAlex field of its primary
 
 \section{Validation samples and coding guide}\label{app:validation}
 
-Every measure used in the paper was compared with a reading of the texts. The samples were drawn at random; the motivation, stance and tone samples were topped up with texts written by economists so that each holds at least 50 of them (\cref{tab:samples}). Coding was done blind to the machine labels, by one coder assisted by a language model; a 200-item sheet for a second, independent human coder is provided with the data (\texttt{presentation/second\_coder\_sheet.csv}).
+Every measure used in the paper was compared with a reading of the texts. The samples were drawn at random; the motivation, stance and tone samples were topped up with texts written by economists so that each holds at least 50 of them (\cref{tab:samples}). Coding was done blind to the machine labels, by one coder assisted by a language model.
 
 \input{tables/samples}
 
@@ -659,7 +659,7 @@ Artificial intelligence was used in two distinct ways in this work.
 
 \paragraph{As research instruments.} Several language models are part of the method and are described with it: multilingual sentence embeddings (topics), FinBERT (tone), a natural language inference model and two local Qwen2.5 models (tested as coders; the 7B model codes stance). Each of them was evaluated against a reading of the texts before being used, and their scores are reported in \cref{app:validation}. They run locally; no text of the corpus was sent to an external service for coding.
 
-\paragraph{As assistants.} A general-purpose AI assistant helped to write and debug the code that collects, cleans and analyses the corpus, to produce tables and figures, and to draft parts of the technical description in the appendices. The hand coding of the validation samples was AI-assisted: texts were read and coded blind to the machine labels, with the help of the assistant. For this reason, the validation scores measure agreement with an AI-assisted reading; an independent human coder remains to be added (\cref{app:validation}).
+\paragraph{As assistants.} A general-purpose AI assistant helped to write and debug the code that collects, cleans and analyses the corpus, to produce tables and figures, and to draft parts of the technical description in the appendices. The hand coding of the validation samples was AI-assisted: texts were read and coded blind to the machine labels, with the help of the assistant. For this reason, the validation scores measure agreement with an AI-assisted reading.
 
 The research question, the choice and interpretation of the methods, the reading of the results and the conclusions are the authors'. Every number reported in the paper is computed by the code from the data, and the authors checked the text, the code and the results; they take full responsibility for the content of the paper.
 
