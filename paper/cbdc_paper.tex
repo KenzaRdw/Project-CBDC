@@ -62,25 +62,55 @@
 \newcommand{\shorttitle}{How economists discuss central bank digital currencies}
 \title{\sffamily\bfseries\color{accent} How Economists Discuss Central Bank Digital Currencies\\[4pt]
        \large\mdseries Themes, Tone and Stance, 2014--2026}
-\author{Adriel Mazere\thanks{M2 -- Private crypto.}}
-\date{\today}
+\author{Louis Drogo \and Kenza Redwane \and Adriel Mazere}
+\date{M2 -- Private crypto\\[2pt]\today}
+
+% ---------------------------------------------------------------- page count of the main text
+% Pages from the Introduction to the end of the Conclusion, minus the space taken by figures there
+% (height of each figure float over the text height). Computed at compile time; needs two runs.
+\usepackage{refcount}
+\makeatletter
+\newdimen\cbdc@figheight \global\cbdc@figheight=\z@
+\newif\ifcbdc@content
+\def\cbdc@figure{figure}
+\g@addto@macro\@endfloatbox{%
+  \ifcbdc@content\ifx\@captype\cbdc@figure
+    \global\advance\cbdc@figheight by \dimexpr\ht\@currbox+\dp\@currbox+\floatsep\relax
+  \fi\fi}
+\newcommand{\contentstart}{\label{content-start}\global\cbdc@contenttrue}
+\newcommand{\contentend}{\label{content-end}\global\cbdc@contentfalse
+  \immediate\write\@auxout{\gdef\string\cbdcfigpages{\fpeval{round(\number\cbdc@figheight/\number\textheight,1)}}}}
+\providecommand{\cbdcfigpages}{0}
+\newcommand{\contentpages}{%
+  \fpeval{round(\getpagerefnumber{content-end} - \getpagerefnumber{content-start} + 1 - \cbdcfigpages, 1)}}
+\makeatother
 
 \begin{document}
 
+% ---------------------------------------------------------------- front matter: not paginated
+\pagenumbering{gobble}
+\hypersetup{pageanchor=false}
+\pagestyle{empty}
 \maketitle
-\thispagestyle{plain}
+\thispagestyle{empty}
 
 \begin{abstract}
 \noindent
 \end{abstract}
 
 \noindent\textbf{Keywords:} \\
-\noindent\textbf{JEL codes:}
+\noindent\textbf{Number of pages:} \contentpages{} (main text, Introduction to Conclusion, figures excluded)
 
-\bigskip
+\newpage
+\tableofcontents
+
+\newpage
+\hypersetup{pageanchor=true}
+\pagenumbering{arabic}
+\pagestyle{fancy}
 
 % =====================================================================
-\section{Introduction}\label{sec:intro}
+\section{Introduction}\label{sec:intro}\contentstart
 % Research question: How did economists' discussion of central bank digital currencies (its themes, tone and
 % stance) evolve between 2014 and 2026, and how did it move with changes in the policy environment?
 % Scope: descriptive; causes are discussed as hypotheses (Section~\ref{sec:environment}).
@@ -207,6 +237,7 @@ specific national projects and on who they are meant for.
 \section{Conclusion}\label{sec:conclusion}
 
 % =====================================================================
+\contentend
 \section*{Data and code availability}
 \addcontentsline{toc}{section}{Data and code availability}
 
