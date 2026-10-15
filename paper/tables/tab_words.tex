@@ -1,0 +1,21 @@
+% Distinctive words, research economists vs central bankers
+% (values from presentation/cbdc_corpus.tex, frame "Who says what").
+\begin{table}[htbp]
+\centering\small
+\caption{Words most over-used by each group}\label{tab:words}
+\begin{tabular}{@{}lr@{\qquad}lr@{}}
+\toprule
+\multicolumn{2}{@{}l}{\textbf{Research economists}} & \multicolumn{2}{l@{}}{\textbf{Central bankers}} \\
+\midrule
+legal          & 23 & payments   & 28 \\
+analysis       & 21 & euro       & 22 \\
+development    & 21 & european   & 18 \\
+research       & 20 & europe     & 18 \\
+monetary       & 20 & area       & 18 \\
+impact         & 19 & services   & 15 \\
+model          & 18 & innovation & 14 \\
+implementation & 17 & conference & 14 \\
+\bottomrule
+\end{tabular}
+\par\smallskip\parbox{0.85\linewidth}{\footnotesize $z$-scores of the log-odds ratio with an informative Dirichlet prior, each group against the other. English texts only; research economists: title and abstract (259,105 words); central bankers: speeches (232,446 words). Words defining the topic (CBDC, digital, currency\ldots) are removed.}
+\end{table}
