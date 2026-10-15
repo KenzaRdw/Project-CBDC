@@ -29,6 +29,7 @@
 % ---------------------------------------------------------------- colours, headings, captions, lists
 \usepackage{xcolor}
 \definecolor{accent}{HTML}{23395B}
+\colorlet{c1}{accent}\definecolor{c2}{HTML}{D1495B}\definecolor{c3}{HTML}{EDAE49}
 \usepackage[explicit]{titlesec}
 \titleformat{\section}{\normalfont\sffamily\Large\bfseries\color{accent}}{\thesection}{0.8em}{#1}
 \titleformat{\subsection}{\normalfont\sffamily\large\bfseries}{\thesubsection}{0.8em}{#1}
@@ -42,6 +43,8 @@
 % ---------------------------------------------------------------- tables, figures, numbers
 \usepackage{booktabs,tabularx,multirow}
 \usepackage{graphicx}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
 \usepackage{siunitx}
 \sisetup{group-separator={,},group-minimum-digits=4,detect-all}
 \usepackage[section]{placeins}
@@ -156,10 +159,104 @@ MISSING : text-as-data studies
 % =====================================================================
 \section{Data}\label{sec:data}
 \subsection{Sources and collection}
+
+In order to properly use the tools and for better selection purposes, we try first to fetch as many documents as
+possible. Indeed, if we had selected the sample based on pre-determined criteria of our choice, we could face
+the bias of pre-selecting the sample. By having a larger sample with partly irrelevant data, we can apply selection
+processes based on quality criteria, such as the relevance of a document. Also, it is useful to have a large sample
+to be able to validate results on sub-samples or parts of the data kept for testing, which strengthen the results, or
+for robustness tests.
+
+When building the fetching algorithm, we therefore tried to reach for selection criteria as broad as possible. First,
+we wanted many "types" of documents, namely: official academic papers published in journals or magazines, press articles,
+speeches from institutional figures or official documents. The sources span :
+
+\begin{itemize}
+  \item Academic databases: OpenAlex, Semantic Scholar, arXiv, HAL and DOAJ, which mainly contain working papers
+  and journal articles, but also books.
+  \item Institutional databases: speeches were mainly extracted from the BIS archive (as well as
+  BIS RSS) and ECB's speech database. We also extracted from 26 central banks', the EU institutions and
+  international institutions sites the pages relating to CBDC.
+  \item Press: press articles are extracted from Google News
+\end{itemize}
+
+The searching process is fairly easy: we choose 115 sentences in 12 langues (using LLM and suggestions, as well
+as our own formulations, based on common expressions in the literature), that are used to search accross titles and
+abstracts alike. The APIs return results page by page for the papers and authorities' websites and
+the press articles are harvested using a recursive bisection to single down the relevant articles. Everything
+from all sources is collected and we can go over the filtering process.
+
 \subsection{De-duplication and enrichment}
+
+Because some articles may be duplicates or pre-publications or have similar names, we try to get rid
+of all duplicates or fuse when they are from the same authors and relate to the same paper. The
+contents of the documents are also enriched, in that we also harvest the language in which it is procuded,
+the keywords of the text (using YAKE), the exact date (when possible, if not indexed at the beginning
+of the year issued), the authors' names and media in which it has been issued, the introduction and
+conclusion for the papers, which resume the motivations and results of the paper, as well as
+the content of the text.
+
+
 \subsection{Relevance: is CBDC the theme?}
+
+Because CBDC is also a skin disease (Chronic Bullous Disease of Childhood) and a chemical term 
+(CycloButane DiCarboxilate), or that it can be used as an acronym for anything that the author does not
+explicit in the titles and abstracts, it is possible to obtain documents unrelated to the monetary concept.
+Hence, using a range of contextual vocabulary (such as currency, payment, central bank, monnaie,
+Geld, etc.), we filter for papers in which the term CBDC is ambiguous and not directly related to
+Central Bank Digital Currency.
+
+More importantly, we want CBDC to be the main theme of the paper, and not merely
+a cited reference related to the actual content. Therefore, we establish relevance
+scoring as such: each field $f \in F$ gets centrality score $c_f \in [0,1]$ (this term
+will be also used later in the paper, but with a different meaning, be 
+cautious !) that gives weight to the paper relevance if CBDC is a central
+theme to the paper. The centrality scores are determined as such:
+
+\begin{align*}
+  c_{title} = \mathbf{1}[\text{CBDC in title}] \qquad 
+  c_{kw} = 0.4 \cdot \mathbf{1}[\text{CBDC keyword}] \\
+  c_{abs} = \frac{\text{card}(\text{sentences mentioning CBDC})}{\text{card}(\text{sentences})}
+\qquad c_{body} = 0.5 \min \left(1, \frac{\rho}{3} \right) + 0.5
+\sigma
+\end{align*}
+
+Where $\rho = \text{mentions per 1000 words}$ and
+$\sigma = \text{share of ten slices with a mention}$. And the relevance score is:
+
+\begin{equation}
+  \text{score}= 100 \cdot \left(0.6 \max_{f\in F}c_f + \frac{0.4}{\vert 
+  F \vert} \sum_{f\in F} c_f\right)
+\end{equation}
+
 \subsection{Who counts as an economist}
+
+We want now to ensure that the text has been written by an economist. This is
+fairly easy since we can just check using the authors' ID for each academic
+sources, which tells whether the author is an economist or not. Therefore,
+all research document have been kept, when the relevance score clearly
+indicated that the theme was CBDC. Moreover, since articles and speeches
+issued by authorities are produced by either economists working there or 
+economists by practice (C. Lagarde is a lawyer for example, but her vast 
+experience as head of IMF and of ECB qualifies her as such). Press
+articles and documents produces by governments were therefore dropped.
+
+
 \subsection{Descriptive statistics}
+
+The corpus analysed in this paper holds the 4{,}710 texts with CBDC as a theme that were written by economists (\cref{tab:descriptive}). Research makes up 85\% of it (3{,}994 texts); central bank speeches (511) and documents of central banks and international institutions (205) make up the rest. For three texts in four, CBDC is the main theme rather than a secondary one.
+
+\paragraph{A recent and fast-growing literature.} The first texts by economists date from 2016, and the field took off after 2019 (\cref{fig:years}). Research grew from 20 texts in 2017 to 839 in 2025, a compound rate of about 60\% a year, and 2026 had already exceeded 2025 by October. Speeches followed a different path: they rose until 2022 (77) and have stayed close to 70 a year since. Documents of institutions jumped in 2023 (49), the year of the European Commission's proposal for a digital euro and of the end of the ECB's investigation phase. The first period of the paper, 2014--2019, therefore rests on a small number of texts (211 texts, against 972 in 2020--2022 and 3{,}360 in 2023--2026; 167 texts have no year), which is why changes are estimated with intervals and tested against random dates (\cref{sec:how,sec:when}).
+
+\input{tables/fig_years}
+
+\paragraph{Where economists publish.} Research is spread over 1{,}479 outlets, and working papers weigh as much as journals: the largest outlets are SSRN (461 texts) and RePEc (164), ahead of any journal. Articles account for 2{,}455 research texts, preprints for 583, book chapters for 394. Citations are highly concentrated: the median research text has not yet been cited, while the mean is 5.5 citations, so a small core of papers receives most of the attention (\cref{sec:who}). On the institutional side, 61 institutions are represented, led by the European Central Bank (216 texts), the Deutsche Bundesbank (84), the Banque de France (49), the Bank of Japan (41) and the Sveriges Riksbank (32): the digital euro makes the euro area the centre of the institutional debate.
+
+\paragraph{Languages.} Texts are written in 39 languages. English dominates (79\%), but Russian is a substantial second language (422 texts, 9\%), mostly on the digital ruble, ahead of German, Ukrainian and Spanish. English-only databases would miss about a fifth of the economists' writing on CBDCs; the topic model and the motivation codebook are therefore multilingual, while tone is measured on English sentences only.
+
+\paragraph{Completeness.} Most texts can be dated to the day (71\%), and most have keywords (85\%). An abstract is available for 68\% of texts, an introduction for 62\% and the full text for 63\%; reference lists, needed for co-citation, exist for 37\% of research texts only. Each analysis uses the texts for which its input exists, and the number of texts is reported with every result.
+
+\input{tables/descriptive}
 
 % =====================================================================
 % Sections 4--8: one question each, the method first, then the findings.

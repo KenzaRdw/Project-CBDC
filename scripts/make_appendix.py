@@ -1,4 +1,4 @@
-"""Tables of the paper's appendix, computed from the dataset and the validation files.
+"""Tables (and the data of figures) of the paper, computed from the dataset and the validation files.
 
     .venv/bin/python scripts/make_appendix.py      # writes paper/tables/*.tex, \\input by paper/cbdc_paper.tex
 """
@@ -64,6 +64,43 @@ def main():
     table("sources", "@{}lrrr@{}", r"\textbf{Source} & \textbf{Collected} & \textbf{CBDC a theme} & \textbf{By economists}",
           rows, "Records by source and filtering stage", "tab:sources",
           "A record found in several sources counts once per source; the last row counts distinct records.")
+
+    # --- descriptive statistics of the economists' corpus (section 3.5)
+    yrs = list(range(2016, int(econ.year.max()) + 1))
+    kinds = [("academic", "Research", "c1"), ("speech", "Speeches", "c2"), ("official", "Documents", "c3")]
+    plots = [f"\\addplot[fill={c}, draw={c}] coordinates {{"
+             + " ".join(f"({y},{int(((econ.year == y) & (econ.source_type == k)).sum())})" for y in yrs)
+             + f"}};\n\\addlegendentry{{{lbl}}}" for k, lbl, c in kinds]
+    (OUT / "fig_years.tex").write_text(
+        "\\begin{figure}[htbp]\n\\centering\n\\begin{tikzpicture}\n"
+        "\\begin{axis}[ybar stacked, width=0.85\\linewidth, height=6cm, bar width=12pt, xtick=data, ymin=0,\n"
+        "  xticklabel style={/pgf/number format/1000 sep=}, ylabel={Texts}, axis lines*=left, ymajorgrids,\n"
+        "  legend style={at={(0.02,0.98)}, anchor=north west, draw=none, font=\\footnotesize}, tick label style={font=\\footnotesize}]\n"
+        + "\n".join(plots) + "\n\\end{axis}\n\\end{tikzpicture}\n"
+        f"\\caption{{Texts written by economists, by year and type ({int(econ.year.max())}: until October)}}\\label{{fig:years}}\n"
+        "\\end{figure}\n", encoding="utf-8")
+    dp = econ.date_precision.fillna("")
+    lang = econ.language.value_counts()
+    names = {"en": "English", "ru": "Russian", "de": "German", "uk": "Ukrainian", "es": "Spanish", "fr": "French",
+             "pt": "Portuguese", "it": "Italian"}
+    doc = econ.document_type.value_counts()
+    pct = lambda m: f"{100 * m.mean():.0f}\\%"
+    panel = lambda title, items: [f"\\multicolumn{{2}}{{@{{}}l}}{{\\textit{{{title}}}}} \\\\"] + [f"\\quad {a} & {b} \\\\" for a, b in items]
+    rows = (panel("Type of text", [("Research", f"{(econ.source_type == 'academic').sum():,}"),
+                                   ("Central bank speeches", f"{(econ.source_type == 'speech').sum():,}"),
+                                   ("Documents of central banks and institutions", f"{(econ.source_type == 'official').sum():,}")])
+            + panel("Relevance", [("CBDC the main theme", f"{(econ.relevance == 'main theme').sum():,}"),
+                                  ("CBDC a secondary theme", f"{(econ.relevance == 'secondary theme').sum():,}")])
+            + panel("Research, by document type", [(tex(k.capitalize().replace("-", " ")), f"{doc.get(k, 0):,}")
+                                                   for k in ("article", "preprint", "book-chapter", "conference-paper", "dissertation")])
+            + panel(f"Language ({econ.language.nunique()} in all)", [(names.get(k, k), f"{c:,}") for k, c in lang.head(6).items()])
+            + panel("Fields available", [("Exact day of publication", pct(dp.str.startswith("day") & ~dp.str.contains("Jan 1"))),
+                                         ("Abstract", pct(econ.abstract.notna())), ("Introduction", pct(econ.introduction.notna())),
+                                         ("Full text", pct(econ.full_text_path.notna())),
+                                         ("Keywords", pct(econ.keywords_author.notna() | econ.keywords_indexed.notna())),
+                                         ("Reference list (research)", pct(econ[econ.source_type == "academic"].references.notna()))]))
+    rows.append(f"\\midrule Total & {len(econ):,} \\\\")
+    table("descriptive", "@{}lr@{}", r"& \textbf{Texts}", rows, "The economists' corpus", "tab:descriptive")
 
     # --- relevance labels and their validation
     rel = full.relevance.value_counts()

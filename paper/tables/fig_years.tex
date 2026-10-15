@@ -1,0 +1,16 @@
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[ybar stacked, width=0.85\linewidth, height=6cm, bar width=12pt, xtick=data, ymin=0,
+  xticklabel style={/pgf/number format/1000 sep=}, ylabel={Texts}, axis lines*=left, ymajorgrids,
+  legend style={at={(0.02,0.98)}, anchor=north west, draw=none, font=\footnotesize}, tick label style={font=\footnotesize}]
+\addplot[fill=c1, draw=c1] coordinates {(2016,3) (2017,20) (2018,36) (2019,77) (2020,161) (2021,284) (2022,315) (2023,572) (2024,623) (2025,839) (2026,898)};
+\addlegendentry{Research}
+\addplot[fill=c2, draw=c2] coordinates {(2016,3) (2017,8) (2018,30) (2019,24) (2020,41) (2021,66) (2022,77) (2023,67) (2024,67) (2025,72) (2026,56)};
+\addlegendentry{Speeches}
+\addplot[fill=c3, draw=c3] coordinates {(2016,1) (2017,5) (2018,2) (2019,2) (2020,9) (2021,7) (2022,12) (2023,49) (2024,30) (2025,45) (2026,42)};
+\addlegendentry{Documents}
+\end{axis}
+\end{tikzpicture}
+\caption{Texts written by economists, by year and type (2026: until October)}\label{fig:years}
+\end{figure}
