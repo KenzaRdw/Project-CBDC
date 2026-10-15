@@ -165,6 +165,26 @@ MISSING : text-as-data studies
 % Sections 4--8: one question each, the method first, then the findings.
 \section{Who writes}\label{sec:who}
 \subsection{Method: co-citation, co-authorship, bibliometric laws and distinctive vocabulary}
+
+In the following analysis, to see who writes about CBDCs (which authors, institutions and papers), 
+we use four different tools. The first one, called a co-citation network, links references that are 
+cited in the same paper, which allows us to build groups of references often cited together. Then, 
+we build a co-authorship network, which shows research teams by linking authors when they write a 
+paper together. In both networks, to avoid giving too much weight to links between very popular references 
+or authors, we weigh each link by its association strength, which takes into account how popular each item is. 
+
+Besides these two networks, we also compute three standard bibliometric laws. To see how fast literature 
+on CBDC grows, we compute the growth rate of published papers. The second one, Lotka’s law, allows us to 
+see how papers are spread among authors, whether a few authors write most of the papers or whether many 
+authors only write one. Then, the last one, called Bradford’s law, ranks publication sources by their number 
+of papers on CBDCs and splits them into three groups of equal sizes in papers. This shows whether the literature 
+is concentrated in a few sources or spread over many of them.
+
+
+Finally, in order to compare the words used by research economists and central bankers, we use a method called 
+log-odds ratio with an informative Dirichlet prior. Compared with simple word counts, this method does not give 
+too much weight to rare words and allows us to see which words one group uses more than the other.
+
 \subsection{Findings}
 
 % =====================================================================
