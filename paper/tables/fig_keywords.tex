@@ -3,7 +3,8 @@
 \begin{tikzpicture}
 \begin{axis}[width=0.8\linewidth, height=6cm, symbolic x coords={2014--2019,2020--2022,2023--2026}, xtick=data,
   ylabel={\% of the period's papers}, ymin=0, axis lines*=left, ymajorgrids, enlarge x limits=0.15,
-  legend pos=outer north east, legend cell align=left, legend style={draw=none, font=\footnotesize}, tick label style={font=\footnotesize}]
+  legend style={at={(0.5,-0.22)}, anchor=north, legend columns=3, draw=none, font=\footnotesize, /tikz/every even column/.append style={column sep=8pt}},
+  legend cell align=left, tick label style={font=\footnotesize}]
 \addplot[c1, thick, mark=*] coordinates {(2014--2019,51.5) (2020--2022,23.0) (2023--2026,20.7)};
 \addlegendentry{monetary policy and economic impact}
 \addplot[c5, thick, mark=diamond*] coordinates {(2014--2019,18.4) (2020--2022,17.5) (2023--2026,12.2)};

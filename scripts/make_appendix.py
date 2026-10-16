@@ -133,7 +133,8 @@ def main():
         "\\begin{figure}[htbp]\n\\centering\n\\begin{tikzpicture}\n"
         "\\begin{axis}[width=0.8\\linewidth, height=6cm, symbolic x coords={" + ",".join(periods) + "}, xtick=data,\n"
         "  ylabel={\\% of the period's papers}, ymin=0, axis lines*=left, ymajorgrids, enlarge x limits=0.15,\n"
-        "  legend pos=outer north east, legend cell align=left, legend style={draw=none, font=\\footnotesize}, tick label style={font=\\footnotesize}]\n"
+        "  legend style={at={(0.5,-0.22)}, anchor=north, legend columns=3, draw=none, font=\\footnotesize, /tikz/every even column/.append style={column sep=8pt}},\n"
+        "  legend cell align=left, tick label style={font=\\footnotesize}]\n"
         + "\n".join(lines) + "\n\\end{axis}\n\\end{tikzpicture}\n"
         "\\caption{Share of research papers carrying each keyword, by period ("
         + ", ".join(f"{kw['period_n'][p_]:,} papers in {p_}" for p_ in periods) + ")}\\label{fig:keywords}\n\\end{figure}\n",
