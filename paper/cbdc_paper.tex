@@ -257,7 +257,8 @@ institutional discourse has evolved between 2014 and 2026.
 
 Within our corpus, we observe 29 titles that announce a literature,
 systematic or bibliometric review of CBDCs, published between 2019 and
-2026. When comparing the five most recent bibliometric studies with ours, 
+2026. When comparing the five most recent bibliometric studies 
+\parencite{kvedaraviciute2024,fahad2024,bapat2025,prodan2024,paulovici2026} with ours, 
 we found three shared main limits. First, their
 data come from one or two databases, Scopus and/or Web of Science, and are
 mostly journal papers written in English. Working papers, central-bank speeches 
@@ -438,7 +439,8 @@ of papers in which $i$ appears. The weight of the link is the association streng
 \begin{equation}\label{eq:assoc}
 s_{ij} = \frac{c_{ij}}{c_i\,c_j},
 \end{equation}
-proportional to the ratio of observed to expected co-occurrences (van Eck and Waltman, 2009). Groups are found with the Louvain algorithm, which maximises the modularity
+proportional to the ratio of observed to expected co-occurrences (van Eck and Waltman, 2009). Groups are found with the Louvain algorithm
+\parencite{blondel2008}, which maximises the modularity
 \begin{equation}\label{eq:modularity}
 Q = \frac{1}{2m}\sum_{i,j}\Big[s_{ij} - \frac{k_i k_j}{2m}\Big]\,\delta(g_i, g_j),
 \end{equation}
@@ -446,9 +448,9 @@ where $k_i = \sum_j s_{ij}$, $m = \tfrac12\sum_{i,j} s_{ij}$, and $\delta(g_i, g
 effectively evaluates the quality of the network's division into "communities".
 
 
-Besides these two networks, we also compute two standard bibliometric laws. The first one, Lotka’s law, allows us to 
+Besides these two networks, we also compute two standard bibliometric laws. The first one, Lotka’s law \parencite{lotka1926}, allows us to 
 see how papers are spread among authors, whether a few authors write most of the papers or whether many 
-authors only write one. Then, the second one, called Bradford’s law, ranks publication sources by their number 
+authors only write one. Then, the second one, called Bradford’s law \parencite{bradford1934}, ranks publication sources by their number 
 of papers on CBDCs and splits them into three groups of equal sizes in papers. This shows whether the literature 
 is concentrated in a few sources or spread over many of them.
 
