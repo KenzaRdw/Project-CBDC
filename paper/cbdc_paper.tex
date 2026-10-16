@@ -412,7 +412,11 @@ Lotka's law states that the share of authors with $n$ papers decreases as a powe
 \begin{equation}\label{eq:lotka}
 f(n) = \frac{C}{n^{\beta}},
 \end{equation}
-with $\beta$ estimated by least squares on $\log f(n) = \log C - \beta \log n$; $\beta \approx 2$ in mature fields, and a larger $\beta$ means that more authors write a single paper. For Bradford's law, sources are sorted by decreasing number of papers and cut into three zones holding a third of the papers each; the number of sources in each zone, $n_1 : n_2 : n_3$, measures concentration.
+with $\beta$ estimated by least squares on $\log f(n) = \log C - \beta \log n$; $\beta \approx 2$ in 
+mature fields, and a larger $\beta$ means that more authors write a single paper. 
+For Bradford's law, sources are sorted by decreasing number of papers and cut into 
+three zones holding a third of the papers each, and the number of sources in each zone, 
+$n_1 : n_2 : n_3$, measures concentration.
 
 
 
@@ -481,19 +485,24 @@ and the four quadrants are separated by the medians of the two measures (Callon,
 
 
 The second method consists in grouping texts by their meaning. To do so, we use \emph{SBERT}, 
-a multilingual model that turns each title and abstract into a vector, so that two texts saying 
-the same thing end up close, even if they are not written in the same language. We then group 
+a multilingual model that turns each title and abstract into a vector, so that two similar texts 
+end up close, even if they are not written in the same language. We then group 
 these vectors into 24 topics with \emph{BERTopic} and label each topic with its most specific words.
 
-Each text $t$ is represented by a vector $\mathbf{e}_t \in \mathbb{R}^{384}$, and the similarity of two texts is the cosine
+Each text $t$ is represented by a vector $\mathbf{e}_t \in \mathbb{R}^{384}$, and the similarity of two 
+texts is the cosine
 \begin{equation}\label{eq:cosine}
 \cos(\mathbf{e}_s, \mathbf{e}_t) = \frac{\mathbf{e}_s\cdot\mathbf{e}_t}{\lVert\mathbf{e}_s\rVert\,\lVert\mathbf{e}_t\rVert}.
 \end{equation}
-The vectors are reduced to five dimensions with UMAP and grouped with HDBSCAN, which finds dense regions without fixing the number of topics in advance. Each topic $c$ is then described by the words with the highest class-based TF-IDF,
+The vectors are reduced to five dimensions with UMAP and grouped with HDBSCAN, which finds dense regions 
+without fixing the number of topics in advance. Each topic $c$ is then described by the 
+words with the highest class-based TF-IDF,
 \begin{equation}\label{eq:ctfidf}
 W_{w,c} = \frac{\text{tf}_{w,c}}{|c|}\,\log\Big(1 + \frac{A}{f_w}\Big),
 \end{equation}
-where $\text{tf}_{w,c}$ is the number of occurrences of $w$ in topic $c$, $|c|$ the number of words in $c$, $f_w$ the number of occurrences of $w$ in all topics and $A$ the average number of words per topic (Grootendorst, 2022).
+where $\text{tf}_{w,c}$ is the number of occurrences of $w$ in topic $c$, 
+$f_w$ the number of occurrences of $w$ in all topics and $A$ the average number of words per topic 
+(Grootendorst, 2022).
 
 
 Finally, to make sure that a change in the share of a topic is not only due to a change in who 
