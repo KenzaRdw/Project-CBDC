@@ -64,14 +64,16 @@
 
 % ---------------------------------------------------------------- bibliography (your reading list: references.bib)
 \usepackage[backend=biber,style=authoryear-comp,maxcitenames=2,maxbibnames=10,uniquelist=false,
-            giveninits=true,dashed=false,doi=true,url=false,isbn=false]{biblatex}
+            giveninits=true,uniquename=init,dashed=false,doi=true,url=false,isbn=false]{biblatex}
 \addbibresource{references.bib}
 \DeclareFieldFormat[article]{title}{#1}
 \renewbibmacro{in:}{\ifentrytype{article}{}{\printtext{\bibstring{in}\intitlepunct}}}
 
 % ---------------------------------------------------------------- links and cross-references (load last)
 \usepackage{xurl}
-\usepackage[colorlinks=true,linkcolor=accent,citecolor=accent,urlcolor=accent,pdfusetitle]{hyperref}
+\usepackage[colorlinks=true,linkcolor=accent,citecolor=accent,urlcolor=accent,
+            pdftitle={How Economists Discuss Central Bank Digital Currencies: Themes, Tone and Stance, 2014-2026},
+            pdfauthor={Louis Drogo, Kenza Redwane, Adriel Mazere}]{hyperref}
 \usepackage[capitalise,noabbrev]{cleveref}
 
 % ---------------------------------------------------------------- title block
@@ -808,6 +810,36 @@ and monetary policy), so this result fits with an effect of the sanctions but do
 
 % =====================================================================
 \section{Robustness}\label{sec:robustness}
+
+In order to test whether our analysis really shows the economists' debate and is not 
+driven by the way we built the data, we test the robustness of our main results. 
+
+To build our corpus and our measures, we made several choices that could affect the results. 
+For example, the fall of monetary policy could simply come from the growing share of texts 
+written in Russian, which may discuss CBDCs differently, and not from a real change in the debate. 
+Therefore, to check for robustness, we run the same calculations on six different samples in which 
+we change one choice at a time: 
+
+\begin{itemize} 
+\item only texts where CBDC is the main theme.
+ \item only texts in English, since the mix of languages changes over time.
+ \item only journal articles for research, since working papers may differ from published work.
+\item only texts before 2026.
+\item a less strict coding of motivations, since our codebook misses many of them.
+\item research from every discipline, to check that our filter on economists does not create the results by itself. 
+\end{itemize}
+
+\input{tables/tab_robustness}
+
+The results we obtained seem to be very stable. Across all samples, the rise of financial inclusion 
+lies between $+11.8$ and $+15.6$ points and the fall of monetary policy between $-8.8$ and $-16.8$ points, 
+and both changes are statistically significant in every sample. With English texts only, the fall of monetary 
+policy is almost unchanged ($-16.0$ points), so it does not come from the growing share of Russian texts. It 
+is smaller with the less strict coding of motivations, but still significant. Central banks are also more 
+favourable to CBDCs than research economists in every sample, by 11 to 16 points, the gap in tone is always 
+small (0.01 to 0.03), and the same four events are followed by a rise in attention each time. In short, our 
+main results do not depend on the way we built the corpus. However, these tests only tell us that they are 
+stable, not what causes them.
 
 % =====================================================================
 \section{Discussion}\label{sec:discussion}
