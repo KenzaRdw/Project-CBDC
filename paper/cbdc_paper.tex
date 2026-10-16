@@ -414,7 +414,8 @@ Lotka's law states that the share of authors with $n$ papers decreases as a powe
 \begin{equation}\label{eq:lotka}
 f(n) = \frac{C}{n^{\beta}},
 \end{equation}
-with $\beta$ estimated by least squares on $\log f(n) = \log C - \beta \log n$; $\beta \approx 2$ in 
+where $f(n)$ is the share of authors who write exactly $n$ papers on CBDCs, $C$ a normalising constant and 
+$\beta$ the Lotka exponent, estimated by least squares on $\log f(n) = \log C - \beta \log n$; $\beta \approx 2$ in 
 mature fields, and a larger $\beta$ means that more authors write a single paper. 
 For Bradford's law, sources are sorted by decreasing number of papers and cut into 
 three zones holding a third of the papers each, and the number of sources in each zone, 
@@ -483,7 +484,7 @@ Formally, with $c_{ij}$ the number of papers where keywords $i$ and $j$ appear t
 \qquad
 \text{density}(C) = \frac{100}{|C|}\sum_{i,j\in C} e_{ij},
 \end{equation}
-and the four quadrants are separated by the medians of the two measures (Callon, Courtial and Laville, 1991; Cobo et al., 2011).
+where $|C|$ is the number of keywords in $C$, and the four quadrants are separated by the medians of the two measures (Callon, Courtial and Laville, 1991; Cobo et al., 2011).
 
 
 The second method consists in grouping texts by their meaning. To do so, we use \emph{SBERT}, 
@@ -492,7 +493,7 @@ end up close, even if they are not written in the same language. We then group
 these vectors into 24 topics with \emph{BERTopic} and label each topic with its most specific words.
 
 Each text $t$ is represented by a vector $\mathbf{e}_t \in \mathbb{R}^{384}$, and the similarity of two 
-texts is the cosine
+texts $s$ and $t$ is the cosine
 \begin{equation}\label{eq:cosine}
 \cos(\mathbf{e}_s, \mathbf{e}_t) = \frac{\mathbf{e}_s\cdot\mathbf{e}_t}{\lVert\mathbf{e}_s\rVert\,\lVert\mathbf{e}_t\rVert}.
 \end{equation}
@@ -502,8 +503,8 @@ words with the highest class-based TF-IDF,
 \begin{equation}\label{eq:ctfidf}
 W_{w,c} = \frac{\text{tf}_{w,c}}{|c|}\,\log\Big(1 + \frac{A}{f_w}\Big),
 \end{equation}
-where $\text{tf}_{w,c}$ is the number of occurrences of $w$ in topic $c$, 
-$f_w$ the number of occurrences of $w$ in all topics and $A$ the average number of words per topic 
+where $\text{tf}_{w,c}$ is the number of occurrences of word $w$ in topic $c$ (all texts of the topic put together), 
+$|c|$ the total number of words in topic $c$, $f_w$ the number of occurrences of $w$ in all topics and $A$ the average number of words per topic 
 (Grootendorst, 2022).
 
 
@@ -514,14 +515,19 @@ That allows us to measure how the share of each topic changed between two period
 
 For text $t$ and an outcome $y_t \in \{0,1\}$ (here, belonging to a topic),
 \begin{equation}\label{eq:logit}
-P(y_t = 1) = \Lambda\big(a + b_{\text{period}(t)} + c_{\text{actor}(t)} + e\cdot\mathbf{1}[\text{English}_t]\big),
-\qquad \Lambda(x) = \frac{1}{1+e^{-x}},
+P(y_t = 1) = \Lambda\big(\alpha + \beta_{\text{period}(t)} + \gamma_{\text{actor}(t)} + \theta\,\mathbf{1}[\text{English}_t]\big),
+\qquad \Lambda(x) = \frac{1}{1+\exp(-x)},
 \end{equation}
-estimated with robust (HC1) standard errors. The change reported is the average marginal effect of the period,
+where $\alpha$ is the intercept; $\beta_p$ is the effect of period $p \in \{\text{2020--2022}, \text{2023--2026}\}$, with 
+2014--2019 as the reference ($\beta_{\text{2014--2019}} = 0$); $\gamma_{\text{actor}(t)}$ is the effect of the type of author of $t$, 
+equal to $0$ for research economists and to $\gamma$ for central banks and institutions; $\mathbf{1}[\text{English}_t]$ equals $1$ 
+when $t$ is written in English and $0$ otherwise, and $\theta$ is its effect; $\Lambda$ is the logistic function. The model is 
+estimated by maximum likelihood with robust (HC1) standard errors. The change reported is the average marginal effect of the period,
 \begin{equation}\label{eq:ame}
 \Delta = \frac{1}{T}\sum_{t=1}^{T}\Big[\hat P\big(y_t = 1 \mid \text{2023--2026}, x_t\big) - \hat P\big(y_t = 1 \mid \text{2014--2019}, x_t\big)\Big],
 \end{equation}
-where $x_t$ holds the actor and the language of text $t$; its 95\% confidence interval is obtained by drawing the coefficients 400 times from their estimated distribution. This is the prevalence part of a structural topic model (Roberts et al., 2014), applied to the topics found by BERTopic.
+where $T$ is the number of texts, $\hat P(y_t = 1 \mid p, x_t)$ is the probability predicted by \cref{eq:logit} for text $t$ when its 
+period is set to $p$, and $x_t$ holds the actor and the language of text $t$, kept at their observed values; its 95\% confidence interval is obtained by drawing the coefficients 400 times from their estimated distribution. This is the prevalence part of a structural topic model (Roberts et al., 2014), applied to the topics found by BERTopic.
 
 
 
@@ -562,17 +568,21 @@ Tone measures whether the language used to discuss CBDCs is positive or negative
 the author’s overall position toward CBDCs for instance whether the text is favorable, neutral, or critical.
 For the tone analysis, we keep the English sentences that explicitly mention a CBDC and apply \textit{FinBERT}, 
 a model trained on financial text. For each sentence, the model gives three probabilities: \(P(+)\), \(P(0)\) and \(P(-)\) . 
-We define the tone score as :
-\[
-\text{Net Tone} = P(+) - P(-), \qquad \text{Tone} \in [-1,1]
-\]
+We define the tone of sentence $s$ and of document $d$ as
+\begin{equation}\label{eq:tone}
+\text{Tone}_s = P_s(+) - P_s(-) \in [-1, 1],
+\qquad
+\text{Tone}_d = \frac{1}{S_d}\sum_{s \in d} \text{Tone}_s ,
+\end{equation}
+where $P_s(+)$ and $P_s(-)$ are the probabilities that sentence $s$ is positive and negative, and $S_d$ is the number of 
+CBDC sentences in document $d$. A tone of $1$ means certainly positive, $-1$ certainly negative and $0$ neutral or balanced.
 The scores are first averaged within each document and then across groups and years. This avoids giving too much 
 weight to longer texts. In order to check the quality of the measure, 90 sentences from economists’ texts were also 
 coded by hand. The agreement between FinBERT and manual coding gives a Cohen’s \(\kappa\) of 0.52.
 
 For stance, we use two approaches. First, texts are read manually to estimate the level of favourable, neutral 
 and critical positions. The share of favourable texts is reported with a Wilson confidence interval:
-\[
+\begin{equation}\label{eq:wilson}
 \frac{
 \hat{p} + \frac{z^2}{2n}
 \pm
@@ -583,17 +593,22 @@ z \sqrt{
 }
 }{
 1+\frac{z^2}{n}
-}
-\]
+},
+\end{equation}
+where $n$ is the number of texts read in the group, $\hat p = k/n$ is the share of them, $k$, judged favourable, and 
+$z = 1.96$ is the standard normal quantile for a 95\% interval. Unlike the usual interval $\hat p \pm z\sqrt{\hat p(1-\hat p)/n}$, 
+it stays within $[0, 1]$ and remains reliable for small samples and shares close to 0 or 1.
 
 Manual reading gives a more reliable measure of the level of support, however it cannot easily be applied to 
 the whole corpus. To study changes over time, we therefore use a local \textit{Qwen2.5 7B} model on random 
 samples of texts for each actor and period. The change in stance is measured as:
-\[
-\Delta \hat{p} = \hat{p}_{\text{late}} - \hat{p}_{\text{early}}
-\]
-with an approximate confidence interval given by:
-\[
+\begin{equation}\label{eq:dstance}
+\Delta \hat{p} = \hat{p}_{\text{late}} - \hat{p}_{\text{early}},
+\end{equation}
+where $\hat p_{\text{early}}$ and $\hat p_{\text{late}}$ are the shares of texts labelled favourable by the model among the 
+$n_{\text{early}}$ texts of 2014--2019 and the $n_{\text{late}}$ texts of 2023--2026 of the sample (up to 100 per actor and period), 
+with an approximate 95\% confidence interval given by:
+\begin{equation}\label{eq:dstance-ci}
 \Delta \hat{p}
 \pm
 1.96
@@ -601,8 +616,8 @@ with an approximate confidence interval given by:
 \frac{\hat{p}_{\text{late}}\left(1-\hat{p}_{\text{late}}\right)}{n_{\text{late}}}
 +
 \frac{\hat{p}_{\text{early}}\left(1-\hat{p}_{\text{early}}\right)}{n_{\text{early}}}
-}
-\]
+}.
+\end{equation}
 The local LLM reaches a Cohen’s \(\kappa\) of 0.45 against manual coding, but it tends to classify too many texts as favourable. 
 For that reason, we use manual reading for the level of stance, and the LLM mainly to compare changes across periods
 
@@ -663,22 +678,26 @@ and to \textit{monetary sovereignty}, such as “\textit{global stablecoin}”, 
 The final codebook was then applied to 4,110 texts. 
 
 The codebook was then evaluated on a separate test set of 74 texts, which was not used during its construction. These texts were coded 
-manually, and performance was assessed on the 50 documents written by economists. We use three main validation measures. Precision captures 
-the share of detected motivations that are correctly identified:
-\[
-\text{Precision} = \frac{TP}{TP + FP}
-\]
+manually, and performance was assessed on the 50 documents written by economists. We use three main validation measures, computed on the $50 \times 10 = 500$ (text, motivation) pairs: for each pair, 
+the codebook and the reader each say whether the text states the motivation. A true positive ($TP$) is a pair where both 
+say yes, a false positive ($FP$) a pair where only the codebook says yes, and a false negative ($FN$) a pair where only 
+the reader says yes. Precision captures the share of detected motivations that are correctly identified:
+\begin{equation}\label{eq:precision}
+\text{Precision} = \frac{TP}{TP + FP},
+\end{equation}
 while recall measures how many of the motivations identified by human reading are recovered by the codebook:
-\[
-\text{Recall} = \frac{TP}{TP + FN}
-\]
-Finally, Cohen’s  \(\kappa\) measures agreement between the codebook and manual coding beyond what would be expected by chance:
-
-\[
-\kappa = \frac{p_o - p_e}{1 - p_e}
-\]
-
-where \(p_0\) is the observed agreement and pe the agreement expected by chance
+\begin{equation}\label{eq:recall}
+\text{Recall} = \frac{TP}{TP + FN}.
+\end{equation}
+Finally, Cohen’s \(\kappa\) measures agreement between the codebook and manual coding beyond what would be expected by chance:
+\begin{equation}\label{eq:kappa}
+\kappa = \frac{p_o - p_e}{1 - p_e},
+\qquad
+p_e = q_r\, q_c + (1 - q_r)(1 - q_c),
+\end{equation}
+where \(p_o\) is the observed agreement, the share of pairs on which the codebook and the reader give the same answer, and 
+\(p_e\) the agreement expected by chance, with \(q_r\) and \(q_c\) the shares of pairs coded yes by the reader and by the codebook. 
+$\kappa = 1$ means perfect agreement and $\kappa = 0$ no more agreement than chance.
 
 On the held-out economists’ sample, the codebook reaches a precision of 0.70, a recall of 0.41, and a Cohen’s \(\kappa\) of 0.46. 
 We also compare its performance with several machine-based alternatives, including \textit{SBERT classifiers}, an \textit{NLI model} 
@@ -709,38 +728,53 @@ lies in the direction and relative magnitude of the changes across periods rathe
 \subsection{Method: bursts, event study with placebo dates, difference-in-differences}
 To examine how the CBDC discussion evolves alongside its policy environment, we use three complementary methods.
 First, we use \textit{Kleinberg's burst detection algorithm} to identify periods in which some keywords become much more frequent. 
-For keyword \(w\) in quarter \(t\), \(r_t\) is the number of papers using the keyword among \(d_t\) papers. The model compares a normal 
-state, with rate \(p_0 = R/D\), to a burst state, with a higher rate \(p_1 = 2p_0\). Since entering a burst has a cost, short random 
-fluctuations are less likely to be selected. The final sequence of normal and burst periods is chosen using the \textit{Viterbi algorithm}.
+For keyword \(w\) in quarter \(t\), \(r_t\) is the number of papers using the keyword among the \(d_t\) research papers of that quarter. The model compares a normal 
+state, with rate \(p_0 = R/D\), where \(R = \sum_t r_t\) and \(D = \sum_t d_t\) are the totals over all quarters, to a burst state, with a higher rate \(p_1 = 2p_0\). 
+The cost of being in state \(i \in \{0, 1\}\) in quarter \(t\) is minus the log-likelihood of the observed count,
+\begin{equation}\label{eq:burst}
+\sigma_i(t) = -\ln\Big[\binom{d_t}{r_t}\, p_i^{\,r_t}\,(1 - p_i)^{\,d_t - r_t}\Big],
+\end{equation}
+and moving from the normal to the burst state costs an extra \(\ln Q\), where \(Q\) is the number of quarters, while leaving a burst is free. Since entering a burst has a cost, short random 
+fluctuations are less likely to be selected. The final sequence of normal and burst periods, the one with the lowest total cost, is chosen using the \textit{Viterbi algorithm}.
 
 Second, we run an event study with placebo dates to see whether attention to CBDCs increases immediately after major policy events. 
-We estimate a baseline publication rate over the period from 90 to 15 days before each event. The expected number of texts in 
-the following 15 days is then:
-\[
+We estimate a baseline publication rate over the period from 90 to 15 days before each event, 
+\(\lambda = N_{\text{pre}}/76\), where \(N_{\text{pre}}\) is the number of texts dated to the day published in these 76 days. The expected number of texts in 
+the 15 days starting on the day of the event is then:
+\begin{equation}\label{eq:expected}
 E = 15\lambda
-\]
+\end{equation}
 and the observed increase is measured using:
-\[
-z = \frac{N-E}{\sqrt{E}}
-\]
+\begin{equation}\label{eq:zevent}
+z = \frac{N-E}{\sqrt{E}},
+\end{equation}
+where \(N\) is the number of texts actually published in these 15 days. If publications followed a Poisson process with rate \(\lambda\), 
+\(z\) would be approximately standard normal.
 Because publication activity is not stable over time, each event is compared with 500 random placebo dates. 
 The \(p\)-value is the share of placebo dates with a larger \(z\)-score than the actual event.
 
 Finally, we use a difference-in-differences approach to examine whether geopolitical motivations became more important after 2021, 
 especially in texts related to Russia. The outcome variable indicates whether a motivation is stated, while the treatment group 
 includes texts about Russia or written in Russian:
-\[
+\begin{equation}\label{eq:did}
 y_{it}
 =
-a_T + b_t
+\alpha + \eta\, T_i + \mu_t
 +
 \sum_{k \neq 2021}
 \gamma_k T_i \mathbf{1}[t = k]
 +
-\varepsilon_{it}
-\]
+\varepsilon_{it},
+\end{equation}
+where \(y_{it}\) equals 1 if text \(i\), published in year \(t\) (2018--2026), states the motivation and 0 otherwise; \(T_i\) equals 1 
+if text \(i\) is in the treatment group and 0 otherwise; \(\alpha\) is the intercept, \(\eta\) the permanent gap between the two groups, 
+\(\mu_t\) a year effect common to all texts (\(\mu_{2021} = 0\)), \(\mathbf{1}[t = k]\) equals 1 if \(t = k\), and \(\varepsilon_{it}\) is the error term. 
+The model is a linear probability model estimated by ordinary least squares with robust (HC1) standard errors. 
 The coefficients \(\gamma_k\) measure how the gap between Russia-related texts and the rest of the corpus changes in each year relative to 2021. 
-This allows us to see whether the post-2021 shift is stronger in Russia-related discourse than in the broader CBDC literature.
+This allows us to see whether the post-2021 shift is stronger in Russia-related discourse than in the broader CBDC literature. 
+The coefficients for the years before 2021 test whether the two groups followed parallel trends before the shock. The single effect 
+reported in the findings comes from the same model in which the yearly interactions are replaced by one term, 
+\(\gamma\, T_i \mathbf{1}[t > 2021]\).
 
 \subsection{Findings}
 The results show that the focus of the CBDC debate changes quite clearly over time. 
