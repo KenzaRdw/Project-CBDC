@@ -18,6 +18,7 @@
 \usepackage{setspace}
 \setstretch{1.15}
 \setlength{\parindent}{1.5em}
+\setlength{\parskip}{0.6em plus 0.2em minus 0.1em}  % small vertical gap between paragraphs
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
@@ -32,6 +33,11 @@
 \colorlet{c1}{accent}\definecolor{c2}{HTML}{D1495B}\definecolor{c3}{HTML}{EDAE49}
 \definecolor{c4}{HTML}{00798C}\definecolor{c5}{HTML}{8F6593}\definecolor{c6}{HTML}{6A994E}
 \definecolor{c7}{HTML}{E07A5F}\definecolor{c8}{HTML}{3D5A80}
+% framed display maths: every equation / align / \[...\] is drawn inside a thin accent-coloured box
+\usepackage[overload]{empheq}
+\newcommand*{\eqframe}[1]{{\setlength{\fboxsep}{6pt}\setlength{\fboxrule}{0.6pt}%
+  \fcolorbox{accent}{accent!4}{\hspace{0.6em}#1\hspace{0.6em}}}}
+\empheqset{box=\eqframe}
 % \bbcaps{...}: every capital letter A-Z in blackboard bold (\mathbb), the rest unchanged; used on the title page only
 \ExplSyntaxOn
 \tl_new:N \l__cbdc_bb_tl
