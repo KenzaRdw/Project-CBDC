@@ -344,6 +344,12 @@ rests on a small number of texts (211 texts, against 972 in
 why changes are estimated with intervals and tested against random dates 
 (\cref{sec:how,sec:when}).
 
+The growth rates above are compound annual rates: with $N_y$ texts in year $y$, the rate between $y_0$ and $y_1$ is
+\begin{equation}\label{eq:growth}
+g = \Big(\frac{N_{y_1}}{N_{y_0}}\Big)^{1/(y_1 - y_0)} - 1 ,
+\end{equation}
+so that research, with $N_{2017} = 20$ and $N_{2025} = 839$, grew by $g = (839/20)^{1/8} - 1 \approx 60\%$ a year.
+
 \input{tables/fig_years}
 
 Research is spread over 1{,}479 outlets, and working 
@@ -385,7 +391,8 @@ we build a co-authorship network, which shows research teams by linking authors 
 paper together. In both networks, to avoid giving too much weight to links between very popular references 
 or authors, we weigh each link by its association strength, which takes into account how popular each item is. 
 
-For two items $i$ and $j$ (references or authors), let $c_{ij}$ be the number of papers in which they appear together and $c_i$ the number of papers in which $i$ appears. The weight of the link is the association strength
+For two items $i$ and $j$ (references or authors), $c_{ij}$ is the number of papers in which they appear together and $c_i$ the number 
+of papers in which $i$ appears. The weight of the link is the association strength given by:
 \begin{equation}\label{eq:assoc}
 s_{ij} = \frac{c_{ij}}{c_i\,c_j},
 \end{equation}
@@ -393,20 +400,16 @@ proportional to the ratio of observed to expected co-occurrences (van Eck and Wa
 \begin{equation}\label{eq:modularity}
 Q = \frac{1}{2m}\sum_{i,j}\Big[s_{ij} - \frac{k_i k_j}{2m}\Big]\,\delta(g_i, g_j),
 \end{equation}
-where $k_i = \sum_j s_{ij}$, $m = \tfrac12\sum_{i,j} s_{ij}$, and $\delta(g_i, g_j) = 1$ when $i$ and $j$ are in the same group.
+where $k_i = \sum_j s_{ij}$, $m = \tfrac12\sum_{i,j} s_{ij}$, and $\delta(g_i, g_j) = 1$ when $i$ and $j$ are in the same group. This metric
+effectively evaluates the quality of the network's division into "communities".
 
 
-Besides these two networks, we also compute three standard bibliometric laws. To see how fast literature 
-on CBDC grows, we compute the growth rate of published papers. The second one, Lotka’s law, allows us to 
+Besides these two networks, we also compute two standard bibliometric laws. The first one, Lotka’s law, allows us to 
 see how papers are spread among authors, whether a few authors write most of the papers or whether many 
-authors only write one. Then, the last one, called Bradford’s law, ranks publication sources by their number 
+authors only write one. Then, the second one, called Bradford’s law, ranks publication sources by their number 
 of papers on CBDCs and splits them into three groups of equal sizes in papers. This shows whether the literature 
 is concentrated in a few sources or spread over many of them.
 
-With $N_y$ papers in year $y$, the compound growth rate between $y_0$ and $y_1$ is
-\begin{equation}\label{eq:growth}
-g = \Big(\frac{N_{y_1}}{N_{y_0}}\Big)^{1/(y_1 - y_0)} - 1 .
-\end{equation}
 Lotka's law states that the share of authors with $n$ papers decreases as a power of $n$,
 \begin{equation}\label{eq:lotka}
 f(n) = \frac{C}{n^{\beta}},
@@ -430,7 +433,7 @@ and words are ranked by $z_w$. The prior pulls the log-odds of rare words toward
 
 \subsection{Findings}
 
-From our analysis, academic output on CBDCs grew by 60\% a year between 2017 and 2025. The two 
+From our analysis, the two 
 largest sources are SSRN (461 papers) and RePEc (164 papers), two repositories of working papers. 
 We also obtain a Lotka exponent of 3.3, which is higher than the value, of about 2, found in more 
 mature fields: 83\% of authors write only one paper on CBDCs. In the same way, Bradford's law shows 
@@ -838,6 +841,8 @@ stable, not what causes them.
 
 % =====================================================================
 \contentend
+\newpage
+\nocite{*}
 \printbibliography[heading=bibintoc,title={References}]
 
 % =====================================================================

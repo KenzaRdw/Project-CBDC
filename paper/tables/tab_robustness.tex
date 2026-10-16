@@ -1,0 +1,22 @@
+% Robustness table (values from presentation/cbdc_corpus.tex, frame "Robustness").
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{Main results under alternative samples}\label{tab:robustness}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lrcccc@{}}
+\toprule
+ & & \multicolumn{2}{c}{\textbf{Motivations: change, points}} & \textbf{Stance} & \textbf{Events} \\
+\cmidrule(lr){3-4}
+\textbf{Sample} & \textbf{Texts} & \textbf{Inclusion} & \textbf{Monetary policy} & \textbf{CB -- research} & \textbf{significant} \\
+\midrule
+Baseline: economists          & 4,710 & $+12.3$ {\scriptsize[$+8$, $+15$]}  & $-15.1$ {\scriptsize[$-22$, $-8$]} & $+16$ & 4/12 \\
+Main theme only               & 3,513 & $+14.9$ {\scriptsize[$+10$, $+18$]} & $-16.0$ {\scriptsize[$-25$, $-7$]} & $+13$ & 4/12 \\
+English only                  & 3,721 & $+13.7$ {\scriptsize[$+9$, $+16$]}  & $-16.0$ {\scriptsize[$-23$, $-7$]} & $+16$ & 4/12 \\
+Journal articles only         & 3,171 & $+12.3$ {\scriptsize[$+6$, $+15$]}  & $-16.8$ {\scriptsize[$-25$, $-8$]} & $+11$ & 4/12 \\
+Without 2026 (partial year)   & 3,547 & $+11.8$ {\scriptsize[$+7$, $+15$]}  & $-15.3$ {\scriptsize[$-23$, $-8$]} & $+15$ & 4/12 \\
+High-recall motivation coding & 4,710 & $+15.6$ {\scriptsize[$+10$, $+19$]} & $-8.8$ {\scriptsize[$-16$, $-2$]}  & $+16$ & 4/12 \\
+All disciplines               & 8,213 & $+13.2$ {\scriptsize[$+10$, $+15$]} & $-15.0$ {\scriptsize[$-21$, $-9$]} & $+15$ & 4/12 \\
+\bottomrule
+\end{tabular}
+\par\smallskip\parbox{0.92\linewidth}{\footnotesize Motivations: change between 2014--2019 and 2023--2026, adjusted for period, type of author and language (logit, 95\% confidence interval). Stance: gap in the share of favourable texts between central banks and research economists (LLM labels, points). Events: number of the 12 policy events followed by more texts than 95\% of random dates.}
+\end{table}
