@@ -61,6 +61,26 @@
 % ---------------------------------------------------------------- tables, figures, numbers
 \usepackage{booktabs,tabularx,multirow}
 \usepackage{graphicx}
+\usepackage{float}
+% \fitfigure{graphic}{legend and caption}, inside figure[H]: shrinks the graphic to the space left on
+% the page (down to 70% of its size); if even that does not fit, it keeps its size and moves to the next page
+\makeatletter
+\newsavebox\cbdc@gbox \newsavebox\cbdc@cbox \newdimen\cbdc@avail
+\newcommand{\fitfigure}[2]{%
+  \sbox\cbdc@gbox{#1}%
+  \sbox\cbdc@cbox{\parbox{\linewidth}{\centering #2}}%
+  \cbdc@avail=\dimexpr\pagegoal-\pagetotal-\ht\cbdc@cbox-\dp\cbdc@cbox-2\baselineskip\relax
+  \ifdim\cbdc@avail<\dimexpr\ht\cbdc@gbox+\dp\cbdc@gbox\relax
+    \ifdim\cbdc@avail<\dimexpr(\ht\cbdc@gbox+\dp\cbdc@gbox)*7/10\relax
+      \usebox\cbdc@gbox
+    \else
+      \resizebox*{!}{\cbdc@avail}{\usebox\cbdc@gbox}%
+    \fi
+  \else
+    \usebox\cbdc@gbox
+  \fi
+  \par\usebox\cbdc@cbox}
+\makeatother
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
 \usetikzlibrary{arrows.meta}
@@ -599,6 +619,7 @@ the same trend, as the topic on interest rates and uncertainty decreases by 9.6 
 also often discussed CBDC together with private cryptocurrencies: the largest topic of the period is 
 characterized by words such as \emph{cryptocurrencies} and \emph{private}, and it is also the topic 
 that lost the most ground since then ($-13.2$ points).
+
 \input{tables/fig_topics}
 
 
@@ -608,6 +629,7 @@ papers, and \emph{euro}, \emph{ruble} and \emph{India} are among the words that 
 years. At the same time, financial inclusion is the theme that grows the fastest, from 6\% to 16\% of the 
 papers. Overall, the literature moved from general questions on the effects of a CBDC to questions on 
 specific national projects and on who they are meant for.
+
 \input{tables/fig_keywords}
 
 

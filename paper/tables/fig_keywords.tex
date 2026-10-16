@@ -1,6 +1,6 @@
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
-\begin{tikzpicture}
+\fitfigure{\begin{tikzpicture}
 \begin{axis}[width=0.8\linewidth, height=6cm, symbolic x coords={2014--2019,2020--2022,2023--2026}, xtick=data,
   ylabel={\% of the period's papers}, ymin=0, axis lines*=left, ymajorgrids, enlarge x limits=0.15,
   legend style={at={(0.5,-0.22)}, anchor=north, legend columns=3, draw=none, font=\footnotesize, /tikz/every even column/.append style={column sep=8pt}},
@@ -16,6 +16,6 @@
 \addplot[c3, thick, mark=otimes*] coordinates {(2014--2019,2.9) (2020--2022,7.8) (2023--2026,11.4)};
 \addlegendentry{digital euro}
 \end{axis}
-\end{tikzpicture}
-\caption{Share of research papers carrying each keyword, by period (136 papers in 2014--2019, 755 papers in 2020--2022, 2,919 papers in 2023--2026)}\label{fig:keywords}
+\end{tikzpicture}}{%
+\caption{Share of research papers carrying each keyword, by period (136 papers in 2014--2019, 755 papers in 2020--2022, 2,919 papers in 2023--2026)}\label{fig:keywords}}
 \end{figure}

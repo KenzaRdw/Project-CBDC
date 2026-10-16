@@ -119,8 +119,8 @@ def main():
     legend = "\\\\[2pt]\n".join(f"\\textbf{{{i + 1}}} ({quadrant(t, mx, my)}): {tex(', '.join(t['members'][:4]))}"
                                for i, t in enumerate(themes))
     (OUT / "fig_thematic.tex").write_text(
-        "\\begin{figure}[htbp]\n\\centering\n" + tz + "\n\\par\\medskip\n\\parbox{0.9\\linewidth}{\\footnotesize " + legend + "}\n"
-        "\\caption{Thematic map of the keywords of research by economists}\\label{fig:thematic}\n\\end{figure}\n",
+        "\\begin{figure}[H]\n\\centering\n\\fitfigure{" + tz + "}{%\n\\medskip\n\\parbox{0.9\\linewidth}{\\footnotesize " + legend + "}\n"
+        "\\caption{Thematic map of the keywords of research by economists}\\label{fig:thematic}}\n\\end{figure}\n",
         encoding="utf-8")
     kw = A.keyword_network(econ)
     ev = kw["evolution"]
@@ -130,14 +130,14 @@ def main():
     lines = [f"\\addplot[{c}, thick, mark={m}] coordinates {{" + " ".join(f"({p_},{ev.loc[k, p_]:.1f})" for p_ in periods)
              + f"}};\n\\addlegendentry{{{tex(k)}}}" for k, c, m in shown if k in ev.index]
     (OUT / "fig_keywords.tex").write_text(
-        "\\begin{figure}[htbp]\n\\centering\n\\begin{tikzpicture}\n"
+        "\\begin{figure}[H]\n\\centering\n\\fitfigure{\\begin{tikzpicture}\n"
         "\\begin{axis}[width=0.8\\linewidth, height=6cm, symbolic x coords={" + ",".join(periods) + "}, xtick=data,\n"
         "  ylabel={\\% of the period's papers}, ymin=0, axis lines*=left, ymajorgrids, enlarge x limits=0.15,\n"
         "  legend style={at={(0.5,-0.22)}, anchor=north, legend columns=3, draw=none, font=\\footnotesize, /tikz/every even column/.append style={column sep=8pt}},\n"
         "  legend cell align=left, tick label style={font=\\footnotesize}]\n"
-        + "\n".join(lines) + "\n\\end{axis}\n\\end{tikzpicture}\n"
+        + "\n".join(lines) + "\n\\end{axis}\n\\end{tikzpicture}}{%\n"
         "\\caption{Share of research papers carrying each keyword, by period ("
-        + ", ".join(f"{kw['period_n'][p_]:,} papers in {p_}" for p_ in periods) + ")}\\label{fig:keywords}\n\\end{figure}\n",
+        + ", ".join(f"{kw['period_n'][p_]:,} papers in {p_}" for p_ in periods) + ")}\\label{fig:keywords}}\n\\end{figure}\n",
         encoding="utf-8")
     tp = nlp.topics(econ, ROOT, ROOT / "data/cache/embeddings.npz", min_size=40, selection="leaf")
     tf = A.with_covariates(econ[econ.source_type.isin(nlp.NON_PRESS)].merge(tp["assign"], on="record_id"))
@@ -151,15 +151,15 @@ def main():
         labels.append(tex(lab))
         pts.append(f"({e_[0]:.2f},{{{tex(lab)}}}) += ({e_[2] - e_[0]:.2f},0) -= ({e_[0] - e_[1]:.2f},0)")
     (OUT / "fig_topics.tex").write_text(
-        "\\begin{figure}[htbp]\n\\centering\n\\begin{tikzpicture}\n"
+        "\\begin{figure}[H]\n\\centering\n\\fitfigure{\\begin{tikzpicture}\n"
         "\\begin{axis}[width=0.62\\linewidth, height=8cm, symbolic y coords={" + ",".join("{" + l + "}" for l in labels[::-1]) + "},\n"
         "  ytick=data, y dir=normal, xmin=-30, xmax=30, xlabel={adjusted change, points (2023--2026 vs 2014--2019)}, axis lines*=left, xmajorgrids,\n"
         "  tick label style={font=\\footnotesize}, label style={font=\\footnotesize}, enlarge y limits=0.05]\n"
         "\\addplot[c1, only marks, mark=*, error bars/.cd, x dir=both, x explicit] coordinates {" + " ".join(pts) + "};\n"
         "\\draw[c2, dashed] (axis cs:0,{" + labels[0] + "}) -- (axis cs:0,{" + labels[-1] + "});\n"
-        "\\end{axis}\n\\end{tikzpicture}\n"
+        "\\end{axis}\n\\end{tikzpicture}}{%\n"
         "\\caption{Change in the share of the twelve largest topics, adjusted for the type of author and the language, "
-        "with 95\\% confidence intervals (axis cut at $\\pm 30$ points: topics almost absent in 2014--2019 have very wide intervals)}\\label{fig:topics}\n\\end{figure}\n", encoding="utf-8")
+        "with 95\\% confidence intervals (axis cut at $\\pm 30$ points: topics almost absent in 2014--2019 have very wide intervals)}\\label{fig:topics}}\n\\end{figure}\n", encoding="utf-8")
 
     # --- relevance labels and their validation
     rel = full.relevance.value_counts()
